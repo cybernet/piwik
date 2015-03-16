@@ -76,11 +76,7 @@ class GroupBy extends BaseFilter
         $groupByRows = array();
         $nonGroupByRowIds = array();
 
-        foreach ($table->getRows() as $rowId => $row) {
-            // skip the summary row
-            if ($rowId == DataTable::ID_SUMMARY_ROW) {
-                continue;
-            }
+        foreach ($table->getRowsWithoutSummaryRow() as $rowId => $row) {
 
             $groupByColumnValue = $row->getColumn($this->groupByColumn);
             $groupByValue = $groupByColumnValue;

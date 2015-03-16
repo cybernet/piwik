@@ -208,12 +208,11 @@ Sort extends BaseFilter
             return;
         }
 
-        $rows = $table->getRows();
-        if (count($rows) == 0) {
+        if (!$table->getRowsCount()) {
             return;
         }
 
-        $row = current($rows);
+        $row = $table->getFirstRow();
         if ($row === false) {
             return;
         }
