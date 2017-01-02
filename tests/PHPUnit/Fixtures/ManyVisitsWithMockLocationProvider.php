@@ -33,6 +33,8 @@ class ManyVisitsWithMockLocationProvider extends Fixture
         $this->setUpWebsitesAndGoals();
         $this->setMockLocationProvider();
         $this->trackVisits();
+
+        ManyVisitsWithGeoIP::unsetLocationProvider();
     }
 
     public function tearDown()
@@ -210,6 +212,8 @@ class ManyVisitsWithMockLocationProvider extends Fixture
 
     private function setMockLocationProvider()
     {
+        LocationProvider::$providers = array();
+        LocationProvider::$providers[] = new MockLocationProvider();
         LocationProvider::setCurrentProvider('mock_provider');
         MockLocationProvider::$locations = array(
             self::makeLocation('Toronto', 'ON', 'CA', $lat = null, $long = null, $isp = 'comcast.net'),

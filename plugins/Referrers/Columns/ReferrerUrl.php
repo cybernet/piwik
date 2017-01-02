@@ -16,7 +16,7 @@ use Piwik\Tracker\Action;
 class ReferrerUrl extends Base
 {
     protected $columnName = 'referer_url';
-    protected $columnType = 'TEXT NOT NULL';
+    protected $columnType = 'TEXT NULL';
 
     protected function configureSegments()
     {
@@ -35,7 +35,7 @@ class ReferrerUrl extends Base
      */
     public function onNewVisit(Request $request, Visitor $visitor, $action)
     {
-        $information = $this->getReferrerInformationFromRequest($request);
+        $information = $this->getReferrerInformationFromRequest($request, $visitor);
 
         return $information['referer_url'];
     }

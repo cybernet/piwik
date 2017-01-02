@@ -33,7 +33,7 @@ class Model
      */
     public function queryActionsForVisit($idVisit, $actionsLimit)
     {
-        $maxCustomVariables = CustomVariables::getMaxCustomVariables();
+        $maxCustomVariables = CustomVariables::getNumUsableCustomVariables();
 
         $sqlCustomVariables = '';
         for ($i = 1; $i <= $maxCustomVariables; $i++) {
@@ -52,7 +52,8 @@ class Model
 					log_link_visit_action.server_time as serverTimePretty,
 					log_link_visit_action.time_spent_ref_action as timeSpentRef,
 					log_link_visit_action.idlink_va AS pageId,
-					log_link_visit_action.custom_float
+					log_link_visit_action.custom_float,
+					log_link_visit_action.interaction_position
 					" . $sqlCustomVariables . ",
 					log_action_event_category.name AS eventCategory,
 					log_action_event_action.name as eventAction
@@ -86,7 +87,7 @@ class Model
 						'goal' as type,
 						goal.name as goalName,
 						goal.idgoal as goalId,
-						goal.revenue as revenue,
+						log_conversion.revenue as revenue,
 						log_conversion.idlink_va,
 						log_conversion.idlink_va as goalPageId,
 						log_conversion.server_time as serverTimePretty,
@@ -176,25 +177,18 @@ class Model
      * @param $period
      * @param $date
      * @param $segment
-     * @param $countVisitorsToFetch
+     * @param $limit
      * @param $visitorId
      * @param $minTimestamp
      * @param $filterSortOrder
      * @return array
      * @throws Exception
      */
-    public function queryLogVisits($idSite, $period, $date, $segment, $countVisitorsToFetch, $visitorId, $minTimestamp, $filterSortOrder)
+    public function queryLogVisits($idSite, $period, $date, $segment, $offset, $limit, $visitorId, $minTimestamp, $filterSortOrder)
     {
-        list($sql, $bind) = $this->makeLogVisitsQueryString($idSite, $period, $date, $segment, $countVisitorsToFetch, $visitorId, $minTimestamp, $filterSortOrder);
+        list($sql, $bind) = $this->makeLogVisitsQueryString($idSite, $period, $date, $segment, $offset, $limit, $visitorId, $minTimestamp, $filterSortOrder);
 
-        try {
-            $data = Db::fetchAll($sql, $bind);
-            return $data;
-        } catch (Exception $e) {
-            echo $e->getMessage();
-            exit;
-        }
-        return $data;
+        return Db::fetchAll($sql, $bind);
     }
 
     /**
@@ -368,18 +362,20 @@ class Model
      * @param $period
      * @param $date
      * @param $segment
-     * @param $countVisitorsToFetch
+     * @param int $offset
+     * @param int $limit
      * @param $visitorId
      * @param $minTimestamp
      * @param $filterSortOrder
      * @return array
      * @throws Exception
      */
-    public function makeLogVisitsQueryString($idSite, $period, $date, $segment, $countVisitorsToFetch, $visitorId, $minTimestamp, $filterSortOrder)
+    public function makeLogVisitsQueryString($idSite, $period, $date, $segment, $offset, $limit, $visitorId, $minTimestamp, $filterSortOrder)
     {
         // If no other filter, only look at the last 24 hours of stats
         if (empty($visitorId)
-            && empty($countVisitorsToFetch)
+            && empty($limit)
+            && empty($offset)
             && empty($period)
             && empty($date)
         ) {
@@ -387,32 +383,54 @@ class Model
             $date = 'yesterdaySameTime';
         }
 
-        list($whereBind, $where) = $this->getWhereClauseAndBind($idSite, $period, $date, $visitorId, $minTimestamp);
+
+        list($whereClause, $bindIdSites) = $this->getIdSitesWhereClause($idSite);
+
+        list($whereBind, $where) = $this->getWhereClauseAndBind($whereClause, $bindIdSites, $idSite, $period, $date, $visitorId, $minTimestamp);
 
         if (strtolower($filterSortOrder) !== 'asc') {
             $filterSortOrder = 'DESC';
         }
+
         $segment = new Segment($segment, $idSite);
 
         // Subquery to use the indexes for ORDER BY
         $select = "log_visit.*";
         $from = "log_visit";
         $groupBy = false;
-        $limit = $countVisitorsToFetch >= 1 ? (int)$countVisitorsToFetch : 0;
-        $orderBy = "idsite, visit_last_action_time " . $filterSortOrder;
+        $limit = $limit >= 1 ? (int)$limit : 0;
+        $offset = $offset >= 1 ? (int)$offset : 0;
+
+        $orderBy = '';
+        if (count($bindIdSites) <= 1) {
+            $orderBy = 'idsite ' . $filterSortOrder . ', ';
+        }
+
+        $orderBy .= "visit_last_action_time " . $filterSortOrder;
         $orderByParent = "sub.visit_last_action_time " . $filterSortOrder;
 
-        $subQuery = $segment->getSelectQuery($select, $from, $where, $whereBind, $orderBy, $groupBy, $limit);
+        // this $innerLimit is a workaround (see https://github.com/piwik/piwik/issues/9200#issuecomment-183641293)
+        $innerLimit = $limit;
+        if (!$segment->isEmpty()) {
+            $innerLimit = $limit * 10;
+        }
 
-        $bind = $subQuery['bind'];
-        // Group by idvisit so that a visitor converting 2 goals only appears once
+        $innerQuery = $segment->getSelectQuery($select, $from, $where, $whereBind, $orderBy, $groupBy, $innerLimit, $offset);
+
+        $bind = $innerQuery['bind'];
+        // Group by idvisit so that a given visit appears only once, useful when for example:
+        // 1) when a visitor converts 2 goals
+        // 2) when an Action Segment is used, the inner query will return one row per action, but we want one row per visit
         $sql = "
 			SELECT sub.* FROM (
-				" . $subQuery['sql'] . "
+				" . $innerQuery['sql'] . "
 			) AS sub
 			GROUP BY sub.idvisit
 			ORDER BY $orderByParent
 		";
+        if($limit) {
+            $sql .= sprintf("LIMIT %d \n", $limit);
+        }
         return array($sql, $bind);
     }
 
@@ -426,6 +444,8 @@ class Model
     }
 
     /**
+     * @param string $whereClause
+     * @param array $bindIdSites
      * @param $idSite
      * @param $period
      * @param $date
@@ -434,10 +454,8 @@ class Model
      * @return array
      * @throws Exception
      */
-    private function getWhereClauseAndBind($idSite, $period, $date, $visitorId, $minTimestamp)
+    private function getWhereClauseAndBind($whereClause, $bindIdSites, $idSite, $period, $date, $visitorId, $minTimestamp)
     {
-        list($whereClause, $bindIdSites) = $this->getIdSitesWhereClause($idSite);
-
         $where = array();
         $where[] = $whereClause;
         $whereBind = $bindIdSites;
@@ -465,12 +483,6 @@ class Model
                 }
             } else {
                 $processedDate = Date::factory($date);
-                if ($date == 'today'
-                    || $date == 'now'
-                    || $processedDate->toString() == Date::factory('now', $currentTimezone)->toString()
-                ) {
-                    $processedDate = $processedDate->subDay(1);
-                }
                 $processedPeriod = Period\Factory::build($period, $processedDate);
             }
             $dateStart = $processedPeriod->getDateStart()->setTimezone($currentTimezone);

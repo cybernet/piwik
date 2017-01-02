@@ -11,8 +11,8 @@ namespace Piwik\Container;
 use DI\Container;
 use DI\ContainerBuilder;
 use Doctrine\Common\Cache\ArrayCache;
-use Piwik\Config;
-use Piwik\Development;
+use Piwik\Application\Kernel\GlobalSettingsProvider;
+use Piwik\Application\Kernel\PluginList;
 use Piwik\Plugin\Manager;
 
 /**
@@ -21,23 +21,38 @@ use Piwik\Plugin\Manager;
 class ContainerFactory
 {
     /**
-     * Optional environment config to load.
-     *
-     * @var string|null
+     * @var PluginList
      */
-    private $environment;
+    private $pluginList;
 
     /**
-     * @var array
+     * @var GlobalSettingsProvider
+     */
+    private $settings;
+
+    /**
+     * Optional environment configs to load.
+     *
+     * @var string[]
+     */
+    private $environments;
+
+    /**
+     * @var array[]
      */
     private $definitions;
 
     /**
-     * @param string|null $environment Optional environment config to load.
+     * @param PluginList $pluginList
+     * @param GlobalSettingsProvider $settings
+     * @param string[] $environment Optional environment configs to load.
+     * @param array[] $definitions
      */
-    public function __construct($environment = null, array $definitions = array())
+    public function __construct(PluginList $pluginList, GlobalSettingsProvider $settings, array $environments = array(), array $definitions = array())
     {
-        $this->environment = $environment;
+        $this->pluginList = $pluginList;
+        $this->settings = $settings;
+        $this->environments = $environments;
         $this->definitions = $definitions;
     }
 
@@ -54,7 +69,7 @@ class ContainerFactory
         $builder->setDefinitionCache(new ArrayCache());
 
         // INI config
-        $builder->addDefinitions(new IniConfigDefinitionSource(Config::getInstance()));
+        $builder->addDefinitions(new IniConfigDefinitionSource($this->settings));
 
         // Global config
         $builder->addDefinitions(PIWIK_USER_PATH . '/config/global.php');
@@ -63,8 +78,13 @@ class ContainerFactory
         $this->addPluginConfigs($builder);
 
         // Development config
-        if (Development::isEnabled()) {
-            $builder->addDefinitions(PIWIK_USER_PATH . '/config/environment/dev.php');
+        if ($this->isDevelopmentModeEnabled()) {
+            $this->addEnvironmentConfig($builder, 'dev');
+        }
+
+        // Environment config
+        foreach ($this->environments as $environment) {
+            $this->addEnvironmentConfig($builder, $environment);
         }
 
         // User config
@@ -72,39 +92,60 @@ class ContainerFactory
             $builder->addDefinitions(PIWIK_USER_PATH . '/config/config.php');
         }
 
-        // Environment config
-        $this->addEnvironmentConfig($builder);
-
         if (!empty($this->definitions)) {
-            $builder->addDefinitions($this->definitions);
+            foreach ($this->definitions as $definitionArray) {
+                $builder->addDefinitions($definitionArray);
+            }
         }
 
-        return $builder->build();
+        $container = $builder->build();
+        $container->set('Piwik\Application\Kernel\PluginList', $this->pluginList);
+        $container->set('Piwik\Application\Kernel\GlobalSettingsProvider', $this->settings);
+
+        return $container;
     }
 
-    private function addEnvironmentConfig(ContainerBuilder $builder)
+    private function addEnvironmentConfig(ContainerBuilder $builder, $environment)
     {
-        if (!$this->environment) {
+        if (!$environment) {
             return;
         }
 
-        $file = sprintf('%s/config/environment/%s.php', PIWIK_USER_PATH, $this->environment);
+        $file = sprintf('%s/config/environment/%s.php', PIWIK_USER_PATH, $environment);
 
-        $builder->addDefinitions($file);
+        if (file_exists($file)) {
+            $builder->addDefinitions($file);
+        }
+
+        // add plugin environment configs
+        $plugins = $this->pluginList->getActivatedPlugins();
+        foreach ($plugins as $plugin) {
+            $baseDir = Manager::getPluginsDirectory() . $plugin;
+
+            $environmentFile = $baseDir . '/config/' . $environment . '.php';
+            if (file_exists($environmentFile)) {
+                $builder->addDefinitions($environmentFile);
+            }
+        }
     }
 
     private function addPluginConfigs(ContainerBuilder $builder)
     {
-        $plugins = Manager::getInstance()->getActivatedPluginsFromConfig();
+        $plugins = $this->pluginList->getActivatedPlugins();
 
         foreach ($plugins as $plugin) {
-            $file = Manager::getPluginsDirectory() . $plugin . '/config/config.php';
+            $baseDir = Manager::getPluginsDirectory() . $plugin;
 
-            if (! file_exists($file)) {
-                continue;
+            $file = $baseDir . '/config/config.php';
+            if (file_exists($file)) {
+                $builder->addDefinitions($file);
             }
-
-            $builder->addDefinitions($file);
         }
+    }
+
+    private function isDevelopmentModeEnabled()
+    {
+        $section = $this->settings->getSection('Development');
+        return (bool) @$section['enabled']; // TODO: code redundancy w/ Development. hopefully ok for now.
     }
 }

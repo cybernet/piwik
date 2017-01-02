@@ -97,11 +97,13 @@ class Scheduler
         // remove from timetable tasks that are not active anymore
         $this->timetable->removeInactiveTasks($tasks);
 
+        $this->logger->info("Starting Scheduled tasks... ");
+
         // for every priority level, starting with the highest and concluding with the lowest
         $executionResults = array();
-        for ($priority = Task::HIGHEST_PRIORITY;
-             $priority <= Task::LOWEST_PRIORITY;
-             ++$priority) {
+        for ($priority = Task::HIGHEST_PRIORITY; $priority <= Task::LOWEST_PRIORITY; ++$priority) {
+            $this->logger->debug("Executing tasks with priority {priority}:", array('priority' => $priority));
+
             // loop through each task
             foreach ($tasks as $task) {
                 // if the task does not have the current priority level, don't execute it yet
@@ -113,20 +115,41 @@ class Scheduler
                 $shouldExecuteTask = $this->timetable->shouldExecuteTask($taskName);
 
                 if ($this->timetable->taskShouldBeRescheduled($taskName)) {
-                    $this->timetable->rescheduleTask($task);
+                    $rescheduledDate = $this->timetable->rescheduleTask($task);
+
+                    $this->logger->debug("Task {task} is scheduled to run again for {date}.", array('task' => $taskName, 'date' => $rescheduledDate));
                 }
 
                 if ($shouldExecuteTask) {
-                    $this->isRunningTask = true;
                     $message = $this->executeTask($task);
-                    $this->isRunningTask = false;
 
                     $executionResults[] = array('task' => $taskName, 'output' => $message);
                 }
             }
         }
 
+        $this->logger->info("done");
+
         return $executionResults;
+    }
+
+    /**
+     * Run a specific task now. Will ignore the schedule completely.
+     *
+     * @param string $taskName
+     * @return string Task output.
+     */
+    public function runTaskNow($taskName)
+    {
+        $tasks = $this->loader->loadTasks();
+
+        foreach ($tasks as $task) {
+            if ($task->getName() === $taskName) {
+                return $this->executeTask($task);
+            }
+        }
+
+        throw new \InvalidArgumentException('Task ' . $taskName . ' not found');
     }
 
     /**
@@ -170,6 +193,20 @@ class Scheduler
     }
 
     /**
+     * Returns the list of the task names.
+     *
+     * @return string[]
+     */
+    public function getTaskList()
+    {
+        $tasks = $this->loader->loadTasks();
+
+        return array_map(function (Task $task) {
+            return $task->getName();
+        }, $tasks);
+    }
+
+    /**
      * Executes the given task
      *
      * @param Task $task
@@ -177,15 +214,27 @@ class Scheduler
      */
     private function executeTask($task)
     {
-        $this->logger->debug('Running task {task}', array('task' => $task->getName()));
+        $this->logger->info("Scheduler: executing task {taskName}...", array(
+            'taskName' => $task->getName(),
+        ));
+
+        $this->isRunningTask = true;
+
+        $timer = new Timer();
 
         try {
-            $timer = new Timer();
-            call_user_func(array($task->getObjectInstance(), $task->getMethodName()), $task->getMethodParameter());
+            $callable = array($task->getObjectInstance(), $task->getMethodName());
+            call_user_func($callable, $task->getMethodParameter());
             $message = $timer->__toString();
         } catch (Exception $e) {
             $message = 'ERROR: ' . $e->getMessage();
         }
+
+        $this->isRunningTask = false;
+
+        $this->logger->info("Scheduler: finished. {timeElapsed}", array(
+            'timeElapsed' => $timer,
+        ));
 
         return $message;
     }

@@ -8,7 +8,6 @@
 
 namespace Piwik\Plugins\MobileMessaging\tests\Integration;
 
-use Piwik\Access;
 use Piwik\Plugins\MobileMessaging\API as APIMobileMessaging;
 use Piwik\Plugins\MobileMessaging\MobileMessaging;
 use Piwik\Plugins\MobileMessaging\SMSProvider;
@@ -31,10 +30,7 @@ class MobileMessagingTest extends IntegrationTestCase
         parent::setUp();
 
         // setup the access layer
-        $pseudoMockAccess = new FakeAccess;
         FakeAccess::$superUser = true;
-        //finally we set the user as a Super User by default
-        Access::setSingletonInstance($pseudoMockAccess);
 
         $this->idSiteAccess = APISitesManager::getInstance()->addSite("test", "http://test");
 
@@ -245,7 +241,10 @@ class MobileMessagingTest extends IntegrationTestCase
             'parameters' => array(MobileMessaging::PHONE_NUMBERS_PARAMETER => array($phoneNumber)),
         );
 
-        $stubbedAPIMobileMessaging = $this->getMock('\\Piwik\\Plugins\\MobileMessaging\\API', array('sendSMS', 'getInstance'), $arguments = array(), $mockClassName = '', $callOriginalConstructor = false);
+        $stubbedAPIMobileMessaging = $this->getMockBuilder('\\Piwik\\Plugins\\MobileMessaging\\API')
+                                          ->setMethods(array('sendSMS', 'getInstance'))
+                                          ->disableOriginalConstructor()
+                                          ->getMock();
         $stubbedAPIMobileMessaging->expects($this->once())->method('sendSMS')->with(
             $this->equalTo($expectedReportContent, 0),
             $this->equalTo($expectedPhoneNumber, 1),
@@ -258,5 +257,12 @@ class MobileMessagingTest extends IntegrationTestCase
         $mobileMessaging->sendReport(MobileMessaging::MOBILE_TYPE, $report, $reportContent, null, null, $reportSubject, null, null, null, false);
 
         \Piwik\Plugins\MobileMessaging\API::unsetInstance();
+    }
+
+    public function provideContainerConfig()
+    {
+        return array(
+            'Piwik\Access' => new FakeAccess()
+        );
     }
 }

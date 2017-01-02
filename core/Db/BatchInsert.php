@@ -9,12 +9,10 @@
 namespace Piwik\Db;
 
 use Exception;
-use Piwik\AssetManager;
 use Piwik\Common;
 use Piwik\Config;
 use Piwik\Container\StaticContainer;
 use Piwik\Db;
-use Piwik\DbHelper;
 use Piwik\Log;
 use Piwik\SettingsServer;
 
@@ -52,17 +50,20 @@ class BatchInsert
      * @param array $values array of data to be inserted
      * @param bool $throwException Whether to throw an exception that was caught while trying
      *                                LOAD DATA INFILE, or not.
+     * @param string $charset The charset to use, defaults to utf8
      * @throws Exception
      * @return bool  True if the bulk LOAD was used, false if we fallback to plain INSERTs
      */
-    public static function tableInsertBatch($tableName, $fields, $values, $throwException = false)
+    public static function tableInsertBatch($tableName, $fields, $values, $throwException = false, $charset = 'utf8')
     {
-        $filePath = StaticContainer::get('path.tmp') . '/assets/' . $tableName . '-' . Common::generateUniqId() . '.csv';
-
         $loadDataInfileEnabled = Config::getInstance()->General['enable_load_data_infile'];
 
         if ($loadDataInfileEnabled
             && Db::get()->hasBulkLoader()) {
+
+            $path = self::getBestPathForLoadData();
+            $filePath = $path . $tableName . '-' . Common::generateUniqId() . '.csv';
+
             try {
                 $fileSpec = array(
                     'delim'            => "\t",
@@ -73,12 +74,8 @@ class BatchInsert
                         },
                     'eol'              => "\r\n",
                     'null'             => 'NULL',
+                    'charset'          => $charset
                 );
-
-                // hack for charset mismatch
-                if (!DbHelper::isDatabaseConnectionUTF8() && !isset(Config::getInstance()->database['charset'])) {
-                    $fileSpec['charset'] = 'latin1';
-                }
 
                 self::createCSVFile($filePath, $fileSpec, $values);
 
@@ -92,17 +89,38 @@ class BatchInsert
                     return true;
                 }
             } catch (Exception $e) {
-
                 if ($throwException) {
                     throw $e;
                 }
             }
+
+            // if all else fails, fallback to a series of INSERTs
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
         }
 
-        // if all else fails, fallback to a series of INSERTs
-        @unlink($filePath);
         self::tableInsertBatchIterate($tableName, $fields, $values);
+
         return false;
+    }
+
+    private static function getBestPathForLoadData()
+    {
+        try {
+            $path = Db::fetchOne('SELECT @@secure_file_priv'); // was introduced in 5.0.38
+        } catch (Exception $e) {
+            // we do not rethrow exception as an error is expected if MySQL is < 5.0.38
+            // in this case tableInsertBatch might still work
+        }
+
+        if (empty($path) || !@is_dir($path) || !@is_writable($path)) {
+            $path = StaticContainer::get('path.tmp') . '/assets/';
+        } elseif (!Common::stringEndsWith($path, '/')) {
+            $path .= '/';
+        }
+
+        return $path;
     }
 
     /**
@@ -157,17 +175,17 @@ class BatchInsert
 		";
 
         /*
-		 * First attempt: assume web server and MySQL server are on the same machine;
-		 * this requires that the db user have the FILE privilege; however, since this is
-		 * a global privilege, it may not be granted due to security concerns
-		 */
+         * First attempt: assume web server and MySQL server are on the same machine;
+         * this requires that the db user have the FILE privilege; however, since this is
+         * a global privilege, it may not be granted due to security concerns
+         */
         $keywords = array('');
 
         /*
-		 * Second attempt: using the LOCAL keyword means the client reads the file and sends it to the server;
-		 * the LOCAL keyword may trigger a known PHP PDO\MYSQL bug when MySQL not built with --enable-local-infile
-		 * @see http://bugs.php.net/bug.php?id=54158
-		 */
+         * Second attempt: using the LOCAL keyword means the client reads the file and sends it to the server;
+         * the LOCAL keyword may trigger a known PHP PDO\MYSQL bug when MySQL not built with --enable-local-infile
+         * @see http://bugs.php.net/bug.php?id=54158
+         */
         $openBaseDir = ini_get('open_basedir');
         $safeMode    = ini_get('safe_mode');
 

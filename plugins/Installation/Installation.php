@@ -8,12 +8,12 @@
  */
 namespace Piwik\Plugins\Installation;
 
+use Piwik\API\Request;
 use Piwik\Common;
 use Piwik\Config;
 use Piwik\FrontController;
 use Piwik\Piwik;
 use Piwik\Plugins\Installation\Exception\DatabaseConnectionFailedException;
-use Piwik\Translate;
 use Piwik\View as PiwikView;
 
 /**
@@ -24,9 +24,9 @@ class Installation extends \Piwik\Plugin
     protected $installationControllerName = '\\Piwik\\Plugins\\Installation\\Controller';
 
     /**
-     * @see Piwik\Plugin::getListHooksRegistered
+     * @see Piwik\Plugin::registerEvents
      */
-    public function getListHooksRegistered()
+    public function registerEvents()
     {
         $hooks = array(
             'Config.NoConfigurationFile'      => 'dispatch',
@@ -40,8 +40,17 @@ class Installation extends \Piwik\Plugin
 
     public function displayDbConnectionMessage($exception = null)
     {
+        Common::sendResponseCode(500);
+
+        $errorMessage = $exception->getMessage();
+
+        if (Request::isApiRequest($_GET)) {
+            $ex = new DatabaseConnectionFailedException($errorMessage);
+            throw $ex;
+        }
+
         $view = new PiwikView("@Installation/cannotConnectToDb");
-        $view->exceptionMessage = $exception->getMessage();
+        $view->exceptionMessage = $errorMessage;
 
         $ex = new DatabaseConnectionFailedException($view->render());
         $ex->setIsHtmlMessage();
@@ -96,7 +105,7 @@ class Installation extends \Piwik\Plugin
         if ($this->isAllowedAction($action)) {
             echo FrontController::getInstance()->dispatch('Installation', $action, array($message));
         } else {
-            Piwik::exitWithErrorMessage(Piwik::translate('Installation_NoConfigFound'));
+            Piwik::exitWithErrorMessage($this->getMessageToInviteUserToInstallPiwik($message));
         }
 
         exit;
@@ -113,9 +122,27 @@ class Installation extends \Piwik\Plugin
     private function isAllowedAction($action)
     {
         $controller = $this->getInstallationController();
-        $isActionWhiteListed = in_array($action, array('saveLanguage', 'getBaseCss', 'reuseTables'));
+        $isActionWhiteListed = in_array($action, array('saveLanguage', 'getInstallationCss', 'getInstallationJs', 'reuseTables'));
 
         return in_array($action, array_keys($controller->getInstallationSteps()))
                 || $isActionWhiteListed;
+    }
+
+    /**
+     * @param $message
+     * @return string
+     */
+    private function getMessageToInviteUserToInstallPiwik($message)
+    {
+        $messageWhenPiwikSeemsNotInstalled =
+            $message .
+            "\n<br/>" .
+            Piwik::translate('Installation_NoConfigFileFound') .
+            "<br/><b>» " .
+            Piwik::translate('Installation_YouMayInstallPiwikNow', array("<a href='index.php'>", "</a></b>")) .
+            "<br/><small>" .
+            Piwik::translate('Installation_IfPiwikInstalledBeforeTablesCanBeKept') .
+            "</small>";
+        return $messageWhenPiwikSeemsNotInstalled;
     }
 }

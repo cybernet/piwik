@@ -90,36 +90,7 @@
                         && typeof self.jqplotParams.axes.xaxis.onclick[lastTick] == 'string') {
                         var url = self.jqplotParams.axes.xaxis.onclick[lastTick];
 
-                        if (url && -1 === url.indexOf('#')) {
-                            var module = broadcast.getValueFromHash('module');
-                            var action = broadcast.getValueFromHash('action');
-                            var idGoal = broadcast.getValueFromHash('idGoal');
-                            var idSite = broadcast.getValueFromUrl('idSite', url);
-                            var period = broadcast.getValueFromUrl('period', url);
-                            var date   = broadcast.getValueFromUrl('date', url);
-
-                            if (module && action) {
-                                url += '#module=' + module + '&action=' + action;
-
-                                if (idSite) {
-                                    url += '&idSite=' + idSite;
-                                }
-
-                                if (idGoal) {
-                                    url += '&idGoal=' + idGoal;
-                                }
-
-                                if (period) {
-                                    url += '&period=' + period;
-                                }
-
-                                if (period) {
-                                    url += '&date=' + date;
-                                }
-                            }
-                        }
-
-                        piwikHelper.redirectToUrl(url);
+                        broadcast.propagateNewPage(url);
                     }
                 })
                 .on('jqplotPiwikTickOver', function (e, tick) {
@@ -135,12 +106,14 @@
                     for (var d = 0; d < self.data.length; d++) {
                         var value = self.formatY(self.data[d][tick], d);
                         var series = self.jqplotParams.series[d].label;
-                        text.push('<strong>' + value + '</strong> ' + series);
+                        text.push('<strong>' + value + '</strong> ' + piwikHelper.htmlEntities(series));
                     }
+                    var content = '<h3>'+piwikHelper.htmlEntities(label)+'</h3>'+text.join('<br />');
+
                     $(this).tooltip({
                         track:   true,
                         items:   'div',
-                        content: '<h3>'+label+'</h3>'+text.join('<br />'),
+                        content: content,
                         show: false,
                         hide: false
                     }).trigger('mouseover');
@@ -159,6 +132,10 @@
 
         render: function () {
             JqplotGraphDataTablePrototype.render.call(this);
+
+            if (initializeSparklines) {
+                initializeSparklines();
+            }
         }
     });
 

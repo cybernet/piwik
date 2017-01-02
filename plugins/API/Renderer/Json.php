@@ -11,15 +11,13 @@ namespace Piwik\Plugins\API\Renderer;
 use Piwik\API\ApiRenderer;
 use Piwik\Common;
 use Piwik\DataTable\Renderer;
-use Piwik\DataTable;
 use Piwik\Piwik;
 use Piwik\ProxyHttp;
 
 /**
  * API output renderer for JSON.
- *
- * **NOTE: This is the old JSON format. It includes bugs that are fixed in the JSON2 API output
- * format. Please use that format instead of this.**
+ * NOTE: This is the old JSON format. It includes bugs that are fixed in the JSON2 API output format.
+ * Please use json2 format instead of this.
  *
  * @deprecated
  */
@@ -31,7 +29,13 @@ class Json extends ApiRenderer
         return $this->applyJsonpIfNeeded($result);
     }
 
-    public function renderException($message, \Exception $exception)
+    /**
+     * @param $message
+     * @param Exception|\Throwable $exception
+     * @param \Exception|\Throwable $exception
+     * @return string
+     */
+    public function renderException($message, $exception)
     {
         $exceptionMessage = str_replace(array("\r\n", "\n"), "", $message);
 
@@ -55,8 +59,7 @@ class Json extends ApiRenderer
             $result = $jsonRenderer->render();
             return $this->applyJsonpIfNeeded($result);
         }
-
-        return $this->renderDataTable($array);
+        return  $this->renderDataTable($array);
     }
 
     public function sendHeader()

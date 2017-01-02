@@ -2,7 +2,7 @@
 <result>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>40</idVisit>
+		<idVisit>42</idVisit>
 		<visitIp>174.97.139.63</visitIp>
 		
 		<actionDetails>
@@ -11,7 +11,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>47</goalPageId>
+				<goalPageId>49</goalPageId>
 				
 				<url>http://piwik.org/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -21,16 +21,18 @@
 				<type>action</type>
 				<url>http://piwik.org/</url>
 				<pageTitle>Liberate Web Analytics - Analytics - Piwik</pageTitle>
-				<pageIdAction>34</pageIdAction>
+				<pageIdAction>35</pageIdAction>
 				
-				<pageId>47</pageId>
+				<pageId>49</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>292</generationTimeMilliseconds>
 				<generationTime>0.29s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -57,6 +59,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>website</referrerType>
 		<referrerTypeName>Websites</referrerTypeName>
 		<referrerName>blog.comperiosearch.com</referrerName>
@@ -65,7 +68,12 @@
 		<referrerUrl>http://blog.comperiosearch.com/blog/2014/02/05/dynamic-search-ranking-using-elasticsearch-neo4j-and-piwik/</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 8.1</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -88,14 +96,11 @@
 		<regionCode>NC</regionCode>
 		<city>Raleigh</city>
 		<location>Raleigh, North Carolina, United States</location>
-		<latitude>35.771999</latitude>
+		<latitude>35.772000</latitude>
 		<longitude>-78.639000</longitude>
 		<visitLocalTime>20:34:49</visitLocalTime>
 		<visitLocalHour>20</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -126,7 +131,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>33</idVisit>
+		<idVisit>35</idVisit>
 		<visitIp>206.190.75.8</visitIp>
 		
 		<actionDetails>
@@ -134,15 +139,16 @@
 				<type>action</type>
 				<url>http://piwik.org/changelog/</url>
 				<pageTitle>Changelog Archive - Analytics - Piwik</pageTitle>
-				<pageIdAction>43</pageIdAction>
+				<pageIdAction>44</pageIdAction>
 				
-				<pageId>38</pageId>
+				<pageId>40</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<timeSpent>79</timeSpent>
 				<timeSpentPretty>1 min 19s</timeSpentPretty>
 				<icon />
@@ -153,7 +159,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>38</goalPageId>
+				<goalPageId>40</goalPageId>
 				
 				<url>http://piwik.org/changelog/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -163,15 +169,16 @@
 				<type>action</type>
 				<url>http://piwik.org/contact/</url>
 				<pageTitle>Contact the Piwik team - Analytics - Piwik</pageTitle>
-				<pageIdAction>54</pageIdAction>
+				<pageIdAction>55</pageIdAction>
 				
-				<pageId>46</pageId>
+				<pageId>48</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>2</interactionPosition>
 				<icon />
 				
 			</row>
@@ -198,6 +205,7 @@
 		<visitDurationPretty>1 min 21s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>2</actions>
+		<interactions>2</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -206,7 +214,12 @@
 		<referrerUrl>http://piwik.org/what-is-piwik/</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -230,13 +243,10 @@
 		<city>Lake Forest</city>
 		<location>Lake Forest, California, United States</location>
 		<latitude>33.645000</latitude>
-		<longitude>-117.679001</longitude>
+		<longitude>-117.679000</longitude>
 		<visitLocalTime>17:33:27</visitLocalTime>
 		<visitLocalHour>17</visitLocalHour>
 		<daysSinceLastVisit>181</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -254,7 +264,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>39</idVisit>
+		<idVisit>41</idVisit>
 		<visitIp>193.159.20.129</visitIp>
 		
 		<actionDetails>
@@ -263,7 +273,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>45</goalPageId>
+				<goalPageId>47</goalPageId>
 				
 				<url>http://demo.piwik.org/index.php?module=CoreHome&amp;action=index&amp;date=yesterday&amp;period=day&amp;idSite=7</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -273,16 +283,18 @@
 				<type>action</type>
 				<url>http://demo.piwik.org/index.php?module=CoreHome&amp;action=index&amp;date=yesterday&amp;period=day&amp;idSite=7</url>
 				<pageTitle>demo.piwik.org/Piwik Forums - Piwik › Web Analytics Reports</pageTitle>
-				<pageIdAction>52</pageIdAction>
+				<pageIdAction>53</pageIdAction>
 				
-				<pageId>45</pageId>
+				<pageId>47</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>413</generationTimeMilliseconds>
 				<generationTime>0.41s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -309,6 +321,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -317,7 +330,12 @@
 		<referrerUrl>http://demo.piwik.org/index.php?module=MultiSites&amp;action=index&amp;date=yesterday&amp;period=day&amp;idSite=32</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -345,9 +363,6 @@
 		<visitLocalTime>01:34:37</visitLocalTime>
 		<visitLocalHour>1</visitLocalHour>
 		<daysSinceLastVisit>4</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -390,7 +405,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>37</idVisit>
+		<idVisit>39</idVisit>
 		<visitIp>50.244.17.130</visitIp>
 		
 		<actionDetails>
@@ -398,15 +413,16 @@
 				<type>action</type>
 				<url>http://piwik.org/</url>
 				<pageTitle>Liberate Web Analytics - Analytics - Piwik</pageTitle>
-				<pageIdAction>34</pageIdAction>
+				<pageIdAction>35</pageIdAction>
 				
-				<pageId>42</pageId>
+				<pageId>44</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<timeSpent>32</timeSpent>
 				<timeSpentPretty>32s</timeSpentPretty>
 				<icon />
@@ -417,7 +433,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>42</goalPageId>
+				<goalPageId>44</goalPageId>
 				
 				<url>http://piwik.org/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -427,15 +443,16 @@
 				<type>action</type>
 				<url>http://piwik.org/what-is-piwisk/</url>
 				<pageTitle>What is Piwik? - Analytics - Piwik</pageTitle>
-				<pageIdAction>50</pageIdAction>
+				<pageIdAction>51</pageIdAction>
 				
-				<pageId>44</pageId>
+				<pageId>46</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
-						<customVariablePageValue1>200</customVariablePageValue1>
+						<customVariablePageValue1>501</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>2</interactionPosition>
 				<icon />
 				
 			</row>
@@ -462,6 +479,7 @@
 		<visitDurationPretty>34s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>2</actions>
+		<interactions>2</interactions>
 		<referrerType>search</referrerType>
 		<referrerTypeName>Search Engines</referrerTypeName>
 		<referrerName>Google</referrerName>
@@ -470,7 +488,12 @@
 		<referrerUrl>http://piwik.org/faq/general/#faq_144</referrerUrl>
 		<referrerSearchEngineUrl>http://google.com</referrerSearchEngineUrl>
 		<referrerSearchEngineIcon>plugins/Referrers/images/searchEngines/google.com.png</referrerSearchEngineIcon>
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.9</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -498,9 +521,6 @@
 		<visitLocalTime>19:34:01</visitLocalTime>
 		<visitLocalHour>19</visitLocalHour>
 		<daysSinceLastVisit>6</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -535,7 +555,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>38</idVisit>
+		<idVisit>40</idVisit>
 		<visitIp>84.194.72.21</visitIp>
 		
 		<actionDetails>
@@ -543,15 +563,16 @@
 				<type>outlink</type>
 				<url>http://demo.piwik.org/</url>
 				<pageTitle />
-				<pageIdAction>48</pageIdAction>
+				<pageIdAction>49</pageIdAction>
 				
-				<pageId>43</pageId>
+				<pageId>45</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition />
 				<icon>plugins/Morpheus/images/link.gif</icon>
 				
 			</row>
@@ -578,6 +599,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>0</interactions>
 		<referrerType>website</referrerType>
 		<referrerTypeName>Websites</referrerTypeName>
 		<referrerName>musicforeveryoneradio.be</referrerName>
@@ -586,7 +608,12 @@
 		<referrerUrl>http://musicforeveryoneradio.be:2222/CMD_PLUGINS/installatron/index.raw</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -609,14 +636,11 @@
 		<regionCode>05</regionCode>
 		<city>Maaseik</city>
 		<location>Maaseik, Limburg, Belgium</location>
-		<latitude>51.099998</latitude>
+		<latitude>51.100000</latitude>
 		<longitude>5.800000</longitude>
 		<visitLocalTime>01:34:24</visitLocalTime>
 		<visitLocalHour>1</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -651,7 +675,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>36</idVisit>
+		<idVisit>38</idVisit>
 		<visitIp>108.211.181.12</visitIp>
 		
 		<actionDetails>
@@ -660,7 +684,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>41</goalPageId>
+				<goalPageId>43</goalPageId>
 				
 				<url>http://piwik.org/blog/2012/10/integrate-piwik-into-your-rails-application/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -670,16 +694,18 @@
 				<type>action</type>
 				<url>http://piwik.org/blog/2012/10/integrate-piwik-into-your-rails-application/</url>
 				<pageTitle>Integrate Piwik into your Rails Application - Analytics - Piwik</pageTitle>
-				<pageIdAction>47</pageIdAction>
+				<pageIdAction>48</pageIdAction>
 				
-				<pageId>41</pageId>
+				<pageId>43</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>391</generationTimeMilliseconds>
 				<generationTime>0.39s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -706,6 +732,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>search</referrerType>
 		<referrerTypeName>Search Engines</referrerTypeName>
 		<referrerName>Google</referrerName>
@@ -714,7 +741,12 @@
 		<referrerUrl>http://piwik.org/faq/general/#faq_144</referrerUrl>
 		<referrerSearchEngineUrl>http://google.com</referrerSearchEngineUrl>
 		<referrerSearchEngineIcon>plugins/Referrers/images/searchEngines/google.com.png</referrerSearchEngineIcon>
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.9</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -738,13 +770,10 @@
 		<city>San Francisco</city>
 		<location>San Francisco, California, United States</location>
 		<latitude>37.792000</latitude>
-		<longitude>-122.408997</longitude>
+		<longitude>-122.409000</longitude>
 		<visitLocalTime>17:33:58</visitLocalTime>
 		<visitLocalHour>17</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -787,7 +816,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>35</idVisit>
+		<idVisit>37</idVisit>
 		<visitIp>219.101.46.222</visitIp>
 		
 		<actionDetails>
@@ -796,7 +825,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>40</goalPageId>
+				<goalPageId>42</goalPageId>
 				
 				<url>https://piwik.org/log-analytics/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -806,15 +835,16 @@
 				<type>action</type>
 				<url>http://piwik.org/log-analytics/</url>
 				<pageTitle>Log Analytics - Analytics - Piwik</pageTitle>
-				<pageIdAction>41</pageIdAction>
+				<pageIdAction>42</pageIdAction>
 				
-				<pageId>40</pageId>
+				<pageId>42</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
-						<customVariablePageValue1>200</customVariablePageValue1>
+						<customVariablePageValue1>404</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -841,6 +871,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>search</referrerType>
 		<referrerTypeName>Search Engines</referrerTypeName>
 		<referrerName>Google</referrerName>
@@ -849,7 +880,12 @@
 		<referrerUrl>http://piwik.org/faq/general/#faq_144</referrerUrl>
 		<referrerSearchEngineUrl>http://google.com</referrerSearchEngineUrl>
 		<referrerSearchEngineIcon>plugins/Referrers/images/searchEngines/google.com.png</referrerSearchEngineIcon>
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.9</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -872,14 +908,11 @@
 		<regionCode>19</regionCode>
 		<city>Nihon'odori</city>
 		<location>Nihon'odori, Kanagawa, Japan</location>
-		<latitude>35.450001</latitude>
-		<longitude>139.649994</longitude>
+		<latitude>35.450000</latitude>
+		<longitude>139.650000</longitude>
 		<visitLocalTime>09:33:50</visitLocalTime>
 		<visitLocalHour>9</visitLocalHour>
 		<daysSinceLastVisit>1</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -910,7 +943,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>34</idVisit>
+		<idVisit>36</idVisit>
 		<visitIp>80.136.160.65</visitIp>
 		
 		<actionDetails>
@@ -919,7 +952,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>39</goalPageId>
+				<goalPageId>41</goalPageId>
 				
 				<url>http://piwik.org/blog/2014/03/piwik-2-1-massive-performance-reliability-improvements/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -929,16 +962,18 @@
 				<type>action</type>
 				<url>http://piwik.org/blog/2014/03/piwik-2-1-massive-performance-reliability-improvements/</url>
 				<pageTitle>Piwik 2.1 — Massive Performance and Reliability Improvements - Analytics - Piwik</pageTitle>
-				<pageIdAction>45</pageIdAction>
+				<pageIdAction>46</pageIdAction>
 				
-				<pageId>39</pageId>
+				<pageId>41</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>119</generationTimeMilliseconds>
 				<generationTime>0.12s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -965,6 +1000,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>website</referrerType>
 		<referrerTypeName>Websites</referrerTypeName>
 		<referrerName>berndjung.com</referrerName>
@@ -973,7 +1009,12 @@
 		<referrerUrl>http://berndjung.com/piwik/index.php?module=CoreHome&amp;action=index&amp;idSite=1&amp;period=day&amp;date=today</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Smartphone</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/smartphone.png</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Android</operatingSystem>
 		<operatingSystemName>Android</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/AND.gif</operatingSystemIcon>
@@ -996,14 +1037,11 @@
 		<regionCode>07</regionCode>
 		<city>Weilerswist</city>
 		<location>Weilerswist, Nordrhein-Westfalen, Germany</location>
-		<latitude>50.766998</latitude>
+		<latitude>50.767000</latitude>
 		<longitude>6.833000</longitude>
 		<visitLocalTime>01:33:31</visitLocalTime>
 		<visitLocalHour>1</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -1026,7 +1064,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>32</idVisit>
+		<idVisit>34</idVisit>
 		<visitIp>188.107.238.9</visitIp>
 		
 		<actionDetails>
@@ -1035,7 +1073,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>37</goalPageId>
+				<goalPageId>39</goalPageId>
 				
 				<url>http://piwik.org/log-analytics/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -1045,16 +1083,18 @@
 				<type>action</type>
 				<url>http://piwik.org/log-analytics/</url>
 				<pageTitle>Log Analytics - Analytics - Piwik</pageTitle>
-				<pageIdAction>41</pageIdAction>
+				<pageIdAction>42</pageIdAction>
 				
-				<pageId>37</pageId>
+				<pageId>39</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>145</generationTimeMilliseconds>
 				<generationTime>0.15s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -1081,6 +1121,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>website</referrerType>
 		<referrerTypeName>Websites</referrerTypeName>
 		<referrerName>forum.golem.de</referrerName>
@@ -1089,7 +1130,12 @@
 		<referrerUrl>http://forum.golem.de/kommentare/security/urteil-zu-tracking-nutzer-muessen-piwik-analyse-widersprechen-koennen/piwik-log-analytics/80715,3669355,3669355,read.html</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -1117,9 +1163,6 @@
 		<visitLocalTime>01:33:13</visitLocalTime>
 		<visitLocalHour>1</visitLocalHour>
 		<daysSinceLastVisit>3</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -1162,7 +1205,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>30</idVisit>
+		<idVisit>32</idVisit>
 		<visitIp>93.80.130.163</visitIp>
 		
 		<actionDetails>
@@ -1170,16 +1213,18 @@
 				<type>action</type>
 				<url>http://piwik.org/</url>
 				<pageTitle>Liberate Web Analytics - Analytics - Piwik</pageTitle>
-				<pageIdAction>34</pageIdAction>
+				<pageIdAction>35</pageIdAction>
 				
-				<pageId>33</pageId>
+				<pageId>35</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
-						<customVariablePageValue1>200</customVariablePageValue1>
+						<customVariablePageValue1>403</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>182</generationTimeMilliseconds>
 				<generationTime>0.18s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<timeSpent>2</timeSpent>
 				<timeSpentPretty>2s</timeSpentPretty>
 				<icon />
@@ -1190,7 +1235,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>33</goalPageId>
+				<goalPageId>35</goalPageId>
 				
 				<url>http://piwik.org/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -1200,16 +1245,18 @@
 				<type>action</type>
 				<url>http://piwik.org/download/</url>
 				<pageTitle>Download - Analytics - Piwik</pageTitle>
-				<pageIdAction>38</pageIdAction>
+				<pageIdAction>39</pageIdAction>
 				
-				<pageId>35</pageId>
+				<pageId>37</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
-						<customVariablePageValue1>200</customVariablePageValue1>
+						<customVariablePageValue1>500</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>113</generationTimeMilliseconds>
 				<generationTime>0.11s</generationTime>
+				<interactionPosition>2</interactionPosition>
 				<timeSpent>7</timeSpent>
 				<timeSpentPretty>7s</timeSpentPretty>
 				<icon />
@@ -1219,15 +1266,16 @@
 				<type>download</type>
 				<url>http://builds.piwik.org/latest.zip</url>
 				<pageTitle />
-				<pageIdAction>39</pageIdAction>
+				<pageIdAction>40</pageIdAction>
 				
-				<pageId>36</pageId>
+				<pageId>38</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition />
 				<icon>plugins/Morpheus/images/download.png</icon>
 				
 			</row>
@@ -1254,6 +1302,7 @@
 		<visitDurationPretty>10s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>3</actions>
+		<interactions>2</interactions>
 		<referrerType>search</referrerType>
 		<referrerTypeName>Search Engines</referrerTypeName>
 		<referrerName>Google</referrerName>
@@ -1262,7 +1311,12 @@
 		<referrerUrl>http://piwik.org/faq/general/#faq_144</referrerUrl>
 		<referrerSearchEngineUrl>http://google.com</referrerSearchEngineUrl>
 		<referrerSearchEngineIcon>plugins/Referrers/images/searchEngines/google.com.png</referrerSearchEngineIcon>
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 8</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -1278,21 +1332,18 @@
 		<events>0</events>
 		<continent>Europe</continent>
 		<continentCode>eur</continentCode>
-		<country>Russian Federation</country>
+		<country>Russia</country>
 		<countryCode>ru</countryCode>
 		<countryFlag>plugins/UserCountry/images/flags/ru.png</countryFlag>
 		<region>Moscow City</region>
 		<regionCode>48</regionCode>
 		<city>Moscow</city>
-		<location>Moscow, Moscow City, Russian Federation</location>
-		<latitude>55.751999</latitude>
-		<longitude>37.616001</longitude>
+		<location>Moscow, Moscow City, Russia</location>
+		<latitude>55.752000</latitude>
+		<longitude>37.616000</longitude>
 		<visitLocalTime>04:28:18</visitLocalTime>
 		<visitLocalHour>4</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -1319,7 +1370,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>31</idVisit>
+		<idVisit>33</idVisit>
 		<visitIp>176.41.226.154</visitIp>
 		
 		<actionDetails>
@@ -1328,7 +1379,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>34</goalPageId>
+				<goalPageId>36</goalPageId>
 				
 				<url>http://piwik.org/docs/installation/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -1338,16 +1389,18 @@
 				<type>action</type>
 				<url>http://piwik.org/docs/installation/</url>
 				<pageTitle>Hello Installing Piwik - Analytics - Piwik</pageTitle>
-				<pageIdAction>36</pageIdAction>
+				<pageIdAction>37</pageIdAction>
 				
-				<pageId>34</pageId>
+				<pageId>36</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>134</generationTimeMilliseconds>
 				<generationTime>0.13s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -1374,6 +1427,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -1382,7 +1436,12 @@
 		<referrerUrl>http://piwik.org/docs/installation/</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -1406,13 +1465,10 @@
 		<city>Esentepe</city>
 		<location>Esentepe, Rize, Turkey</location>
 		<latitude>40.979000</latitude>
-		<longitude>40.415001</longitude>
+		<longitude>40.415000</longitude>
 		<visitLocalTime>02:32:21</visitLocalTime>
 		<visitLocalHour>2</visitLocalHour>
 		<daysSinceLastVisit>8</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -1447,7 +1503,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>29</idVisit>
+		<idVisit>31</idVisit>
 		<visitIp>84.194.72.21</visitIp>
 		
 		<actionDetails>
@@ -1456,7 +1512,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>32</goalPageId>
+				<goalPageId>34</goalPageId>
 				
 				<url>http://piwik.org/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -1466,16 +1522,18 @@
 				<type>action</type>
 				<url>http://piwik.org/</url>
 				<pageTitle>Liberate Web Analytics - Analytics - Piwik</pageTitle>
-				<pageIdAction>34</pageIdAction>
+				<pageIdAction>35</pageIdAction>
 				
-				<pageId>32</pageId>
+				<pageId>34</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>58</generationTimeMilliseconds>
 				<generationTime>0.06s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -1502,6 +1560,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>website</referrerType>
 		<referrerTypeName>Websites</referrerTypeName>
 		<referrerName>musicforeveryoneradio.be</referrerName>
@@ -1510,7 +1569,12 @@
 		<referrerUrl>http://musicforeveryoneradio.be:2222/CMD_PLUGINS/installatron/index.raw</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -1533,14 +1597,11 @@
 		<regionCode>05</regionCode>
 		<city>Maaseik</city>
 		<location>Maaseik, Limburg, Belgium</location>
-		<latitude>51.099998</latitude>
+		<latitude>51.100000</latitude>
 		<longitude>5.800000</longitude>
 		<visitLocalTime>01:34:18</visitLocalTime>
 		<visitLocalHour>1</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Domain landed</customVariableName1>
@@ -1575,7 +1636,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>41</idVisit>
+		<idVisit>57</idVisit>
 		<visitIp>175.41.192.40</visitIp>
 		
 		<actionDetails>
@@ -1585,14 +1646,16 @@
 				<pageTitle />
 				<pageIdAction>1</pageIdAction>
 				
-				<pageId>48</pageId>
+				<pageId>70</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>123</generationTimeMilliseconds>
 				<generationTime>0.12s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<timeSpent>0</timeSpent>
 				<timeSpentPretty>0s</timeSpentPretty>
 				<icon />
@@ -1603,7 +1666,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>48</goalPageId>
+				<goalPageId>70</goalPageId>
 				
 				<url>http://piwik.net/blog/category/meta/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -1615,14 +1678,16 @@
 				<pageTitle />
 				<pageIdAction>1</pageIdAction>
 				
-				<pageId>52</pageId>
+				<pageId>74</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>120</generationTimeMilliseconds>
 				<generationTime>0.12s</generationTime>
+				<interactionPosition>5</interactionPosition>
 				<timeSpent>0</timeSpent>
 				<timeSpentPretty>0s</timeSpentPretty>
 				<icon />
@@ -1634,14 +1699,16 @@
 				<pageTitle />
 				<pageIdAction>1</pageIdAction>
 				
-				<pageId>56</pageId>
+				<pageId>78</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>23</generationTimeMilliseconds>
 				<generationTime>0.02s</generationTime>
+				<interactionPosition>9</interactionPosition>
 				<timeSpent>52</timeSpent>
 				<timeSpentPretty>52s</timeSpentPretty>
 				<icon />
@@ -1653,14 +1720,16 @@
 				<pageTitle />
 				<pageIdAction>2</pageIdAction>
 				
-				<pageId>49</pageId>
+				<pageId>71</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>234</generationTimeMilliseconds>
 				<generationTime>0.23s</generationTime>
+				<interactionPosition>2</interactionPosition>
 				<timeSpent>50</timeSpent>
 				<timeSpentPretty>50s</timeSpentPretty>
 				<icon />
@@ -1672,14 +1741,16 @@
 				<pageTitle />
 				<pageIdAction>2</pageIdAction>
 				
-				<pageId>53</pageId>
+				<pageId>75</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>294</generationTimeMilliseconds>
 				<generationTime>0.29s</generationTime>
+				<interactionPosition>6</interactionPosition>
 				<timeSpent>49</timeSpent>
 				<timeSpentPretty>49s</timeSpentPretty>
 				<icon />
@@ -1691,14 +1762,16 @@
 				<pageTitle />
 				<pageIdAction>2</pageIdAction>
 				
-				<pageId>57</pageId>
+				<pageId>79</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>237</generationTimeMilliseconds>
 				<generationTime>0.24s</generationTime>
+				<interactionPosition>10</interactionPosition>
 				<timeSpent>26</timeSpent>
 				<timeSpentPretty>26s</timeSpentPretty>
 				<icon />
@@ -1710,14 +1783,16 @@
 				<pageTitle />
 				<pageIdAction>3</pageIdAction>
 				
-				<pageId>50</pageId>
+				<pageId>72</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>1324</generationTimeMilliseconds>
 				<generationTime>1.32s</generationTime>
+				<interactionPosition>3</interactionPosition>
 				<timeSpent>26</timeSpent>
 				<timeSpentPretty>26s</timeSpentPretty>
 				<icon />
@@ -1729,14 +1804,16 @@
 				<pageTitle />
 				<pageIdAction>3</pageIdAction>
 				
-				<pageId>54</pageId>
+				<pageId>76</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>624</generationTimeMilliseconds>
 				<generationTime>0.62s</generationTime>
+				<interactionPosition>7</interactionPosition>
 				<timeSpent>7</timeSpent>
 				<timeSpentPretty>7s</timeSpentPretty>
 				<icon />
@@ -1748,14 +1825,16 @@
 				<pageTitle />
 				<pageIdAction>4</pageIdAction>
 				
-				<pageId>51</pageId>
+				<pageId>73</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>543</generationTimeMilliseconds>
 				<generationTime>0.54s</generationTime>
+				<interactionPosition>4</interactionPosition>
 				<timeSpent>8</timeSpent>
 				<timeSpentPretty>8s</timeSpentPretty>
 				<icon />
@@ -1767,14 +1846,16 @@
 				<pageTitle />
 				<pageIdAction>4</pageIdAction>
 				
-				<pageId>55</pageId>
+				<pageId>77</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>343</generationTimeMilliseconds>
 				<generationTime>0.34s</generationTime>
+				<interactionPosition>8</interactionPosition>
 				<icon />
 				
 			</row>
@@ -1801,6 +1882,7 @@
 		<visitDurationPretty>54s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>10</actions>
+		<interactions>10</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -1809,7 +1891,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Unknown</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/unknown.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Unknown</operatingSystem>
 		<operatingSystemName>Unknown</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/UNK.gif</operatingSystemIcon>
@@ -1837,9 +1924,6 @@
 		<visitLocalTime>08:10:38</visitLocalTime>
 		<visitLocalHour>8</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -1853,7 +1937,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>46</idVisit>
+		<idVisit>62</idVisit>
 		<visitIp>192.0.2.10</visitIp>
 		
 		<actionDetails>
@@ -1862,7 +1946,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>64</goalPageId>
+				<goalPageId>86</goalPageId>
 				
 				<url>http://piwik.net/view/my/file.html</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -1872,16 +1956,18 @@
 				<type>action</type>
 				<url>http://piwik.net/view/my/file.html</url>
 				<pageTitle />
-				<pageIdAction>64</pageIdAction>
+				<pageIdAction>65</pageIdAction>
 				
-				<pageId>64</pageId>
+				<pageId>86</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>1</generationTimeMilliseconds>
 				<generationTime>0.001s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -1908,6 +1994,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -1916,19 +2003,24 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
 		<operatingSystemCode>MAC</operatingSystemCode>
 		<operatingSystemVersion />
-		<browserFamily />
-		<browserFamilyDescription>Unknown</browserFamilyDescription>
-		<browser>Unknown</browser>
-		<browserName>Unknown</browserName>
-		<browserIcon>plugins/DevicesDetection/images/browsers/UNK.gif</browserIcon>
-		<browserCode>UNK</browserCode>
-		<browserVersion />
+		<browserFamily>Trident</browserFamily>
+		<browserFamilyDescription>Trident (IE)</browserFamilyDescription>
+		<browser>Internet Explorer 5.0</browser>
+		<browserName>Internet Explorer</browserName>
+		<browserIcon>plugins/DevicesDetection/images/browsers/IE.gif</browserIcon>
+		<browserCode>IE</browserCode>
+		<browserVersion>5.0</browserVersion>
 		<events>0</events>
 		<continent>Unknown</continent>
 		<continentCode>unk</continentCode>
@@ -1944,9 +2036,6 @@
 		<visitLocalTime>01:13:11</visitLocalTime>
 		<visitLocalHour>1</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -1960,7 +2049,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>45</idVisit>
+		<idVisit>61</idVisit>
 		<visitIp>172.20.1.0</visitIp>
 		
 		<actionDetails>
@@ -1968,15 +2057,16 @@
 				<type>action</type>
 				<url>http://piwik.net/Citrix/XenApp/Wan/auth/login.jsp</url>
 				<pageTitle>302/URL = http%3A%2F%2Fpiwik.net%2FCitrix%2FXenApp%2FWan%2Fauth%2Flogin.jsp</pageTitle>
-				<pageIdAction>62</pageIdAction>
+				<pageIdAction>63</pageIdAction>
 				
-				<pageId>62</pageId>
+				<pageId>84</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>302</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<timeSpent>240</timeSpent>
 				<timeSpentPretty>4 min 0s</timeSpentPretty>
 				<icon />
@@ -1987,7 +2077,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>62</goalPageId>
+				<goalPageId>84</goalPageId>
 				
 				<url>http://piwik.net/Citrix/XenApp/Wan/auth/login.jsp</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -1997,15 +2087,16 @@
 				<type>action</type>
 				<url>http://piwik.net/Citrix/XenApp/Wan/auth/silentDetection.jsp</url>
 				<pageTitle />
-				<pageIdAction>63</pageIdAction>
+				<pageIdAction>64</pageIdAction>
 				
-				<pageId>63</pageId>
+				<pageId>85</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>2</interactionPosition>
 				<icon />
 				
 			</row>
@@ -2032,6 +2123,7 @@
 		<visitDurationPretty>4 min 2s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>2</actions>
+		<interactions>2</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -2040,7 +2132,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -2068,9 +2165,6 @@
 		<visitLocalTime>11:55:13</visitLocalTime>
 		<visitLocalHour>11</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -2084,7 +2178,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>51</idVisit>
+		<idVisit>68</idVisit>
 		<visitIp>173.5.0.0</visitIp>
 		
 		<actionDetails>
@@ -2093,19 +2187,19 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>71</goalPageId>
+				<goalPageId>94</goalPageId>
 				
-				<url>http://piwik.net/hello/from/another/world/6,681965</url>
+				<url>http://hello.example.com/hello/from/another/world/6,681965</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
 				
 			</row>
 			<row>
 				<type>action</type>
-				<url>http://piwik.net/hello/from/another/world/6,681965</url>
+				<url>http://hello.example.com/hello/from/another/world/6,681965</url>
 				<pageTitle />
-				<pageIdAction>60</pageIdAction>
+				<pageIdAction>61</pageIdAction>
 				
-				<pageId>71</pageId>
+				<pageId>94</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>Generation Time</customVariablePageName1>
@@ -2120,7 +2214,9 @@
 						<customVariablePageValue3>200</customVariablePageValue3>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>359</generationTimeMilliseconds>
 				<generationTime>0.36s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -2147,6 +2243,7 @@
 		<visitDurationPretty>1s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -2155,7 +2252,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.10</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -2183,9 +2285,6 @@
 		<visitLocalTime>17:30:00</visitLocalTime>
 		<visitLocalHour>17</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>User Name</customVariableName1>
@@ -2203,24 +2302,26 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>42</idVisit>
+		<idVisit>58</idVisit>
 		<visitIp>70.95.0.0</visitIp>
 		
 		<actionDetails>
 			<row>
 				<type>action</type>
-				<url>http://piwik.net/Products/theProduct</url>
+				<url>http://xzy.example.com/Products/theProduct</url>
 				<pageTitle />
-				<pageIdAction>55</pageIdAction>
+				<pageIdAction>56</pageIdAction>
 				
-				<pageId>58</pageId>
+				<pageId>80</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>109</generationTimeMilliseconds>
 				<generationTime>0.11s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<timeSpent>0</timeSpent>
 				<timeSpentPretty>0s</timeSpentPretty>
 				<icon />
@@ -2231,25 +2332,26 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>58</goalPageId>
+				<goalPageId>80</goalPageId>
 				
-				<url>http://piwik.net/Products/theProduct</url>
+				<url>http://xzy.example.com/Products/theProduct</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
 				
 			</row>
 			<row>
 				<type>action</type>
-				<url>http://piwik.net/Topic/hw43061</url>
-				<pageTitle>301/URL = http%3A%2F%2Fpiwik.net%2FTopic%2Fhw43061</pageTitle>
-				<pageIdAction>57</pageIdAction>
+				<url>http://example.hello.com/Topic/hw43061</url>
+				<pageTitle>301/URL = http%3A%2F%2Fexample.hello.com%2FTopic%2Fhw43061</pageTitle>
+				<pageIdAction>58</pageIdAction>
 				
-				<pageId>59</pageId>
+				<pageId>81</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>301</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>2</interactionPosition>
 				<timeSpent>0</timeSpent>
 				<timeSpentPretty>0s</timeSpentPretty>
 				<icon />
@@ -2257,11 +2359,11 @@
 			</row>
 			<row>
 				<type>action</type>
-				<url>http://piwik.net/Products/theProduct</url>
+				<url>http://xzy.example.com/Products/theProduct</url>
 				<pageTitle />
-				<pageIdAction>55</pageIdAction>
+				<pageIdAction>56</pageIdAction>
 				
-				<pageId>68</pageId>
+				<pageId>91</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>Generation Time</customVariablePageName1>
@@ -2276,7 +2378,9 @@
 						<customVariablePageValue3>200</customVariablePageValue3>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>109</generationTimeMilliseconds>
 				<generationTime>0.11s</generationTime>
+				<interactionPosition>3</interactionPosition>
 				<icon />
 				
 			</row>
@@ -2303,6 +2407,7 @@
 		<visitDurationPretty>2s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>3</actions>
+		<interactions>3</interactions>
 		<referrerType>website</referrerType>
 		<referrerTypeName>Websites</referrerTypeName>
 		<referrerName>example.com</referrerName>
@@ -2311,7 +2416,12 @@
 		<referrerUrl>http://example.com/Search/SearchResults.pg?informationRecipient.languageCode.c=en</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Smartphone</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/smartphone.png</deviceTypeIcon>
+		<deviceBrand>Samsung</deviceBrand>
+		<deviceModel>GALAXY S5</deviceModel>
 		<operatingSystem>Android 4.4</operatingSystem>
 		<operatingSystemName>Android</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/AND.gif</operatingSystemIcon>
@@ -2339,9 +2449,6 @@
 		<visitLocalTime>17:00:00</visitLocalTime>
 		<visitLocalHour>17</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>User Name</customVariableName1>
@@ -2359,7 +2466,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>43</idVisit>
+		<idVisit>59</idVisit>
 		<visitIp>173.5.0.0</visitIp>
 		
 		<actionDetails>
@@ -2368,26 +2475,28 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>60</goalPageId>
+				<goalPageId>82</goalPageId>
 				
-				<url>http://piwik.net/hello/world/6,681965</url>
+				<url>http://hello.example.com/hello/world/6,681965</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
 				
 			</row>
 			<row>
 				<type>action</type>
-				<url>http://piwik.net/hello/world/6,681965</url>
-				<pageTitle>404/URL = http%3A%2F%2Fpiwik.net%2Fhello%2Fworld%2F6%2C681965</pageTitle>
-				<pageIdAction>59</pageIdAction>
+				<url>http://hello.example.com/hello/world/6,681965</url>
+				<pageTitle>404/URL = http%3A%2F%2Fhello.example.com%2Fhello%2Fworld%2F6%2C681965</pageTitle>
+				<pageIdAction>60</pageIdAction>
 				
-				<pageId>60</pageId>
+				<pageId>82</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>404</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>359</generationTimeMilliseconds>
 				<generationTime>0.36s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -2414,6 +2523,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -2422,7 +2532,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.10</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -2450,9 +2565,6 @@
 		<visitLocalTime>17:00:00</visitLocalTime>
 		<visitLocalHour>17</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -2466,17 +2578,17 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>44</idVisit>
+		<idVisit>60</idVisit>
 		<visitIp>173.5.0.0</visitIp>
 		
 		<actionDetails>
 			<row>
 				<type>action</type>
-				<url>http://piwik.net/hello/world/6,681965</url>
-				<pageTitle>404/URL = http%3A%2F%2Fpiwik.net%2Fhello%2Fworld%2F6%2C681965</pageTitle>
-				<pageIdAction>59</pageIdAction>
+				<url>http://hello.example.com/hello/world/6,681965</url>
+				<pageTitle>404/URL = http%3A%2F%2Fhello.example.com%2Fhello%2Fworld%2F6%2C681965</pageTitle>
+				<pageIdAction>60</pageIdAction>
 				
-				<pageId>70</pageId>
+				<pageId>93</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>Generation Time</customVariablePageName1>
@@ -2491,7 +2603,9 @@
 						<customVariablePageValue3>404</customVariablePageValue3>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>359</generationTimeMilliseconds>
 				<generationTime>0.36s</generationTime>
+				<interactionPosition>2</interactionPosition>
 				<timeSpent>0</timeSpent>
 				<timeSpentPretty>0s</timeSpentPretty>
 				<icon />
@@ -2502,26 +2616,28 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>61</goalPageId>
+				<goalPageId>83</goalPageId>
 				
-				<url>http://piwik.net/hello/from/another/world/6,681965</url>
+				<url>http://hello.example.com/hello/from/another/world/6,681965</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
 				
 			</row>
 			<row>
 				<type>action</type>
-				<url>http://piwik.net/hello/from/another/world/6,681965</url>
+				<url>http://hello.example.com/hello/from/another/world/6,681965</url>
 				<pageTitle />
-				<pageIdAction>60</pageIdAction>
+				<pageIdAction>61</pageIdAction>
 				
-				<pageId>61</pageId>
+				<pageId>83</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>359</generationTimeMilliseconds>
 				<generationTime>0.36s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -2548,6 +2664,7 @@
 		<visitDurationPretty>1s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>2</actions>
+		<interactions>2</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -2556,7 +2673,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.10</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -2584,9 +2706,6 @@
 		<visitLocalTime>17:30:00</visitLocalTime>
 		<visitLocalHour>17</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -2600,7 +2719,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>50</idVisit>
+		<idVisit>67</idVisit>
 		<visitIp>70.95.32.0</visitIp>
 		
 		<actionDetails>
@@ -2609,19 +2728,19 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>69</goalPageId>
+				<goalPageId>92</goalPageId>
 				
-				<url>http://piwik.net/Topic/hw43061</url>
+				<url>http://example.hello.com/Topic/hw43061</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
 				
 			</row>
 			<row>
 				<type>action</type>
-				<url>http://piwik.net/Topic/hw43061</url>
-				<pageTitle>301/URL = http%3A%2F%2Fpiwik.net%2FTopic%2Fhw43061</pageTitle>
-				<pageIdAction>57</pageIdAction>
+				<url>http://example.hello.com/Topic/hw43061</url>
+				<pageTitle>301/URL = http%3A%2F%2Fexample.hello.com%2FTopic%2Fhw43061</pageTitle>
+				<pageIdAction>58</pageIdAction>
 				
-				<pageId>69</pageId>
+				<pageId>92</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>Generation Time</customVariablePageName1>
@@ -2636,6 +2755,7 @@
 						<customVariablePageValue3>301</customVariablePageValue3>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -2662,6 +2782,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -2670,7 +2791,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.10</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -2698,9 +2824,6 @@
 		<visitLocalTime>17:00:00</visitLocalTime>
 		<visitLocalHour>17</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>User Name</customVariableName1>
@@ -2718,7 +2841,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>26</idVisit>
+		<idVisit>27</idVisit>
 		<visitIp>0.0.0.0</visitIp>
 		
 		<actionDetails>
@@ -2727,7 +2850,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>29</goalPageId>
+				<goalPageId>30</goalPageId>
 				
 				<url>http://example.org/index.htm</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -2739,7 +2862,7 @@
 				<pageTitle>incredible title!</pageTitle>
 				<pageIdAction>29</pageIdAction>
 				
-				<pageId>29</pageId>
+				<pageId>30</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName3>_pks</customVariablePageName3>
@@ -2754,6 +2877,7 @@
 						<customVariablePageValue5>Electronics &amp; Cameras</customVariablePageValue5>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -2780,6 +2904,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>website</referrerType>
 		<referrerTypeName>Websites</referrerTypeName>
 		<referrerName>piwik.org</referrerName>
@@ -2788,7 +2913,12 @@
 		<referrerUrl>http://piwik.org/contribute%</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -2816,9 +2946,6 @@
 		<visitLocalTime>12:34:06</visitLocalTime>
 		<visitLocalHour>12</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName5>VisitorType</customVariableName5>
@@ -2845,7 +2972,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>27</idVisit>
+		<idVisit>28</idVisit>
 		<visitIp>0.0.0.0</visitIp>
 		
 		<actionDetails>
@@ -2854,7 +2981,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>30</goalPageId>
+				<goalPageId>31</goalPageId>
 				
 				<url>http://forum.piwik.org/register.php?0,approve=9a94a02145599</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -2866,13 +2993,14 @@
 				<pageTitle>Piwik Forums</pageTitle>
 				<pageIdAction>31</pageIdAction>
 				
-				<pageId>30</pageId>
+				<pageId>31</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -2899,6 +3027,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>website</referrerType>
 		<referrerTypeName>Websites</referrerTypeName>
 		<referrerName>sn110w.snt110.mail.live.com</referrerName>
@@ -2907,7 +3036,12 @@
 		<referrerUrl>http://sn110w.snt110.mail.live.com/mail/InboxLight.aspx?n=184083971</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -2935,9 +3069,6 @@
 		<visitLocalTime>08:00:47</visitLocalTime>
 		<visitLocalHour>8</visitLocalHour>
 		<daysSinceLastVisit>444</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName3>Forum status</customVariableName3>
@@ -2980,7 +3111,7 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>49</idVisit>
+		<idVisit>65</idVisit>
 		<visitIp>72.45.67.32</visitIp>
 		
 		<actionDetails>
@@ -2989,7 +3120,7 @@
 				<goalName>all</goalName>
 				<goalId>1</goalId>
 				<revenue>5</revenue>
-				<goalPageId>67</goalPageId>
+				<goalPageId>89</goalPageId>
 				
 				<url>http://piwik.net/</url>
 				<icon>plugins/Morpheus/images/goal.png</icon>
@@ -3001,14 +3132,16 @@
 				<pageTitle />
 				<pageIdAction>5</pageIdAction>
 				
-				<pageId>67</pageId>
+				<pageId>89</pageId>
 				<customVariables>
 					<row>
 						<customVariablePageName1>HTTP-code</customVariablePageName1>
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<generationTimeMilliseconds>1</generationTimeMilliseconds>
 				<generationTime>0.001s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -3035,6 +3168,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>website</referrerType>
 		<referrerTypeName>Websites</referrerTypeName>
 		<referrerName>www.test.nl</referrerName>
@@ -3043,7 +3177,12 @@
 		<referrerUrl>https://www.test.nl/</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -3066,14 +3205,11 @@
 		<regionCode>NU</regionCode>
 		<city>Igloolik</city>
 		<location>Igloolik, Nunavut, Canada</location>
-		<latitude>69.400002</latitude>
-		<longitude>-81.800003</longitude>
+		<latitude>69.400000</latitude>
+		<longitude>-81.800000</longitude>
 		<visitLocalTime>12:20:31</visitLocalTime>
 		<visitLocalHour>12</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -3087,16 +3223,128 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>48</idVisit>
+		<idVisit>66</idVisit>
+		<visitIp>73.77.55.45</visitIp>
+		
+		<actionDetails>
+			<row>
+				<type>goal</type>
+				<goalName>all</goalName>
+				<goalId>1</goalId>
+				<revenue>5</revenue>
+				<goalPageId>90</goalPageId>
+				
+				<url>http://piwik.net/api/fútbol-user-agent</url>
+				<icon>plugins/Morpheus/images/goal.png</icon>
+				
+			</row>
+			<row>
+				<type>action</type>
+				<url>http://piwik.net/api/fútbol-user-agent</url>
+				<pageTitle />
+				<pageIdAction>71</pageIdAction>
+				
+				<pageId>90</pageId>
+				<customVariables>
+					<row>
+						<customVariablePageName1>HTTP-code</customVariablePageName1>
+						<customVariablePageValue1>200</customVariablePageValue1>
+					</row>
+				</customVariables>
+				<generationTimeMilliseconds>9</generationTimeMilliseconds>
+				<generationTime>0.009s</generationTime>
+				<interactionPosition>1</interactionPosition>
+				<icon />
+				
+			</row>
+		</actionDetails>
+		<goalConversions>1</goalConversions>
+		<siteCurrency>USD</siteCurrency>
+		<siteCurrencySymbol>$</siteCurrencySymbol>
+		
+		
+		
+		
+		<userId />
+		<visitorType>new</visitorType>
+		<visitorTypeIcon />
+		<visitConverted>1</visitConverted>
+		<visitConvertedIcon>plugins/Morpheus/images/goal.png</visitConvertedIcon>
+		<visitCount>1</visitCount>
+		
+		<visitEcommerceStatus>none</visitEcommerceStatus>
+		<visitEcommerceStatusIcon />
+		<daysSinceFirstVisit>0</daysSinceFirstVisit>
+		<daysSinceLastEcommerceOrder>0</daysSinceLastEcommerceOrder>
+		<visitDuration>0</visitDuration>
+		<visitDurationPretty>0s</visitDurationPretty>
+		<searches>0</searches>
+		<actions>1</actions>
+		<interactions>1</interactions>
+		<referrerType>direct</referrerType>
+		<referrerTypeName>Direct Entry</referrerTypeName>
+		<referrerName />
+		<referrerKeyword />
+		<referrerKeywordPosition />
+		<referrerUrl />
+		<referrerSearchEngineUrl />
+		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
+		<deviceType>Smartphone</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/smartphone.png</deviceTypeIcon>
+		<deviceBrand>Apple</deviceBrand>
+		<deviceModel>iPhone</deviceModel>
+		<operatingSystem>iOS 7.1</operatingSystem>
+		<operatingSystemName>iOS</operatingSystemName>
+		<operatingSystemIcon>plugins/DevicesDetection/images/os/IOS.gif</operatingSystemIcon>
+		<operatingSystemCode>IOS</operatingSystemCode>
+		<operatingSystemVersion>7.1</operatingSystemVersion>
+		<browserFamily />
+		<browserFamilyDescription>Unknown</browserFamilyDescription>
+		<browser>Unknown</browser>
+		<browserName>Unknown</browserName>
+		<browserIcon>plugins/DevicesDetection/images/browsers/UNK.gif</browserIcon>
+		<browserCode>UNK</browserCode>
+		<browserVersion>1.0</browserVersion>
+		<events>0</events>
+		<continent>North America</continent>
+		<continentCode>amn</continentCode>
+		<country>United States</country>
+		<countryCode>us</countryCode>
+		<countryFlag>plugins/UserCountry/images/flags/us.png</countryFlag>
+		<region>New Jersey</region>
+		<regionCode>NJ</regionCode>
+		<city>Mount Laurel</city>
+		<location>Mount Laurel, New Jersey, United States</location>
+		<latitude>39.957000</latitude>
+		<longitude>-74.916000</longitude>
+		<visitLocalTime>12:20:31</visitLocalTime>
+		<visitLocalHour>12</visitLocalHour>
+		<daysSinceLastVisit>0</daysSinceLastVisit>
+		<customVariables>
+		</customVariables>
+		<resolution>unknown</resolution>
+		<plugins />
+		<pluginsIcons />
+		
+		
+		
+		
+		
+	</row>
+	<row>
+		<idSite>1</idSite>
+		<idVisit>64</idVisit>
 		<visitIp>192.0.2.222</visitIp>
 		
 		<actionDetails>
 			<row>
 				<type>event</type>
 				<url>http://piwik.net/shqshne4jdp4b6.cloudfront.net/cfx/st​?key=value</url>
-				<pageIdAction>65</pageIdAction>
+				<pageIdAction>66</pageIdAction>
 				
-				<pageId>66</pageId>
+				<pageId>88</pageId>
 				<eventCategory>cloudfront_rtmp</eventCategory>
 				<eventAction>play</eventAction>
 				<customVariables>
@@ -3106,6 +3354,7 @@
 					</row>
 				</customVariables>
 				<eventName>myvideo</eventName>
+				<interactionPosition />
 				<icon>plugins/Morpheus/images/event.png</icon>
 				
 			</row>
@@ -3132,6 +3381,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>0</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -3140,7 +3390,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Unknown</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/unknown.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Unknown</operatingSystem>
 		<operatingSystemName>Unknown</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/UNK.gif</operatingSystemIcon>
@@ -3168,9 +3423,6 @@
 		<visitLocalTime>23:51:21</visitLocalTime>
 		<visitLocalHour>23</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -3184,16 +3436,16 @@
 	</row>
 	<row>
 		<idSite>1</idSite>
-		<idVisit>47</idVisit>
+		<idVisit>63</idVisit>
 		<visitIp>192.0.2.147</visitIp>
 		
 		<actionDetails>
 			<row>
 				<type>event</type>
 				<url>http://piwik.net/shqshne4jdp4b6.cloudfront.net/cfx/st​?key=value</url>
-				<pageIdAction>65</pageIdAction>
+				<pageIdAction>66</pageIdAction>
 				
-				<pageId>65</pageId>
+				<pageId>87</pageId>
 				<eventCategory>cloudfront_rtmp</eventCategory>
 				<eventAction>connect</eventAction>
 				<customVariables>
@@ -3202,6 +3454,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition />
 				<icon>plugins/Morpheus/images/event.png</icon>
 				
 			</row>
@@ -3228,6 +3481,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>0</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -3236,7 +3490,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Unknown</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/unknown.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Unknown</operatingSystem>
 		<operatingSystemName>Unknown</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/UNK.gif</operatingSystemIcon>
@@ -3264,9 +3523,6 @@
 		<visitLocalTime>23:51:20</visitLocalTime>
 		<visitLocalHour>23</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -3308,6 +3564,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -3334,6 +3591,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -3342,7 +3600,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.6</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -3370,9 +3633,120 @@
 		<visitLocalTime>20:15:41</visitLocalTime>
 		<visitLocalHour>20</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
+		<customVariables>
+			<row>
+				<customVariableName1>Not-Bot</customVariableName1>
+				<customVariableValue1>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_7) AppleWebKit/534.24 (KHTML, like Gecko) RockMelt/0.9.58.494 Chrome/11.0.696.71 Safari/534.24</customVariableValue1>
+			</row>
+		</customVariables>
+		<resolution>unknown</resolution>
+		<plugins />
+		<pluginsIcons />
+		
+		
+		
+		
+		
+	</row>
+	<row>
+		<idSite>1</idSite>
+		<idVisit>26</idVisit>
+		<visitIp>::ffff:123.45.67.89</visitIp>
+		
+		<actionDetails>
+			<row>
+				<type>goal</type>
+				<goalName>all</goalName>
+				<goalId>1</goalId>
+				<revenue>5</revenue>
+				<goalPageId>29</goalPageId>
+				
+				<url>http://piwik.net/blog/category/meta/</url>
+				<icon>plugins/Morpheus/images/goal.png</icon>
+				
+			</row>
+			<row>
+				<type>action</type>
+				<url>http://piwik.net/blog/category/meta/</url>
+				<pageTitle />
+				<pageIdAction>1</pageIdAction>
+				
+				<pageId>29</pageId>
+				<customVariables>
+					<row>
+						<customVariablePageName1>HTTP-code</customVariablePageName1>
+						<customVariablePageValue1>200</customVariablePageValue1>
+					</row>
+				</customVariables>
+				<interactionPosition>1</interactionPosition>
+				<icon />
+				
+			</row>
+		</actionDetails>
+		<goalConversions>1</goalConversions>
+		<siteCurrency>USD</siteCurrency>
+		<siteCurrencySymbol>$</siteCurrencySymbol>
+		
+		
+		
+		
+		<userId />
+		<visitorType>new</visitorType>
+		<visitorTypeIcon />
+		<visitConverted>1</visitConverted>
+		<visitConvertedIcon>plugins/Morpheus/images/goal.png</visitConvertedIcon>
+		<visitCount>1</visitCount>
+		
+		<visitEcommerceStatus>none</visitEcommerceStatus>
+		<visitEcommerceStatusIcon />
+		<daysSinceFirstVisit>0</daysSinceFirstVisit>
+		<daysSinceLastEcommerceOrder>0</daysSinceLastEcommerceOrder>
+		<visitDuration>0</visitDuration>
+		<visitDurationPretty>0s</visitDurationPretty>
+		<searches>0</searches>
+		<actions>1</actions>
+		<interactions>1</interactions>
+		<referrerType>direct</referrerType>
+		<referrerTypeName>Direct Entry</referrerTypeName>
+		<referrerName />
+		<referrerKeyword />
+		<referrerKeywordPosition />
+		<referrerUrl />
+		<referrerSearchEngineUrl />
+		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
+		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
+		<operatingSystem>Mac 10.6</operatingSystem>
+		<operatingSystemName>Mac</operatingSystemName>
+		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
+		<operatingSystemCode>MAC</operatingSystemCode>
+		<operatingSystemVersion>10.6</operatingSystemVersion>
+		<browserFamily>WebKit</browserFamily>
+		<browserFamilyDescription>WebKit (Safari, Chrome)</browserFamilyDescription>
+		<browser>RockMelt 0.9</browser>
+		<browserName>RockMelt</browserName>
+		<browserIcon>plugins/DevicesDetection/images/browsers/CH.gif</browserIcon>
+		<browserCode>RM</browserCode>
+		<browserVersion>0.9</browserVersion>
+		<events>0</events>
+		<continent>Asia</continent>
+		<continentCode>asi</continentCode>
+		<country>South Korea</country>
+		<countryCode>kr</countryCode>
+		<countryFlag>plugins/UserCountry/images/flags/kr.png</countryFlag>
+		<region>Seoul-t'ukpyolsi</region>
+		<regionCode>11</regionCode>
+		<city>Seoul</city>
+		<location>Seoul, Seoul-t'ukpyolsi, South Korea</location>
+		<latitude>37.599000</latitude>
+		<longitude>126.978000</longitude>
+		<visitLocalTime>20:15:41</visitLocalTime>
+		<visitLocalHour>20</visitLocalHour>
+		<daysSinceLastVisit>0</daysSinceLastVisit>
 		<customVariables>
 			<row>
 				<customVariableName1>Not-Bot</customVariableName1>
@@ -3407,6 +3781,7 @@
 						<customVariablePageValue1>301</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<timeSpent>180</timeSpent>
 				<timeSpentPretty>3 min 0s</timeSpentPretty>
 				<icon />
@@ -3436,6 +3811,7 @@
 						<customVariablePageValue1>307</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>2</interactionPosition>
 				<icon />
 				
 			</row>
@@ -3462,6 +3838,7 @@
 		<visitDurationPretty>3 min 2s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>2</actions>
+		<interactions>2</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -3470,7 +3847,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.6</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -3498,9 +3880,6 @@
 		<visitLocalTime>19:12:40</visitLocalTime>
 		<visitLocalHour>19</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Not-Bot</customVariableName1>
@@ -3535,6 +3914,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition />
 				<timeSpent>61</timeSpent>
 				<timeSpentPretty>1 min 1s</timeSpentPretty>
 				<icon>plugins/Morpheus/images/download.png</icon>
@@ -3553,6 +3933,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition />
 				<timeSpent>61</timeSpent>
 				<timeSpentPretty>1 min 1s</timeSpentPretty>
 				<icon>plugins/Morpheus/images/download.png</icon>
@@ -3571,6 +3952,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition />
 				<icon>plugins/Morpheus/images/download.png</icon>
 				
 			</row>
@@ -3597,6 +3979,7 @@
 		<visitDurationPretty>2 min 3s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>3</actions>
+		<interactions>0</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -3605,7 +3988,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.6</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -3633,9 +4021,6 @@
 		<visitLocalTime>18:10:38</visitLocalTime>
 		<visitLocalHour>18</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Not-Bot</customVariableName1>
@@ -3681,6 +4066,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -3707,6 +4093,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -3715,7 +4102,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Unknown</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/unknown.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Bot</operatingSystem>
 		<operatingSystemName>Bot</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/UNK.gif</operatingSystemIcon>
@@ -3738,14 +4130,11 @@
 		<regionCode>VA</regionCode>
 		<city>Ashburn</city>
 		<location>Ashburn, Virginia, United States</location>
-		<latitude>39.043999</latitude>
-		<longitude>-77.487999</longitude>
+		<latitude>39.044000</latitude>
+		<longitude>-77.488000</longitude>
 		<visitLocalTime>17:48:08</visitLocalTime>
 		<visitLocalHour>17</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Bot</customVariableName1>
@@ -3791,6 +4180,7 @@
 						<customVariablePageValue1>500</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -3817,6 +4207,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -3825,7 +4216,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -3848,14 +4244,11 @@
 		<regionCode>VA</regionCode>
 		<city>Ashburn</city>
 		<location>Ashburn, Virginia, United States</location>
-		<latitude>39.043999</latitude>
-		<longitude>-77.487999</longitude>
+		<latitude>39.044000</latitude>
+		<longitude>-77.488000</longitude>
 		<visitLocalTime>17:48:07</visitLocalTime>
 		<visitLocalHour>17</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Not-Bot</customVariableName1>
@@ -3890,6 +4283,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition />
 				<icon>plugins/Morpheus/images/download.png</icon>
 				
 			</row>
@@ -3916,6 +4310,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>0</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -3924,7 +4319,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Unknown</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/unknown.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Unknown</operatingSystem>
 		<operatingSystemName>Unknown</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/UNK.gif</operatingSystemIcon>
@@ -3952,9 +4352,6 @@
 		<visitLocalTime>17:46:03</visitLocalTime>
 		<visitLocalHour>17</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Not-Bot</customVariableName1>
@@ -4000,6 +4397,7 @@
 						<customVariablePageValue1>404</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -4026,6 +4424,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -4034,7 +4433,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Smartphone</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/smartphone.png</deviceTypeIcon>
+		<deviceBrand>HTC</deviceBrand>
+		<deviceModel>Vision</deviceModel>
 		<operatingSystem>Android 2.3</operatingSystem>
 		<operatingSystemName>Android</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/AND.gif</operatingSystemIcon>
@@ -4062,9 +4466,6 @@
 		<visitLocalTime>16:11:30</visitLocalTime>
 		<visitLocalHour>16</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Not-Bot</customVariableName1>
@@ -4110,6 +4511,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -4136,6 +4538,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -4144,7 +4547,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.6</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -4172,9 +4580,6 @@
 		<visitLocalTime>16:10:38</visitLocalTime>
 		<visitLocalHour>16</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName1>Not-Bot</customVariableName1>
@@ -4220,6 +4625,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -4231,7 +4637,7 @@
 		
 		
 		
-		<userId />
+		<userId>commonuser</userId>
 		<visitorType>new</visitorType>
 		<visitorTypeIcon />
 		<visitConverted>1</visitConverted>
@@ -4246,6 +4652,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -4254,7 +4661,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -4282,9 +4694,6 @@
 		<visitLocalTime>15:31:05</visitLocalTime>
 		<visitLocalHour>15</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -4326,6 +4735,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -4352,6 +4762,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -4360,7 +4771,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>GNU/Linux</operatingSystem>
 		<operatingSystemName>GNU/Linux</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/LIN.gif</operatingSystemIcon>
@@ -4388,9 +4804,6 @@
 		<visitLocalTime>13:49:46</visitLocalTime>
 		<visitLocalHour>13</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -4432,6 +4845,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -4458,6 +4872,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -4466,7 +4881,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -4494,9 +4914,6 @@
 		<visitLocalTime>20:22:08</visitLocalTime>
 		<visitLocalHour>20</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -4538,6 +4955,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -4564,6 +4982,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -4572,7 +4991,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>GNU/Linux</operatingSystem>
 		<operatingSystemName>GNU/Linux</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/LIN.gif</operatingSystemIcon>
@@ -4600,9 +5024,6 @@
 		<visitLocalTime>20:21:28</visitLocalTime>
 		<visitLocalHour>20</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -4644,6 +5065,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -4670,6 +5092,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -4678,7 +5101,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -4706,9 +5134,6 @@
 		<visitLocalTime>20:21:03</visitLocalTime>
 		<visitLocalHour>20</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -4750,6 +5175,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -4776,6 +5202,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -4784,7 +5211,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>GNU/Linux</operatingSystem>
 		<operatingSystemName>GNU/Linux</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/LIN.gif</operatingSystemIcon>
@@ -4812,9 +5244,6 @@
 		<visitLocalTime>20:01:17</visitLocalTime>
 		<visitLocalHour>20</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -4856,6 +5285,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -4882,6 +5312,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -4890,7 +5321,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -4918,9 +5354,6 @@
 		<visitLocalTime>19:59:50</visitLocalTime>
 		<visitLocalHour>19</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -4962,6 +5395,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -4988,6 +5422,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -4996,7 +5431,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -5024,9 +5464,6 @@
 		<visitLocalTime>18:03:40</visitLocalTime>
 		<visitLocalHour>18</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -5068,6 +5505,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -5094,6 +5532,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -5102,7 +5541,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.8</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -5130,9 +5574,6 @@
 		<visitLocalTime>21:00:42</visitLocalTime>
 		<visitLocalHour>21</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -5174,6 +5615,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -5200,6 +5642,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -5208,7 +5651,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>GNU/Linux</operatingSystem>
 		<operatingSystemName>GNU/Linux</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/LIN.gif</operatingSystemIcon>
@@ -5236,9 +5684,6 @@
 		<visitLocalTime>20:56:45</visitLocalTime>
 		<visitLocalHour>20</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -5280,6 +5725,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -5306,6 +5752,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -5314,7 +5761,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>GNU/Linux</operatingSystem>
 		<operatingSystemName>GNU/Linux</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/LIN.gif</operatingSystemIcon>
@@ -5337,14 +5789,11 @@
 		<regionCode>VA</regionCode>
 		<city>Ashburn</city>
 		<location>Ashburn, Virginia, United States</location>
-		<latitude>39.043999</latitude>
-		<longitude>-77.487999</longitude>
+		<latitude>39.044000</latitude>
+		<longitude>-77.488000</longitude>
 		<visitLocalTime>13:49:48</visitLocalTime>
 		<visitLocalHour>13</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -5386,6 +5835,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -5412,6 +5862,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -5420,7 +5871,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>GNU/Linux</operatingSystem>
 		<operatingSystemName>GNU/Linux</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/LIN.gif</operatingSystemIcon>
@@ -5443,14 +5899,11 @@
 		<regionCode>VA</regionCode>
 		<city>Ashburn</city>
 		<location>Ashburn, Virginia, United States</location>
-		<latitude>39.043999</latitude>
-		<longitude>-77.487999</longitude>
+		<latitude>39.044000</latitude>
+		<longitude>-77.488000</longitude>
 		<visitLocalTime>13:48:20</visitLocalTime>
 		<visitLocalHour>13</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -5492,6 +5945,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -5518,6 +5972,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -5526,7 +5981,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows 7</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -5549,14 +6009,11 @@
 		<regionCode>VA</regionCode>
 		<city>Ashburn</city>
 		<location>Ashburn, Virginia, United States</location>
-		<latitude>39.043999</latitude>
-		<longitude>-77.487999</longitude>
+		<latitude>39.044000</latitude>
+		<longitude>-77.488000</longitude>
 		<visitLocalTime>13:48:07</visitLocalTime>
 		<visitLocalHour>13</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -5598,6 +6055,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -5624,6 +6082,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -5632,7 +6091,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>GNU/Linux</operatingSystem>
 		<operatingSystemName>GNU/Linux</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/LIN.gif</operatingSystemIcon>
@@ -5660,9 +6124,6 @@
 		<visitLocalTime>08:12:03</visitLocalTime>
 		<visitLocalHour>8</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -5704,6 +6165,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -5730,6 +6192,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -5738,7 +6201,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>GNU/Linux</operatingSystem>
 		<operatingSystemName>GNU/Linux</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/LIN.gif</operatingSystemIcon>
@@ -5766,9 +6234,6 @@
 		<visitLocalTime>08:11:56</visitLocalTime>
 		<visitLocalHour>8</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -5810,6 +6275,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -5836,6 +6302,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -5844,7 +6311,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Smartphone</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/smartphone.png</deviceTypeIcon>
+		<deviceBrand>HTC</deviceBrand>
+		<deviceModel>Vision</deviceModel>
 		<operatingSystem>Android 2.3</operatingSystem>
 		<operatingSystemName>Android</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/AND.gif</operatingSystemIcon>
@@ -5872,9 +6344,6 @@
 		<visitLocalTime>08:11:30</visitLocalTime>
 		<visitLocalHour>8</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>
@@ -5916,6 +6385,7 @@
 						<customVariablePageValue1>200</customVariablePageValue1>
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -5942,6 +6412,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -5950,7 +6421,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode />
+		<language>Unknown</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Mac 10.6</operatingSystem>
 		<operatingSystemName>Mac</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/MAC.gif</operatingSystemIcon>
@@ -5978,9 +6454,6 @@
 		<visitLocalTime>08:10:38</visitLocalTime>
 		<visitLocalHour>8</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>unknown</resolution>

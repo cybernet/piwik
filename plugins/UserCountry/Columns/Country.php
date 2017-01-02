@@ -26,7 +26,7 @@ use Piwik\Tracker\Request;
 class Country extends Base
 {
     protected $columnName = 'location_country';
-    protected $columnType = 'CHAR(3) NOT NULL';
+    protected $columnType = 'CHAR(3) NULL';
 
     protected function configureSegments()
     {
@@ -67,7 +67,6 @@ class Country extends Base
         $country  = $this->getLocationDetail($userInfo, LocationProvider::COUNTRY_CODE_KEY);
 
         if (!empty($country) && $country != Visit::UNKNOWN_CODE) {
-
             return strtolower($country);
         }
 

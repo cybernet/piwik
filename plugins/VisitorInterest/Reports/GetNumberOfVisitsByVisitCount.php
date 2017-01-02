@@ -16,6 +16,8 @@ use Piwik\Plugins\CoreHome\Columns\Metrics\VisitsPercent;
 
 class GetNumberOfVisitsByVisitCount extends Base
 {
+    protected $defaultSortColumn = '';
+
     protected function init()
     {
         parent::init();
@@ -29,7 +31,6 @@ class GetNumberOfVisitsByVisitCount extends Base
         );
         $this->constantRowsCount = true;
         $this->order = 25;
-        $this->widgetTitle  = 'VisitorInterest_visitsByVisitCount';
     }
 
     public function configureView(ViewDataTable $view)

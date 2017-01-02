@@ -11,19 +11,18 @@ namespace Piwik\Tests\Core\DataTable\Filter;
 use Piwik\DataTable;
 use Piwik\DataTable\Row;
 use Piwik\Plugins\Actions\Reports\GetOutlinks;
+use Piwik\Plugins\DevicePlugins\Reports\GetPlugin;
 use Piwik\Plugins\UserCountry\Reports\GetCity;
 use Piwik\Plugins\UserCountry\Reports\GetCountry;
 use Piwik\Plugins\VisitsSummary\Reports\Get;
-use Piwik\Tests\Framework\TestCase\UnitTestCase;
 
 /**
  * @group AddSegmentBySegmentValueTest
  * @group DataTable
  * @group Filter
- * @group Unit
  * @group Core
  */
-class AddSegmentBySegmentValueTest extends UnitTestCase
+class AddSegmentBySegmentValueTest extends \PHPUnit_Framework_TestCase
 {
     private $filter = 'AddSegmentBySegmentValue';
 
@@ -36,6 +35,8 @@ class AddSegmentBySegmentValueTest extends UnitTestCase
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->report = new GetCity();
         $this->table = new DataTable();
         $this->addRowWithMetadata(array('test' => '1'));
@@ -97,8 +98,8 @@ class AddSegmentBySegmentValueTest extends UnitTestCase
 
     public function test_filter_shouldNotGenerateASegment_IfDimensionHasNoSegmentFilter()
     {
-        // outlinks currently has a dimensions but no segments, we have to use another report once it has segments
-        $report = new GetOutlinks();
+        // plugin report currently has a dimensions but no segments, we have to use another report if later we add segments
+        $report = new GetPlugin();
         $this->assertEmpty($report->getDimension()->getSegments());
 
         $this->assertSegmentForSegmentValueAndReport($report, $segmentValue = 'existing', false);
@@ -130,5 +131,4 @@ class AddSegmentBySegmentValueTest extends UnitTestCase
         $segment = $row->getMetadata('segment');
         $this->assertSame($expected, $segment);
     }
-
 }

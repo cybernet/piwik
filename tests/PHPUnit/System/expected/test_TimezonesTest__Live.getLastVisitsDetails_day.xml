@@ -13,6 +13,7 @@
 				<pageIdAction>2</pageIdAction>
 				
 				<pageId>1</pageId>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -39,6 +40,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -47,7 +49,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode>fr</languageCode>
+		<language>French</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -75,9 +82,6 @@
 		<visitLocalTime>12:34:06</visitLocalTime>
 		<visitLocalHour>12</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>1024x768</resolution>

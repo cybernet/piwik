@@ -12,11 +12,14 @@ use Exception;
 use Piwik\API\Request;
 use Piwik\Common;
 use Piwik\Config;
+use Piwik\Container\StaticContainer;
 use Piwik\Piwik;
 use Piwik\Plugins\Goals\API as APIGoals;
 use Piwik\Site;
 use Piwik\Translation\Translator;
 use Piwik\View;
+
+require_once PIWIK_INCLUDE_PATH . '/plugins/UserCountry/functions.php';
 
 /**
  *
@@ -47,7 +50,16 @@ class Controller extends \Piwik\Plugin\Controller
 
         $period = Common::getRequestVar('period');
         $date = Common::getRequestVar('date');
-        $segment = $segmentOverride ? : Request::getRawSegmentFromRequest() ? : '';
+
+        if (!empty($segmentOverride)) {
+            $segment = $segmentOverride;
+        } else {
+            $segment = Request::getRawSegmentFromRequest();
+            if (empty($segment)) {
+                $segment = '';
+            }
+        }
+        
         $token_auth = Piwik::getCurrentUserTokenAuth();
 
         $view = new View('@UserCountryMap/visitorMap');
@@ -105,6 +117,25 @@ class Controller extends \Piwik\Plugin\Controller
         $view->config = json_encode($config);
         $view->noData = empty($config['visitsSummary']['nb_visits']);
 
+        $countriesByIso = array();
+        $regionDataProvider = StaticContainer::get('Piwik\Intl\Data\Provider\RegionDataProvider');
+        $countries = array_keys($regionDataProvider->getCountryList());
+
+        foreach ($countries AS $country) {
+            $countriesByIso[strtoupper($country)] = Piwik::translate('Intl_Country_'.strtoupper($country));
+        }
+
+        $view->countriesByIso = $countriesByIso;
+
+        $view->continents = array(
+            'AF' => \Piwik\Plugins\UserCountry\continentTranslate('afr'),
+            'AS' => \Piwik\Plugins\UserCountry\continentTranslate('asi'),
+            'EU' => \Piwik\Plugins\UserCountry\continentTranslate('eur'),
+            'NA' => \Piwik\Plugins\UserCountry\continentTranslate('amn'),
+            'OC' => \Piwik\Plugins\UserCountry\continentTranslate('oce'),
+            'SA' => \Piwik\Plugins\UserCountry\continentTranslate('ams')
+        );
+
         return $view->render();
     }
 
@@ -133,7 +164,7 @@ class Controller extends \Piwik\Plugin\Controller
         $token_auth = Piwik::getCurrentUserTokenAuth();
         $view = new View('@UserCountryMap/realtimeMap');
 
-        $view->mapIsStandaloneNotWidget = $standalone;
+        $view->mapIsStandaloneNotWidget = !(bool) Common::getRequestVar('widget', $standalone, 'int');
 
         $view->metrics = $this->getMetrics($idSite, 'range', self::REAL_TIME_WINDOW, $token_auth);
         $view->defaultMetric = 'nb_visits';
@@ -151,14 +182,14 @@ class Controller extends \Piwik\Plugin\Controller
             'nb_actions'       => $this->translator->translate('VisitsSummary_NbActionsDescription'),
             'local_time'       => $this->translator->translate('VisitTime_ColumnLocalTime'),
             'from'             => $this->translator->translate('General_FromReferrer'),
-            'seconds'          => $this->translator->translate('UserCountryMap_Seconds'),
+            'seconds'          => $this->translator->translate('Intl_Seconds'),
             'seconds_ago'      => $this->translator->translate('UserCountryMap_SecondsAgo'),
-            'minutes'          => $this->translator->translate('UserCountryMap_Minutes'),
+            'minutes'          => $this->translator->translate('Intl_Minutes'),
             'minutes_ago'      => $this->translator->translate('UserCountryMap_MinutesAgo'),
-            'hours'            => $this->translator->translate('UserCountryMap_Hours'),
+            'hours'            => $this->translator->translate('Intl_Hours'),
             'hours_ago'        => $this->translator->translate('UserCountryMap_HoursAgo'),
             'days_ago'         => $this->translator->translate('UserCountryMap_DaysAgo'),
-            'actions'          => $this->translator->translate('VisitsSummary_NbPageviewsDescription'),
+            'actions'          => $this->translator->translate('Transitions_NumPageviews'),
             'searches'         => $this->translator->translate('UserCountryMap_Searches'),
             'goal_conversions' => $this->translator->translate('UserCountryMap_GoalConversions'),
         );
@@ -203,15 +234,20 @@ class Controller extends \Piwik\Plugin\Controller
         $params['format'] = 'json';
         $params['showRawMetrics'] = 1;
         if (empty($params['segment'])) {
-            $segment = \Piwik\API\Request::getRawSegmentFromRequest();
+            $segment = Request::getRawSegmentFromRequest();
             if (!empty($segment)) {
-                $params['segment'] = urldecode($segment);
+                $params['segment'] = $segment;
             }
+        }
+
+        if (!empty($params['segment'])) {
+            $params['segment'] = urldecode($params['segment']);
         }
 
         if ($encode) {
             $params = json_encode($params);
         }
+
         return $params;
     }
 
@@ -236,14 +272,18 @@ class Controller extends \Piwik\Plugin\Controller
         $metaData = unserialize($request->process());
 
         $metrics = array();
-        foreach ($metaData[0]['metrics'] as $id => $val) {
-            // todo: should use SettingsPiwik::isUniqueVisitorsEnabled ?
-            if (Common::getRequestVar('period') == 'day' || $id != 'nb_uniq_visitors') {
-                $metrics[] = array($id, $val);
+        if (!empty($metaData[0]['metrics']) && is_array($metaData[0]['metrics'])) {
+            foreach ($metaData[0]['metrics'] as $id => $val) {
+                // todo: should use SettingsPiwik::isUniqueVisitorsEnabled ?
+                if (Common::getRequestVar('period') == 'day' || $id != 'nb_uniq_visitors') {
+                    $metrics[] = array($id, $val);
+                }
             }
         }
-        foreach ($metaData[0]['processedMetrics'] as $id => $val) {
-            $metrics[] = array($id, $val);
+        if (!empty($metaData[0]['processedMetrics']) && is_array($metaData[0]['processedMetrics'])) {
+            foreach ($metaData[0]['processedMetrics'] as $id => $val) {
+                $metrics[] = array($id, $val);
+            }
         }
         return $metrics;
     }

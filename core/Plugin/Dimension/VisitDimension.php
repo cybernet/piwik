@@ -19,7 +19,6 @@ use Piwik\Tracker\Request;
 use Piwik\Tracker\Visitor;
 use Piwik\Tracker\Action;
 use Piwik\Tracker;
-use Piwik\Translate;
 use Piwik\Plugin;
 use Exception;
 
@@ -38,6 +37,8 @@ use Exception;
  */
 abstract class VisitDimension extends Dimension
 {
+    const INSTALLER_PREFIX = 'log_visit.';
+
     private $tableName = 'log_visit';
 
     /**
@@ -299,7 +300,6 @@ abstract class VisitDimension extends Dimension
         $cache   = PiwikCache::getTransientCache();
 
         if (!$cache->contains($cacheId)) {
-
             $plugins   = PluginManager::getInstance()->getPluginsLoadedAndActivated();
             $instances = array();
 
@@ -309,7 +309,7 @@ abstract class VisitDimension extends Dimension
                 }
             }
 
-            usort($instances, array('self', 'sortByRequiredFields'));
+            $instances = self::sortDimensions($instances);
 
             $cache->save($cacheId, $instances);
         }
@@ -319,20 +319,61 @@ abstract class VisitDimension extends Dimension
 
     /**
      * @ignore
+     * @param VisitDimension[] $dimensions
      */
-    public static function sortByRequiredFields($a, $b)
+    public static function sortDimensions($dimensions)
     {
-        $fields = $a->getRequiredVisitFields();
+        $sorted = array();
+        $exists = array();
 
-        if (empty($fields)) {
-            return -1;
+        // we first handle all the once without dependency
+        foreach ($dimensions as $index => $dimension) {
+            $fields = $dimension->getRequiredVisitFields();
+            if (empty($fields)) {
+                $sorted[] = $dimension;
+                $exists[] = $dimension->getColumnName();
+                unset($dimensions[$index]);
+            }
         }
 
-        if (in_array($b->columnName, $fields)) {
-            return 1;
+        // find circular references
+        // and remove dependencies whose column cannot be resolved because it is not installed / does not exist / is defined by core
+        $dependencies = array();
+        foreach ($dimensions as $dimension) {
+            $dependencies[$dimension->getColumnName()] = $dimension->getRequiredVisitFields();
         }
 
-        return 0;
+        foreach ($dependencies as $column => $fields) {
+            foreach ($fields as $key => $field) {
+                if (empty($dependencies[$field]) && !in_array($field, $exists)) {
+                    // we cannot resolve that dependency as it does not exist
+                    unset($dependencies[$column][$key]);
+                } elseif (!empty($dependencies[$field]) && in_array($column, $dependencies[$field])) {
+                    throw new Exception("Circular reference detected for required field $field in dimension $column");
+                }
+            }
+        }
+
+        $count = 0;
+        while (count($dimensions) > 0) {
+            $count++;
+            if ($count > 1000) {
+                foreach ($dimensions as $dimension) {
+                    $sorted[] = $dimension;
+                }
+                break; // to prevent an endless loop
+            }
+            foreach ($dimensions as $key => $dimension) {
+                $fields = $dependencies[$dimension->getColumnName()];
+                if (count(array_intersect($fields, $exists)) === count($fields)) {
+                    $sorted[] = $dimension;
+                    $exists[] = $dimension->getColumnName();
+                    unset($dimensions[$key]);
+                }
+            }
+        }
+
+        return $sorted;
     }
 
     /**
@@ -352,5 +393,4 @@ abstract class VisitDimension extends Dimension
 
         return $instances;
     }
-
 }

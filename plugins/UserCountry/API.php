@@ -180,12 +180,12 @@ class API extends \Piwik\Plugin\API
     {
         Piwik::checkUserHasSomeViewAccess();
 
-        if ($provider === false) {
+        if (empty($provider)) {
             $provider = LocationProvider::getCurrentProviderId();
         }
 
         $oProvider = LocationProvider::getProviderById($provider);
-        if ($oProvider === false) {
+        if (empty($oProvider)) {
             throw new Exception("Cannot find the '$provider' provider. It is either an invalid provider "
                 . "ID or the ID of a provider that is not working.");
         }
@@ -198,12 +198,31 @@ class API extends \Piwik\Plugin\API
         return $location;
     }
 
+    /**
+     * Set the location provider
+     *
+     * @param string $providerId  The ID of the provider to use  eg 'default', 'geoip_php', ...
+     * @throws Exception if ID is invalid
+     */
+    public function setLocationProvider($providerId)
+    {
+        Piwik::checkUserHasSuperUserAccess();
+
+        if (!UserCountry::isGeoLocationAdminEnabled()) {
+            throw new \Exception('Setting geo location has been disabled in config.');
+        }
+
+        $provider = LocationProvider::setCurrentProvider($providerId);
+        if ($provider === false) {
+            throw new Exception("Invalid provider ID: '$providerId'.");
+        }
+    }
+
     protected function getDataTable($name, $idSite, $period, $date, $segment)
     {
         Piwik::checkUserHasViewAccess($idSite);
         $archive = Archive::build($idSite, $period, $date, $segment);
         $dataTable = $archive->getDataTable($name);
-        $dataTable->filter('Sort', array(Metrics::INDEX_NB_VISITS));
         $dataTable->queueFilter('ReplaceColumnNames');
         return $dataTable;
     }

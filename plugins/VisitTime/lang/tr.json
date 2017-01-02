@@ -5,9 +5,12 @@
         "DayOfWeek": "Haftanın günü",
         "LocalTime": "Yerel saat başına ziyaretler",
         "NHour": "%sh",
-        "ServerTime": "yerel sunucu başına ziyaretler",
-        "VisitsByDayOfWeek": "Haftanın günlerine göre Ziyaretler",
-        "WidgetLocalTime": "Yerel saate göre Ziyaretler",
-        "WidgetServerTime": "Sunucu saatine göre Ziyaretler"
+        "PluginDescription": "Ziyaretçinin web sitesi ya da uygulamayı görüntülediği andaki yerel ve sunucu saatinin bildirilmesini sağlar.",
+        "ServerTime": "Sunucu saati başına ziyaretler",
+        "SubmenuTimes": "Zamanlar",
+        "VisitsByDayOfWeek": "Haftanın Günlerine Göre Ziyaretler",
+        "WidgetByDayOfWeekDocumentation": "Bu çizelge sitenize haftanın günlerinde yapılan ziyaret sayılarını görüntüler.",
+        "WidgetLocalTime": "Yerel Saate Göre Ziyaretler",
+        "WidgetServerTime": "Sunucu Saatine Göre Ziyaretler"
     }
 }

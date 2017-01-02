@@ -8,6 +8,7 @@
  * @package Piwik
  */
 
+use Piwik\SettingsServer;
 use Piwik\Tracker\RequestSet;
 use Piwik\Tracker;
 use Piwik\Tracker\Handler;
@@ -30,6 +31,7 @@ require_once PIWIK_INCLUDE_PATH . '/core/bootstrap.php';
 @ignore_user_abort(true);
 
 require_once PIWIK_INCLUDE_PATH . '/core/Plugin/Controller.php';
+require_once PIWIK_INCLUDE_PATH . '/core/Exception/NotYetInstalledException.php';
 require_once PIWIK_INCLUDE_PATH . '/core/Plugin/ControllerAdmin.php';
 require_once PIWIK_INCLUDE_PATH . '/core/Singleton.php';
 require_once PIWIK_INCLUDE_PATH . '/core/Plugin/Manager.php';
@@ -47,6 +49,15 @@ require_once PIWIK_INCLUDE_PATH . '/core/Translate.php';
 require_once PIWIK_INCLUDE_PATH . '/core/Tracker/Cache.php';
 require_once PIWIK_INCLUDE_PATH . '/core/Tracker/Request.php';
 require_once PIWIK_INCLUDE_PATH . '/core/Cookie.php';
+
+SettingsServer::setIsTrackerApiRequest();
+
+$environment = new \Piwik\Application\Environment('tracker');
+try {
+    $environment->init();
+} catch(\Piwik\Exception\NotYetInstalledException $e) {
+    die($e->getMessage());
+}
 
 Tracker::loadTrackerEnvironment();
 

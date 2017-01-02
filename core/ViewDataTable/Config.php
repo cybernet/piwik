@@ -8,12 +8,14 @@
  */
 
 namespace Piwik\ViewDataTable;
+
 use Piwik\API\Request as ApiRequest;
+use Piwik\Common;
 use Piwik\DataTable;
 use Piwik\DataTable\Filter\PivotByDimension;
 use Piwik\Metrics;
-use Piwik\Plugin\Report;
 use Piwik\Plugins\API\API;
+use Piwik\Plugin\ReportsProvider;
 
 /**
  * Contains base display properties for {@link Piwik\Plugin\ViewDataTable}s. Manipulating these
@@ -105,7 +107,6 @@ class Config
         'show_footer',
         'show_footer_icons',
         'show_all_views_icons',
-        'show_active_view_icon',
         'show_related_reports',
         'show_limit_control',
         'show_search',
@@ -120,7 +121,8 @@ class Config
         'show_pagination_control',
         'show_offset_information',
         'hide_annotations_view',
-        'export_limit'
+        'export_limit',
+        'columns_to_display'
     );
 
     /**
@@ -252,11 +254,6 @@ class Config
     public $show_all_views_icons = true;
 
     /**
-     * Controls whether to display a tiny upside-down caret over the currently active view icon.
-     */
-    public $show_active_view_icon = true;
-
-    /**
      * Related reports are listed below a datatable view. When clicked, the original report will
      * change to the clicked report and the list will change so the original report can be
      * navigated back to.
@@ -276,6 +273,19 @@ class Config
      * This must be set if related reports are added.
      */
     public $title = '';
+
+    /**
+     * If a URL is set, the title of the report will be clickable. Is supposed to be set for entities that can be
+     * configured (edited) such as goal. Eg when there is a goal report, and someone is allowed to edit the goal entity,
+     * a link is supposed to be with a URL to the edit goal form.
+     * @var string
+     */
+    public $title_edit_entity_url = '';
+
+    /**
+     * The report description. eg like a goal description
+     */
+    public $description = '';
 
     /**
      * Controls whether a report's related reports are listed with the view or not.
@@ -329,6 +339,19 @@ class Config
      * Controls whether the footer icon that allows users to view data as a tag cloud is shown.
      */
     public $show_tag_cloud = true;
+
+    /**
+     * If enabled, shows the visualization as a content block. This is similar to wrapping your visualization
+     * with a `<div piwik-content-block></div>`
+     * @var bool
+     */
+    public $show_as_content_block = true;
+
+    /**
+     * If enabled shows the title of the report.
+     * @var bool
+     */
+    public $show_title = true;
 
     /**
      * Controls whether the user is allowed to export data as an RSS feed or not.
@@ -464,6 +487,8 @@ class Config
             Metrics::getDefaultMetrics(),
             Metrics::getDefaultProcessedMetrics()
         );
+
+        $this->show_title = (bool)Common::getRequestVar('showtitle', 0, 'int');
     }
 
     /**
@@ -484,7 +509,28 @@ class Config
     {
         $this->metrics_documentation = array();
 
-        $report = API::getInstance()->getMetadata(0, $this->controllerName, $this->controllerAction);
+        $idSite = Common::getRequestVar('idSite', 0, 'int');
+
+        if ($idSite < 1) {
+            return;
+        }
+
+        $apiParameters = array();
+        $idDimension = Common::getRequestVar('idDimension', 0, 'int');
+        $idGoal = Common::getRequestVar('idGoal', 0, 'int');
+        if ($idDimension > 0) {
+            $apiParameters['idDimension'] = $idDimension;
+        }
+        if ($idGoal > 0) {
+            $apiParameters['idGoal'] = $idGoal;
+        }
+
+        $report = API::getInstance()->getMetadata($idSite, $this->controllerName, $this->controllerAction, $apiParameters);
+
+        if (empty($report)) {
+            return;
+        }
+
         $report = $report[0];
 
         if (isset($report['metricsDocumentation'])) {
@@ -552,6 +598,17 @@ class Config
         }
 
         $this->columns_to_display = array_filter($columnsToDisplay);
+    }
+
+    public function removeColumnToDisplay($columnToRemove)
+    {
+        if (!empty($this->columns_to_display)) {
+
+            $key = array_search($columnToRemove, $this->columns_to_display);
+            if (false !== $key) {
+                unset($this->columns_to_display[$key]);
+            }
+        }
     }
 
     /**
@@ -682,7 +739,7 @@ class Config
 
     private function setShouldShowPivotBySubtable()
     {
-        $report = Report::factory($this->controllerName, $this->controllerAction);
+        $report = ReportsProvider::factory($this->controllerName, $this->controllerAction);
 
         if (empty($report)) {
             $this->show_pivot_by_subtable = false;

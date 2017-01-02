@@ -30,6 +30,11 @@ class UrlHelperTest extends \PHPUnit_Framework_TestCase
             array('https://www.tëteâ.org', true),
             array('http://汉语/漢語.cn', true), //chinese
 
+            array('rtp://whatever.com', true),
+            array('testhttp://test.com', true),
+            array('cylon://3.hmn', true),
+            array('://something.com', true),
+
             // valid network-path reference RFC3986
             array('//piwik.org', true),
             array('//piwik/hello?world=test&test', true),
@@ -45,7 +50,7 @@ class UrlHelperTest extends \PHPUnit_Framework_TestCase
             array('jmleslangues.php', false),
             array('http://', false),
             array(' http://', false),
-            array('testhttp://test.com', false),
+            array('2fer://', false),
         );
     }
 
@@ -145,32 +150,6 @@ class UrlHelperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Dataprovider for testExtractSearchEngineInformationFromUrl
-     */
-    public function getSearchEngineUrls()
-    {
-        return Spyc::YAMLLoad(PIWIK_PATH_TEST_TO_ROOT .'/tests/resources/extractSearchEngineInformationFromUrlTests.yml');
-    }
-
-    /**
-     * @dataProvider getSearchEngineUrls
-     * @group Core
-     */
-    public function testExtractSearchEngineInformationFromUrl($url, $engine, $keywords)
-    {
-        $this->includeDataFilesForSearchEngineTest();
-        $returnedValue = UrlHelper::extractSearchEngineInformationFromUrl($url);
-
-        $exptectedValue = false;
-
-        if (!empty($engine)) {
-            $exptectedValue = array('name' => $engine, 'keywords' => $keywords);
-        }
-
-        $this->assertEquals($exptectedValue, $returnedValue);
-    }
-
-    /**
      * Dataprovider for testGetLossyUrl
      */
     public function getLossyUrls()
@@ -198,11 +177,6 @@ class UrlHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, UrlHelper::getLossyUrl($input));
     }
 
-    private function includeDataFilesForSearchEngineTest()
-    {
-        include "DataFiles/SearchEngines.php";
-    }
-
     /**
      * @group Core
      */
@@ -215,14 +189,6 @@ class UrlHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('localhost', UrlHelper::getHostFromUrl('localhost/path'));
         $this->assertEquals('sub.localhost', UrlHelper::getHostFromUrl('sub.localhost/path'));
         $this->assertEquals('sub.localhost', UrlHelper::getHostFromUrl('http://sub.localhost/path/?query=test'));
-
-        if(SystemTestCase::isPhpVersion53()) {
-            //parse_url was fixed in 5,4,7
-            //  Fixed host recognition when scheme is omitted and a leading component separator is present.
-            // http://php.net/parse_url
-            return;
-        }
-
         $this->assertEquals('localhost', UrlHelper::getHostFromUrl('//localhost/path'));
         $this->assertEquals('localhost', UrlHelper::getHostFromUrl('//localhost/path?test=test2'));
         $this->assertEquals('example.org', UrlHelper::getHostFromUrl('//example.org/path'));
@@ -250,6 +216,15 @@ class UrlHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('segment=pageTitle!@%40Hello%20World;pageTitle!@Peace%20Love%20', UrlHelper::getQueryFromUrl('/?segment=pageTitle!@%40Hello%20World;pageTitle!@Peace%20Love%20', array()));
     }
 
+    public function test_getQueryFromUrl_whenUrlParameterIsDuplicatedInQueryString_returnsLastFoundValue()
+    {
+        // Currently when the same parameter is used several times in the query string,
+        // only the last set value is returned by UrlHelper::getParameterFromQueryString
+        // refs https://github.com/piwik/piwik/issues/9842#issue-136043409
+        $this->assertEquals('blue', UrlHelper::getParameterFromQueryString('selected_colors=red&selected_colors=blue&par3=1', 'selected_colors'));
+        $this->assertEquals('selected_colors=red&selected_colors=blue&par3=1', UrlHelper::getQueryFromUrl('http:/mydomain.com?selected_colors=red&selected_colors=blue&par3=1', array()));
+    }
+
     /**
      * @group Core
      */
@@ -259,4 +234,64 @@ class UrlHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('add=foo', UrlHelper::getQueryFromUrl('/', array('add' => 'foo')));
         $this->assertEquals('add[]=foo&add[]=test', UrlHelper::getQueryFromUrl('/', array('add' => array('foo', 'test'))));
     }
+    
+    
+    /**
+     * Dataprovider for testGetQueryStringWithExcludedParameters
+     */
+    public function getQueryParameters()
+    {
+        return array(
+            array(
+                'p1=v1&p2=v2',                      //expected
+                array('p1'=>'v1', 'p2'=>'v2'),      //queryParameters
+                array()                             //parametersToExclude
+            ),
+            array(
+                'p2=v2', 
+                array('p1'=>'v1', 'p2'=>'v2'),
+                array('p1')
+            ),
+            array(
+                'p1=v1&p2=v2', 
+                array('p1'=>'v1', 'p2'=>'v2', 'sessionId'=>'HHSJHERTG'),
+                array('sessionId')
+            ),
+            array(
+                'p1=v1&p2=v2', 
+                array('p1'=>'v1', 'p2'=>'v2', 'sessionId'=>'HHSJHERTG'),
+                array('/session/')
+            ),
+            array(
+                'p1=v1&p2=v2', 
+                array('p1'=>'v1', 'sessionId'=>'HHSJHERTG', 'p2'=>'v2', 'token'=>'RYUN36HSAO'),
+                array('/[session|token]/')
+            ),
+            array(
+                '', 
+                array('p1'=>'v1', 'p2'=>'v2', 'sessionId'=>'HHSJHERTG', 'token'=>'RYUN36HSAO'),
+                array('/.*/')
+            ),
+            array(
+                'p2=v2&p4=v4', 
+                array('p1'=>'v1', 'p2'=>'v2', 'p3'=>'v3', 'p4'=>'v4'),
+                array('/p[1|3]/')
+            ),
+            array(
+                'p2=v2&p4=v4', 
+                array('p1'=>'v1', 'p2'=>'v2', 'p3'=>'v3', 'p4'=>'v4', 'utm_source'=>'gekko', 'utm_medium'=>'email', 'utm_campaign'=>'daily'),
+                array('/p[1|3]/', '/utm_/')
+            )
+        );
+    }
+    
+    /**
+     * @dataProvider getQueryParameters
+     * @group Core
+     */
+    public function testGetQueryStringWithExcludedParameters($expected, $queryParameters, $parametersToExclude)
+    {
+        $this->assertEquals($expected, UrlHelper::getQueryStringWithExcludedParameters($queryParameters, $parametersToExclude));
+    }
+    
 }

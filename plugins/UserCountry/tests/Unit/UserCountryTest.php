@@ -19,7 +19,7 @@ use Exception;
 require_once PIWIK_INCLUDE_PATH . '/plugins/UserCountry/UserCountry.php';
 require_once PIWIK_INCLUDE_PATH . '/plugins/UserCountry/functions.php';
 
-class UserCountryTest extends \PHPUnit_Framework_Testcase
+class UserCountryTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @group Plugins
@@ -109,6 +109,9 @@ class UserCountryTest extends \PHPUnit_Framework_Testcase
      */
     public function testGeoIpDownloadInvalidUrl($url)
     {
+        // unset translations, otherwise Exception message will be translated
+        StaticContainer::get('Piwik\Translation\Translator')->reset();
+
         $updater = new Piwik_UserCountry_GeoIPAutoUpdater_publictest();
         try {
             $updater->downloadFile('loc', $url);
@@ -138,7 +141,7 @@ class UserCountryTest extends \PHPUnit_Framework_Testcase
         foreach ($filesToRemove as $name) {
             $path = $geoIpDirPath . '/' . $name;
             if (file_exists($path)) {
-                unlink($path);
+                @unlink($path);
             }
         }
     }

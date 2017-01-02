@@ -8,10 +8,10 @@
 
 namespace Piwik\Plugins\CoreHome\tests\Integration\Column;
 
-use Piwik\Access;
 use Piwik\Cache;
 use Piwik\DataAccess\ArchiveTableCreator;
 use Piwik\Db;
+use Piwik\Metrics;
 use Piwik\Plugins\CoreHome\Columns\UserId;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\Mock\FakeAccess;
@@ -163,6 +163,17 @@ class UserIdTest extends IntegrationTestCase
         $this->assertDataTableHasUsers($this->getDataTableWithUsers());
     }
 
+    public function test_hasDataTableUsers_shouldBeAbleToDetectIfNbUsersMetricIdIsused()
+    {
+        $table = $this->getDataTableWithZeroUsers();
+        $table->renameColumn('nb_users', Metrics::INDEX_NB_USERS);
+        $this->assertNotDataTableHasUsers($table);
+
+        $table = $this->getDataTableWithUsers();
+        $table->renameColumn('nb_users', Metrics::INDEX_NB_USERS);
+        $this->assertDataTableHasUsers($this->getDataTableWithUsers());
+    }
+
     private function getDataTableWithoutUsersColumn()
     {
         $tableWithoutUsers = new DataTable();
@@ -255,9 +266,13 @@ class UserIdTest extends IntegrationTestCase
 
     private function setSuperUser()
     {
-        $pseudoMockAccess = new FakeAccess();
-        $pseudoMockAccess::setSuperUserAccess(true);
-        Access::setSingletonInstance($pseudoMockAccess);
+        FakeAccess::$superUser = true;
     }
 
+    public function provideContainerConfig()
+    {
+        return array(
+            'Piwik\Access' => new FakeAccess()
+        );
+    }
 }

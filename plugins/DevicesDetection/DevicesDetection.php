@@ -11,35 +11,18 @@ namespace Piwik\Plugins\DevicesDetection;
 
 use Piwik\ArchiveProcessor;
 use Piwik\Db;
-use Piwik\Piwik;
-use Piwik\Plugin\Manager as PluginManager;
-use Piwik\Plugins\DevicesDetection\Visitor;
 
 require_once PIWIK_INCLUDE_PATH . '/plugins/DevicesDetection/functions.php';
 
 class DevicesDetection extends \Piwik\Plugin
 {
     /**
-     * @see Piwik\Plugin::getInformation
+     * @see Piwik\Plugin::registerEvents
      */
-    public function getInformation()
+    public function registerEvents()
     {
         return array(
-            'description'      => Piwik::translate("DevicesDetection_PluginDescription"),
-            'authors'          => array(array('name' => 'Piwik PRO', 'homepage' => 'http://piwik.pro')),
-            'version'          => '1.14',
-            'license'          => 'GPL v3+',
-            'license_homepage' => 'http://www.gnu.org/licenses/gpl.html'
-        );
-    }
-
-    /**
-     * @see Piwik\Plugin::getListHooksRegistered
-     */
-    public function getListHooksRegistered()
-    {
-        return array(
-            'Live.getAllVisitorDetails' => 'extendVisitorDetails'
+            'Live.getAllVisitorDetails' => 'extendVisitorDetails',
         );
     }
 
@@ -48,6 +31,9 @@ class DevicesDetection extends \Piwik\Plugin
         $instance = new Visitor($details);
 
         $visitor['deviceType']               = $instance->getDeviceType();
+        $visitor['deviceTypeIcon']           = $instance->getDeviceTypeIcon();
+        $visitor['deviceBrand']              = $instance->getDeviceBrand();
+        $visitor['deviceModel']              = $instance->getDeviceModel();
         $visitor['operatingSystem']          = $instance->getOperatingSystem();
         $visitor['operatingSystemName']      = $instance->getOperatingSystemName();
         $visitor['operatingSystemIcon']      = $instance->getOperatingSystemIcon();
@@ -61,5 +47,4 @@ class DevicesDetection extends \Piwik\Plugin
         $visitor['browserCode']              = $instance->getBrowserCode();
         $visitor['browserVersion']           = $instance->getBrowserVersion();
     }
-
 }

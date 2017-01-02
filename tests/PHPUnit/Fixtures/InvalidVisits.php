@@ -56,7 +56,7 @@ class InvalidVisits extends Fixture
         // Trigger empty request
         $trackerUrl = self::getTrackerUrl();
         $response = Http::fetchRemoteFile($trackerUrl);
-        self::assertTrue(strpos($response, 'is a free/libre web') !== false, 'Piwik empty request response not correct: ' . $response);
+        self::assertTrue(strpos($response, 'Keep full control of your data with the leading free') !== false, 'Piwik empty request response not correct: ' . $response);
 
         $t = self::getTracker($idSite, $dateTime, $defaultInit = true);
 
@@ -96,6 +96,27 @@ class InvalidVisits extends Fixture
             $t->setIp($excludedIpBis);
             self::checkResponse($t->doTrackPageView('visit from IP globally excluded'));
         }
+
+        // test unknown url exclusion works
+        $urls = array("http://piwik.net", "http://my.stuff.com/");
+        API::getInstance()->updateSite($idSite, $siteName = null, $urls, $ecommerce = null, $siteSearch = null,
+            $searchKeywordParameters = null, $searchCategoryParameters = null, $excludedIps = null, $excludedQueryParams = null,
+            $timezone = null, $currency = null, $group = null, $startDate = null, $excludedUserAgents = null,
+            $keepUrlFragments = null, $type = null, $settings = null, $excludeUnknownUrls = 1);
+
+        $t->setIp("125.4.5.6");
+
+        $t->setUrl("http://piwik.com/to/the/moon");
+        $t->doTrackPageView("ignored, not from piwik.net");
+
+        $t->setUrl("http://their.stuff.com/back/to/the/future");
+        $t->doTrackPageView("ignored, not from my.stuff.com");
+
+        // undo exclude unknown urls change (important when multiple fixtures are setup together, as is done in OmniFixture)
+        API::getInstance()->updateSite($idSite, $siteName = null, $urls, $ecommerce = null, $siteSearch = null,
+            $searchKeywordParameters = null, $searchCategoryParameters = null, $excludedIps = null, $excludedQueryParams = null,
+            $timezone = null, $currency = null, $group = null, $startDate = null, $excludedUserAgents = null,
+            $keepUrlFragments = null, $type = null, $settings = null, $excludeUnknownUrls = 0);
 
         try {
             @$t->setAttributionInfo(array());

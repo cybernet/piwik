@@ -1,6 +1,6 @@
 {
     "MobileMessaging": {
-        "Exception_UnknownProvider": "Tên nhà cung cấp '%s' chưa biết. Thử các cách sau đây để thay thế: %s.",
+        "Exception_UnknownProvider": "Tên nhà cung cấp '%1$s' chưa biết. Thử các cách sau đây để thay thế: %2$s.",
         "MobileReport_AdditionalPhoneNumbers": "Bạn có thể thêm nhiều số điện thoại bằng cách truy cập",
         "MobileReport_MobileMessagingSettingsLink": "Trang cài đặt tin nhắn di động",
         "MobileReport_NoPhoneNumbers": "Hãy kích hoạt ít nhất một số điện thoại bằng cách truy cập",
@@ -21,7 +21,6 @@
         "Settings_PhoneActivated": "Số điện thoại đã xác nhận! Bạn có thể nhận tin nhắn SMS ngay bây giờ với số liệu thống kê của bạn.",
         "Settings_PhoneNumber": "Số điện thoại",
         "Settings_PhoneNumbers_Add": "Thêm một số điện thoại mới",
-        "Settings_PhoneNumbers_CountryCode_Help": "Nếu bạn không biết mã điện thoại quốc gia, tìm kiếm quốc gia của bạn ở đây",
         "Settings_PhoneNumbers_Help": "Trước khi nhận các báo cáo SMS (tin nhắn văn bản) trên điện thoại, số điện thoại phải được nhập phía dưới.",
         "Settings_PhoneNumbers_HelpAdd": "Khi bạn click vào \"Thêm\", một tin nhắn SMS chứa một đoạn mã sẽ được gửi đến điện thoại. Người dùng nhận được đoạn mã sau đó phải đăng nhập vào Piwik, click vào Cài Đặt, sau đó click vào tin nhắn di động. Sau khi nhập đoạn mã, người dùng sẽ có thể nhận được các báo cáo văn bản trên điện thoại của mình.",
         "Settings_PleaseSignUp": "Để tạo ra các báo cáo tin nhắn SMS và nhận tin nhắn văn bản ngắn với số liệu thống kê trang web của bạn trên điện thoại di động của bạn, xin vui lòng đăng ký với các API SMS và nhập thông tin của bạn dưới đây.",
@@ -29,13 +28,13 @@
         "Settings_SMSProvider": "Nhà cung cấp SMS",
         "Settings_SuperAdmin": "Cài đặt siêu người dùng",
         "Settings_SuspiciousPhoneNumber": "Nếu bạn không nhận được tin nhắn văn bản, bạn có thể thử ngoài hàng 0 đầu. tức là. %s",
-        "Settings_UpdateOrDeleteAccount": "Bạn cũng có thể %s cập nhật %s hoặc %s xóa %s tài khoản này.",
+        "Settings_UpdateOrDeleteAccount": "Bạn cũng có thể %1$s cập nhật %2$s hoặc %3$s xóa %4$s tài khoản này.",
         "Settings_ValidatePhoneNumber": "Xác nhận",
         "Settings_VerificationCodeJustSent": "Chúng tôi đã gửi một tin nhắn SMS đến số này với một mã số: vui lòng điền mã ở trên và click \"Xác nhận\".",
         "SettingsMenu": "Tin nhắn trên điện thoại di động",
         "SMS_Content_Too_Long": "[quá lâu]",
         "TopLinkTooltip": "Nhận các báo cáo Web Analytics đã được gửi đến hộp thư email của bạn hoặc điện thoại di động của bạn!",
         "TopMenu": "Các báo cáo Email & SMS",
-        "VerificationText": "Mã số là %s. Để xác nhận số điện thoại của bạn và nhận được báo cáo SMS Piwik hãy sao chép mã này trong mẫu truy cập thông qua Piwik > %s> %s."
+        "VerificationText": "Mã số là %1$s. Để xác nhận số điện thoại của bạn và nhận được báo cáo SMS Piwik hãy sao chép mã này trong mẫu truy cập thông qua Piwik > %2$s> %3$s."
     }
 }

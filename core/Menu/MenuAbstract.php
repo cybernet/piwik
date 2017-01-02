@@ -8,7 +8,7 @@
  */
 namespace Piwik\Menu;
 
-use Piwik\Common;
+use Piwik\Container\StaticContainer;
 use Piwik\Plugins\SitesManager\API;
 use Piwik\Singleton;
 use Piwik\Plugin\Manager as PluginManager;
@@ -31,6 +31,7 @@ abstract class MenuAbstract extends Singleton
     protected $edits = array();
     protected $renames = array();
     protected $orderingApplied = false;
+    protected $menuIcons = array();
     protected static $menus = array();
 
     /**
@@ -43,10 +44,21 @@ abstract class MenuAbstract extends Singleton
     {
         $this->buildMenu();
         $this->applyEdits();
-        $this->applyRenames();
         $this->applyRemoves();
+        $this->applyRenames();
         $this->applyOrdering();
         return $this->menu;
+    }
+
+    /**
+     * lets you register a menu icon for a certain menu category to replace the default arrow icon.
+     *
+     * @param string $menuName The translation key of a main menu category, eg 'Dashboard_Dashboard'
+     * @param string $iconCssClass   The css class name of an icon, eg 'icon-user'
+     */
+    public function registerMenuIcon($menuName, $iconCssClass)
+    {
+        $this->menuIcons[$menuName] = $iconCssClass;
     }
 
     /**
@@ -60,32 +72,24 @@ abstract class MenuAbstract extends Singleton
             return self::$menus;
         }
 
-        self::$menus = PluginManager::getInstance()->findComponents('Menu', 'Piwik\\Plugin\\Menu');
+        $components = PluginManager::getInstance()->findComponents('Menu', 'Piwik\\Plugin\\Menu');
+
+        self::$menus = array();
+        foreach ($components as $component) {
+            self::$menus[] = StaticContainer::get($component);
+        }
 
         return self::$menus;
     }
 
     /**
-     * Adds a new entry to the menu.
+     * To use only for tests.
      *
-     * @param string $menuName The menu's category name. Can be a translation token.
-     * @param string $subMenuName The menu item's name. Can be a translation token.
-     * @param string|array $url The URL the admin menu entry should link to, or an array of query parameters
-     *                          that can be used to build the URL.
-     * @param boolean $displayedForCurrentUser Whether this menu entry should be displayed for the
-     *                                         current user. If false, the entry will not be added.
-     * @param int $order The order hint.
-     * @param bool|string $tooltip An optional tooltip to display or false to display the tooltip.
-     *
-     * @deprecated since 2.7.0 Use {@link addItem() instead}. Method will be removed in Piwik 3.0
+     * @deprecated The whole $menus cache should be replaced by a real transient cache
      */
-    public function add($menuName, $subMenuName, $url, $displayedForCurrentUser = true, $order = 50, $tooltip = false)
+    public static function clearMenus()
     {
-        if (!$displayedForCurrentUser) {
-            return;
-        }
-
-        $this->addItem($menuName, $subMenuName, $url, $order, $tooltip);
+        self::$menus = array();
     }
 
     /**
@@ -155,6 +159,11 @@ abstract class MenuAbstract extends Singleton
             $this->menu[$menuName]['_order'] = $order;
             $this->menu[$menuName]['_name']  = $menuName;
             $this->menu[$menuName]['_tooltip'] = $tooltip;
+            if (!empty($this->menuIcons[$menuName])) {
+                $this->menu[$menuName]['_icon'] = $this->menuIcons[$menuName];
+            } else {
+                $this->menu[$menuName]['_icon'] = '';
+            }
         }
         if (!empty($subMenuName)) {
             $this->menu[$menuName][$subMenuName]['_url'] = $url;
@@ -218,9 +227,17 @@ abstract class MenuAbstract extends Singleton
             $newUrl         = $edit[2];
 
             if ($subMenuToEdit === null) {
-                $menuDataToEdit = @$this->menu[$mainMenuToEdit];
+                if (isset($this->menu[$mainMenuToEdit])) {
+                    $menuDataToEdit = &$this->menu[$mainMenuToEdit];
+                } else {
+                    $menuDataToEdit = null;
+                }
             } else {
-                $menuDataToEdit = @$this->menu[$mainMenuToEdit][$subMenuToEdit];
+                if (isset($this->menu[$mainMenuToEdit][$subMenuToEdit])) {
+                    $menuDataToEdit = &$this->menu[$mainMenuToEdit][$subMenuToEdit];
+                } else {
+                    $menuDataToEdit = null;
+                }
             }
 
             if (empty($menuDataToEdit)) {
@@ -233,8 +250,7 @@ abstract class MenuAbstract extends Singleton
 
     private function applyRemoves()
     {
-        foreach($this->menuEntriesToRemove as $menuToDelete) {
-
+        foreach ($this->menuEntriesToRemove as $menuToDelete) {
             if (empty($menuToDelete[1])) {
                 // Delete Main Menu
                 if (isset($this->menu[$menuToDelete[0]])) {
@@ -268,7 +284,7 @@ abstract class MenuAbstract extends Singleton
                     $this->menu[$mainMenuRenamed][$subMenuRenamed] = $save;
                 }
             } // Changing a first-level element
-            else if (isset($this->menu[$mainMenuOriginal])) {
+            elseif (isset($this->menu[$mainMenuOriginal])) {
                 $save = $this->menu[$mainMenuOriginal];
                 $save['_name'] = $mainMenuRenamed;
                 unset($this->menu[$mainMenuOriginal]);
@@ -292,7 +308,7 @@ abstract class MenuAbstract extends Singleton
         foreach ($this->menu as $key => &$element) {
             if (is_null($element)) {
                 unset($this->menu[$key]);
-            } else if ($element['_hasSubmenu']) {
+            } elseif ($element['_hasSubmenu']) {
                 uasort($element, array($this, 'menuCompare'));
             }
         }

@@ -19,6 +19,7 @@ use Piwik\DataTable\Filter\PivotByDimension;
 use Piwik\Metrics\Formatter;
 use Piwik\Plugin\ProcessedMetric;
 use Piwik\Plugin\Report;
+use Piwik\Plugin\ReportsProvider;
 
 /**
  * Processes DataTables that should be served through Piwik's APIs. This processing handles
@@ -71,7 +72,7 @@ class DataTablePostProcessor
         $this->apiMethod = $apiMethod;
         $this->setRequest($request);
 
-        $this->report = Report::factory($apiModule, $apiMethod);
+        $this->report = ReportsProvider::factory($apiModule, $apiMethod);
         $this->apiInconsistencies = new Inconsistencies();
         $this->setFormatter(new Formatter());
     }
@@ -191,8 +192,8 @@ class DataTablePostProcessor
     public function applyTotalsCalculator($dataTable)
     {
         if (1 == Common::getRequestVar('totals', '1', 'integer', $this->request)) {
-            $reportTotalsCalculator = new ReportTotalsCalculator($this->apiModule, $this->apiMethod, $this->request);
-            $dataTable     = $reportTotalsCalculator->calculate($dataTable);
+            $calculator = new ReportTotalsCalculator($this->apiModule, $this->apiMethod, $this->request, $this->report);
+            $dataTable  = $calculator->calculate($dataTable);
         }
         return $dataTable;
     }
@@ -207,7 +208,7 @@ class DataTablePostProcessor
         if (0 == Common::getRequestVar('disable_generic_filters', '0', 'string', $this->request)) {
             $this->applyProcessedMetricsGenericFilters($dataTable);
 
-            $genericFilter = new DataTableGenericFilter($this->request);
+            $genericFilter = new DataTableGenericFilter($this->request, $this->report);
 
             $self = $this;
             $report = $this->report;
@@ -288,11 +289,12 @@ class DataTablePostProcessor
         // after queued filters are run so processed metrics can be removed, too)
         $hideColumns = Common::getRequestVar('hideColumns', '', 'string', $this->request);
         $showColumns = Common::getRequestVar('showColumns', '', 'string', $this->request);
+        $showRawMetrics = Common::getRequestVar('showRawMetrics', 0, 'int', $this->request);
         if (!empty($hideColumns)
             || !empty($showColumns)
         ) {
             $dataTable->filter('ColumnDelete', array($hideColumns, $showColumns));
-        } else {
+        } else if ($showRawMetrics !== 1) {
             $this->removeTemporaryMetrics($dataTable);
         }
 
@@ -389,7 +391,7 @@ class DataTablePostProcessor
         // this is needed because Proxy uses Common::getRequestVar which in turn
         // uses Common::sanitizeInputValue. This causes the > that separates recursive labels
         // to become &gt; and we need to undo that here.
-        $label = Common::unsanitizeInputValues($label);
+        $label = str_replace( htmlentities('>'), '>', $label);
         return $label;
     }
 

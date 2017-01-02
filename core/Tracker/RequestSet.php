@@ -36,7 +36,6 @@ class RequestSet
         $this->requests = array();
 
         foreach ($requests as $request) {
-
             if (empty($request) && !is_array($request)) {
                 continue;
             }
@@ -146,7 +145,7 @@ class RequestSet
         return array_values(array_unique($siteIds));
     }
 
-    // TODO maybe move to reponse? or somewhere else? not sure where!
+    // TODO maybe move to response? or somewhere else? not sure where!
     public function shouldPerformRedirectToUrl()
     {
         if (!$this->hasRedirectUrl()) {
@@ -253,6 +252,4 @@ class RequestSet
             'server' => $_SERVER
         );
     }
-
-
 }

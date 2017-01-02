@@ -1,12 +1,10 @@
 {
     "Contents": {
+        "Impressions": "Mga Impresyon",
+        "InteractionRate": "Rate ng Pakikipag-ugnayan",
         "ContentName": "Pangalan ng Nilalaman",
         "ContentPiece": "Piraso ng Nilalaman",
-        "Contents": "Mga Nilalaman",
         "ContentTarget": "Target ng Nilalaman",
-        "Impressions": "Mga Impresyon",
-        "Interaction": "Pakikipag-ugnayan",
-        "InteractionRate": "Rate ng Pakikipag-ugnayan",
-        "Interactions": "Mga Pakikipag-ugnayan"
+        "Contents": "Mga Nilalaman"
     }
 }

@@ -19,10 +19,6 @@ use Piwik\Plugins\UserCountry\LocationProvider\GeoIp;
 use Piwik\Plugins\UserCountry\LocationProvider;
 use Piwik\Plugins\UserCountry\LocationProvider\DefaultProvider;
 use Piwik\Plugins\UserCountry\LocationProvider\GeoIp\Pecl;
-use Piwik\Plugins\UserCountry\Reports\GetCity;
-use Piwik\Plugins\UserCountry\Reports\GetContinent;
-use Piwik\Plugins\UserCountry\Reports\GetCountry;
-use Piwik\Plugins\UserCountry\Reports\GetRegion;
 use Piwik\View;
 
 /**
@@ -30,17 +26,12 @@ use Piwik\View;
  */
 class Controller extends \Piwik\Plugin\ControllerAdmin
 {
-    public function index()
+    public function getDistinctCountries()
     {
-        $view = new View('@UserCountry/index');
+        $view = new View('@UserCountry/getDistinctCountries');
 
         $view->urlSparklineCountries = $this->getUrlSparkline('getLastDistinctCountriesGraph');
         $view->numberDistinctCountries = $this->getNumberOfDistinctCountries(true);
-
-        $view->dataTableCountry = $this->renderReport(new GetCountry());
-        $view->dataTableContinent = $this->renderReport(new GetContinent());
-        $view->dataTableRegion = $this->renderReport(new GetRegion());
-        $view->dataTableCity = $this->renderReport(new GetCity());
 
         return $view->render();
     }
@@ -57,6 +48,7 @@ class Controller extends \Piwik\Plugin\ControllerAdmin
         $view->thisIP = IP::getIpFromHeader();
         $geoIPDatabasesInstalled = GeoIp::isDatabaseInstalled();
         $view->geoIPDatabasesInstalled = $geoIPDatabasesInstalled;
+        $view->updatePeriodOptions = $this->getPeriodUpdateOptions();
 
         // check if there is a working provider (that isn't the default one)
         $isThereWorkingProvider = false;
@@ -150,9 +142,19 @@ class Controller extends \Piwik\Plugin\ControllerAdmin
     private function getGeoIpUpdaterManageScreen()
     {
         $view = new View('@UserCountry/getGeoIpUpdaterManageScreen');
+
+        $view->updatePeriodOptions = $this->getPeriodUpdateOptions();
         $view->geoIPDatabasesInstalled = true;
         $this->setUpdaterManageVars($view);
         return $view->render();
+    }
+
+    private function getPeriodUpdateOptions()
+    {
+        return array(
+            'month' => Piwik::translate('Intl_PeriodMonth'),
+            'week' => Piwik::translate('Intl_PeriodWeek')
+        );
     }
 
     /**
@@ -173,7 +175,7 @@ class Controller extends \Piwik\Plugin\ControllerAdmin
 
         $lastRunTime = GeoIPAutoUpdater::getLastRunTime();
         if ($lastRunTime !== false) {
-            $view->lastTimeUpdaterRun = '<strong><em>' . $lastRunTime->toString() . '</em></strong>';
+            $view->lastTimeUpdaterRun = '<strong>' . $lastRunTime->toString() . '</strong>';
         }
 
         $view->nextRunTime = GeoIPAutoUpdater::getNextRunTime();
@@ -282,31 +284,6 @@ class Controller extends \Piwik\Plugin\ControllerAdmin
     }
 
     /**
-     * Sets the current LocationProvider type.
-     *
-     * Input:
-     *   Requires the 'id' query parameter to be set to the desired LocationProvider's ID.
-     *
-     * Output:
-     *   Nothing.
-     */
-    public function setCurrentLocationProvider()
-    {
-        $this->dieIfGeolocationAdminIsDisabled();
-        Piwik::checkUserHasSuperUserAccess();
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $this->checkTokenInUrl();
-
-            $providerId = Common::getRequestVar('id');
-            $provider = LocationProvider::setCurrentProvider($providerId);
-            if ($provider === false) {
-                throw new Exception("Invalid provider ID: '$providerId'.");
-            }
-            return 1;
-        }
-    }
-
-    /**
      * Echo's a pretty formatted location using a specific LocationProvider.
      *
      * Input:
@@ -318,8 +295,8 @@ class Controller extends \Piwik\Plugin\ControllerAdmin
     public function getLocationUsingProvider()
     {
         $providerId = Common::getRequestVar('id');
-        $provider = $provider = LocationProvider::getProviderById($providerId);
-        if ($provider === false) {
+        $provider = LocationProvider::getProviderById($providerId);
+        if (empty($provider)) {
             throw new Exception("Invalid provider ID: '$providerId'.");
         }
 

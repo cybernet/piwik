@@ -15,6 +15,9 @@ use Piwik\Plugins\Actions\Columns\Metrics\AveragePageGenerationTime;
 use Piwik\Plugins\Actions\Columns\Metrics\AverageTimeOnPage;
 use Piwik\Plugins\Actions\Columns\Metrics\BounceRate;
 use Piwik\Plugins\Actions\Columns\Metrics\ExitRate;
+use Piwik\Plugin\ReportsProvider;
+use Piwik\Report\ReportWidgetFactory;
+use Piwik\Widget\WidgetsList;
 
 class GetEntryPageTitles extends Base
 {
@@ -24,7 +27,7 @@ class GetEntryPageTitles extends Base
 
         $this->dimension     = new EntryPageTitle();
         $this->name          = Piwik::translate('Actions_EntryPageTitles');
-        $this->documentation = Piwik::translate('Actions_ExitPageTitlesReportDocumentation', '<br />')
+        $this->documentation = Piwik::translate('Actions_EntryPageTitlesReportDocumentation', '<br />')
                              . ' ' . Piwik::translate('General_UsePlusMinusIconsDocumentation');
         $this->metrics = array('entry_nb_visits', 'entry_bounce_count');
         $this->processedMetrics = array(
@@ -36,7 +39,12 @@ class GetEntryPageTitles extends Base
         $this->order   = 6;
         $this->actionToLoadSubTables = $this->action;
 
-        $this->widgetTitle = 'Actions_WidgetEntryPageTitles';
+        $this->subcategoryId = 'Actions_SubmenuPagesEntry';
+    }
+
+    public function configureWidgets(WidgetsList $widgetsList, ReportWidgetFactory $factory)
+    {
+        $widgetsList->addWidgetConfig($factory->createWidget()->setName('Actions_WidgetEntryPageTitles'));
     }
 
     public function getProcessedMetrics()
@@ -54,7 +62,7 @@ class GetEntryPageTitles extends Base
     protected function getMetricsDocumentation()
     {
         $metrics = parent::getMetricsDocumentation();
-        $metrics['bounce_rate'] = Piwik::translate('General_ColumnBounceRateForPageDocumentation');
+        $metrics['bounce_rate'] = Piwik::translate('General_ColumnPageBounceRateDocumentation');
 
         // remove these metrics from API.getProcessedReport version of this report
         unset($metrics['avg_time_on_page']);
@@ -79,8 +87,8 @@ class GetEntryPageTitles extends Base
     public function getRelatedReports()
     {
         return array(
-            new GetPageTitles(),
-            new GetEntryPageUrls()
+            ReportsProvider::factory('Actions', 'getPageTitles'),
+            ReportsProvider::factory('Actions', 'getEntryPageUrls')
         );
     }
 }

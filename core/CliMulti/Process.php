@@ -14,7 +14,7 @@ use Piwik\SettingsServer;
 /**
  * There are three different states
  * - PID file exists with empty content: Process is created but not started
- * - PID file exists with the actual process PID as content: Process is runnning
+ * - PID file exists with the actual process PID as content: Process is running
  * - PID file does not exist: Process is marked as finished
  *
  * Class Process
@@ -144,7 +144,7 @@ class Process
         }
 
         $lockedPID   = trim($content);
-        $runningPIDs = explode("\n", trim( `ps ex | awk '{print $1}'` ));
+        $runningPIDs = self::getRunningProcesses();
 
         return !empty($lockedPID) && in_array($lockedPID, $runningPIDs);
     }
@@ -173,20 +173,24 @@ class Process
             return false;
         }
 
+        if (!self::commandExists('ps') || !self::returnsSuccessCode('ps') || !self::commandExists('awk')) {
+            return false;
+        }
+
+        if (count(self::getRunningProcesses()) > 0) {
+            return true;
+        }
+
         if (!self::isProcFSMounted()) {
             return false;
         }
 
-        if (self::commandExists('ps') && self::returnsSuccessCode('ps') && self::commandExists('awk')) {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     private static function isSystemNotSupported()
     {
-        $uname = @shell_exec('uname -a');
+        $uname = @shell_exec('uname -a 2> /dev/null');
 
         if (empty($uname)) {
             $uname = php_uname();
@@ -231,9 +235,23 @@ class Process
             return true;
         }
         // Testing if /proc is a resource with @fopen fails on systems with open_basedir set.
-        // by using stat we not only test the existance of /proc but also confirm it's a 'proc' filesystem
+        // by using stat we not only test the existence of /proc but also confirm it's a 'proc' filesystem
         $type = @shell_exec('stat -f -c "%T" /proc 2>/dev/null');
         return strpos($type, 'proc') === 0;
     }
 
+    /**
+     * @return int[] The ids of the currently running processes
+     */
+     public static function getRunningProcesses()
+     {
+         $ids = explode("\n", trim(`ps ex 2>/dev/null | awk '{print $1}' 2>/dev/null`));
+
+         $ids = array_map('intval', $ids);
+         $ids = array_filter($ids, function ($id) {
+            return $id > 0;
+        });
+
+         return $ids;
+     }
 }

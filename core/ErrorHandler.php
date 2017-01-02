@@ -95,7 +95,12 @@ class ErrorHandler
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
             default:
-                Log::warning(self::createLogMessage($errno, $errstr, $errfile, $errline));
+                try {
+                    Log::warning(self::createLogMessage($errno, $errstr, $errfile, $errline));
+                } catch (\Exception $ex) {
+                    // ignore (it's possible for this to happen if the StaticContainer hasn't been created yet)
+                }
+
                 break;
         }
     }
@@ -117,14 +122,13 @@ class ErrorHandler
 
         $message = ErrorHandler::getErrNoString($errno) . ' - ' . $errstr;
 
-        $html = "<strong>There is an error. Please report the message (Piwik " . (class_exists('Piwik\Version') ? Version::VERSION : '') . ")
-        and full backtrace in the <a href='?module=Proxy&action=redirect&url=http://forum.piwik.org' target='_blank'>Piwik forums</a> (please do a Search first as it might have been reported already!).</strong><br /><br/>
-        ";
-        $html .= "<strong>{$message}</strong> in <em>{$errfile}</em>";
-        $html .= " on line {$errline}<br />";
-        $html .= "<br />Backtrace:<div style=\"font-family:Courier;font-size:10pt\"><br />\n";
-        $html .= str_replace("\n", "<br />\n", $trace);
-        $html .= "</div>";
+        $html = "<p>There is an error. Please report the message (Piwik " . (class_exists('Piwik\Version') ? Version::VERSION : '') . ")
+        and full backtrace in the <a href='?module=Proxy&action=redirect&url=http://forum.piwik.org' target='_blank'>Piwik forums</a> (please do a Search firit might have been reported already!).</p>";
+        $html .= "<p><strong>{$message}</strong> in <em>{$errfile}</em>";
+        $html .= " on line {$errline}</p>";
+        $html .= "Backtrace:<pre>";
+        $html .= str_replace("\n", "\n", $trace);
+        $html .= "</pre>";
 
         return $html;
     }

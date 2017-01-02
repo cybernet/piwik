@@ -14,8 +14,7 @@ use Piwik\DataTable;
 use Piwik\DataTable\Renderer;
 use Piwik\DataTable\DataTableInterface;
 use Piwik\DataTable\Filter\ColumnDelete;
-use Piwik\Plugin\Report;
-use Piwik\Plugins\API\Renderer\Original;
+use Piwik\DataTable\Filter\Pattern;
 
 /**
  */
@@ -124,11 +123,11 @@ class ResponseBuilder
     /**
      * Returns an error $message in the requested $format
      *
-     * @param Exception $e
+     * @param Exception|\Throwable $e
      * @throws Exception
      * @return string
      */
-    public function getResponseException(Exception $e)
+    public function getResponseException($e)
     {
         $e       = $this->decorateExceptionWithDebugTrace($e);
         $message = $this->formatExceptionMessage($e);
@@ -139,10 +138,10 @@ class ResponseBuilder
     }
 
     /**
-     * @param Exception $e
+     * @param Exception|\Throwable $e
      * @return Exception
      */
-    private function decorateExceptionWithDebugTrace(Exception $e)
+    private function decorateExceptionWithDebugTrace($e)
     {
         // If we are in tests, show full backtrace
         if (defined('PIWIK_PATH_TEST_TO_ROOT')) {
@@ -158,7 +157,11 @@ class ResponseBuilder
         return $e;
     }
 
-    private function formatExceptionMessage(Exception $exception)
+    /**
+     * @param Exception|\Throwable $exception
+     * @return string
+     */
+    private function formatExceptionMessage($exception)
     {
         $message = $exception->getMessage();
         if (\Piwik_ShouldPrintBackTraceWithMessage()) {
@@ -189,19 +192,32 @@ class ResponseBuilder
 
         $isAssoc = !empty($firstArray) && is_numeric($firstKey) && is_array($firstArray) && count(array_filter(array_keys($firstArray), 'is_string'));
 
+        if (is_numeric($firstKey)) {
+            $columns = Common::getRequestVar('filter_column', false, 'array', $this->request);
+            $pattern = Common::getRequestVar('filter_pattern', '', 'string', $this->request);
+
+            if ($columns != array(false) && $pattern !== '') {
+                $pattern = new Pattern(new DataTable(), $columns, $pattern);
+                $array   = $pattern->filterArray($array);
+            }
+
+            $limit  = Common::getRequestVar('filter_limit', -1, 'integer', $this->request);
+            $offset = Common::getRequestVar('filter_offset', '0', 'integer', $this->request);
+
+            if ($limit >= 0 || $offset > 0) {
+                if ($limit < 0) {
+                    $limit = null; // make sure to return all results from offset
+                }
+                $array = array_slice($array, $offset, $limit, $preserveKeys = false);
+            }
+        }
+
         if ($isAssoc) {
             $hideColumns = Common::getRequestVar('hideColumns', '', 'string', $this->request);
             $showColumns = Common::getRequestVar('showColumns', '', 'string', $this->request);
             if ($hideColumns !== '' || $showColumns !== '') {
                 $columnDelete = new ColumnDelete(new DataTable(), $hideColumns, $showColumns);
                 $array = $columnDelete->filter($array);
-            }
-        } else if (is_numeric($firstKey)) {
-            $limit  = Common::getRequestVar('filter_limit', -1, 'integer', $this->request);
-            $offset = Common::getRequestVar('filter_offset', '0', 'integer', $this->request);
-
-            if (-1 !== $limit) {
-                $array = array_slice($array, $offset, $limit);
             }
         }
 

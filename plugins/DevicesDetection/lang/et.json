@@ -1,5 +1,6 @@
 {
     "DevicesDetection": {
+        "BrowserEngine": "Veebisirvija",
         "BrowserFamily": "Sirvija tüüp",
         "Browsers": "Veebisirvijad",
         "BrowserVersion": "Sirvija versioon",
@@ -26,7 +27,7 @@
         "OperatingSystemVersions": "Operatsioonisüsteemide versioonid",
         "SmartDisplay": "Nutikas kuvar",
         "Smartphone": "Nutitelefon",
-        "submenu": "Seadmed",
+        "Devices": "Seadmed",
         "Tablet": "Tahvelarvuti",
         "TV": "Televiisor",
         "UserAgent": "Veebisirvija tüüp",

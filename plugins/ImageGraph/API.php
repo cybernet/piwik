@@ -75,10 +75,6 @@ class API extends \Piwik\Plugin\API
     );
 
     private static $DEFAULT_GRAPH_TYPE_OVERRIDE = array(
-        'UserSettings_getPlugin'    => array(
-            false // override if !$isMultiplePeriod
-            => StaticGraph::GRAPH_TYPE_HORIZONTAL_BAR,
-        ),
         'Referrers_getReferrerType' => array(
             false // override if !$isMultiplePeriod
             => StaticGraph::GRAPH_TYPE_HORIZONTAL_BAR,
@@ -126,7 +122,8 @@ class API extends \Piwik\Plugin\API
         $gridColor = API::DEFAULT_GRID_COLOR,
         $idSubtable = false,
         $legendAppendMetric = true,
-        $segment = false
+        $segment = false,
+        $idDimension = false
     )
     {
         Piwik::checkUserHasViewAccess($idSite);
@@ -154,6 +151,9 @@ class API extends \Piwik\Plugin\API
             $apiParameters = array();
             if (!empty($idGoal)) {
                 $apiParameters = array('idGoal' => $idGoal);
+            }
+            if (!empty($idDimension)) {
+                $apiParameters = array('idDimension' => $idDimension);
             }
             // Fetch the metadata for given api-action
             $parameters = array(
@@ -309,6 +309,7 @@ class API extends \Piwik\Plugin\API
                     'column' => $plottedMetric,
                     'language' => $languageLoaded,
                     'idGoal' => $idGoal,
+                    'idDimension' => $idDimension,
                     'legendAppendMetric' => $legendAppendMetric,
                     'labelUseAbsoluteUrl' => false
                 );
@@ -365,6 +366,7 @@ class API extends \Piwik\Plugin\API
                     'segment' => $segment,
                     'apiParameters' => false,
                     'idGoal' => $idGoal,
+                    'idDimension' => $idDimension,
                     'language' => $languageLoaded,
                     'showTimer' => true,
                     'hideMetricsDoc' => false,
@@ -433,7 +435,7 @@ class API extends \Piwik\Plugin\API
                         $rowData = $rows[0]->getColumns(); // associative Array
 
                         foreach ($ordinateColumns as $column) {
-                            if(empty($rowData[$column])) {
+                            if(!isset($rowData[$column])) {
                                 continue;
                             }
                             $ordinateValue = $rowData[$column];
@@ -510,7 +512,10 @@ class API extends \Piwik\Plugin\API
                 if ($idGoal != '') {
                     $idGoal = '_' . $idGoal;
                 }
-                $fileName = self::$DEFAULT_PARAMETERS[$graphType][self::FILENAME_KEY] . '_' . $apiModule . '_' . $apiAction . $idGoal . ' ' . str_replace(',', '-', $date) . ' ' . $idSite . '.png';
+                if ($idDimension != '') {
+                    $idDimension = '__' . $idDimension;
+                }
+                $fileName = self::$DEFAULT_PARAMETERS[$graphType][self::FILENAME_KEY] . '_' . $apiModule . '_' . $apiAction . $idGoal . $idDimension . ' ' . str_replace(',', '-', $date) . ' ' . $idSite . '.png';
                 $fileName = str_replace(array(' ', '/'), '_', $fileName);
 
                 if (!Filesystem::isValidFilename($fileName)) {

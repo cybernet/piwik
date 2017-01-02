@@ -12,7 +12,6 @@ use Piwik\API\Request;
 use Piwik\Common;
 use Piwik\Config;
 use Piwik\Piwik;
-use Piwik\Plugins\Live\Reports\GetLastVisitsDetails;
 use Piwik\Plugins\Goals\API as APIGoals;
 use Piwik\Url;
 use Piwik\View;
@@ -57,7 +56,7 @@ class Controller extends \Piwik\Plugin\Controller
     public function indexVisitorLog()
     {
         $view = new View('@Live/indexVisitorLog.twig');
-        $view->visitorLog = $this->renderReport(new GetLastVisitsDetails());
+        $view->visitorLog = $this->renderReport('getLastVisitsDetails');
         return $view->render();
     }
 
@@ -66,7 +65,7 @@ class Controller extends \Piwik\Plugin\Controller
      */
     public function getVisitorLog()
     {
-        return $this->renderReport(new GetLastVisitsDetails());
+        return $this->renderReport('getLastVisitsDetails');
     }
 
     public function getLastVisitsStart()
@@ -134,7 +133,7 @@ class Controller extends \Piwik\Plugin\Controller
                                                                        ));
         $view->visitData = $visits->getFirstRow()->getColumns();
         $view->visitReferralSummary = VisitorProfile::getReferrerSummaryForVisit($visits->getFirstRow());
-        $view->showLocation = true;
+        $view->showLocation =  \Piwik\Plugin\Manager::getInstance()->isPluginLoaded('UserCountry');
         $this->setWidgetizedVisitorProfileUrl($view);
         $view->exportLink = $this->getVisitorProfileExportLink();
         return $view->render();
@@ -151,12 +150,14 @@ class Controller extends \Piwik\Plugin\Controller
                                                                                 'date'                    => false
                                                                            ));
 
+        $idSite = Common::getRequestVar('idSite', null, 'int');
+
         if (empty($nextVisits)) {
             return;
         }
 
         $view = new View('@Live/getVisitList.twig');
-        $view->idSite = Common::getRequestVar('idSite', null, 'int');
+        $view->idSite = $idSite;
         $view->startCounter = $startCounter + 1;
         $view->visits = $nextVisits;
         return $view->render();

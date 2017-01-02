@@ -7,6 +7,7 @@
  */
 namespace Piwik\Tests\System;
 
+use Interop\Container\ContainerInterface;
 use Piwik\Date;
 use Piwik\Plugins\SitesManager\API;
 use Piwik\Tests\Framework\TestCase\SystemTestCase;
@@ -77,10 +78,6 @@ class ArchiveCronTest extends SystemTestCase
 
     public function testArchivePhpCron()
     {
-        if(self::isPhpVersion53()) {
-            $this->markTestSkipped('Fails on PHP 5.3 once in a blue moon.');
-        }
-
         $this->setLastRunArchiveOptions();
         $output = $this->runArchivePhpCron();
 
@@ -104,6 +101,15 @@ class ArchiveCronTest extends SystemTestCase
         }
     }
 
+    public function test_archivePhpScript_DoesNotFail_WhenCommandHelpRequested()
+    {
+        $output = $this->runArchivePhpCron(array('--help' => null), PIWIK_INCLUDE_PATH . '/misc/cron/archive.php');
+        $output = implode("\n", $output);
+
+        $this->assertRegExp('/Usage:\s*core:archive/', $output);
+        $this->assertNotContains("Starting Piwik reports archiving...", $output);
+    }
+
     private function setLastRunArchiveOptions()
     {
         $periodTypes = array('day', 'periods');
@@ -122,20 +128,25 @@ class ArchiveCronTest extends SystemTestCase
         }
     }
 
-    private function runArchivePhpCron()
+    private function runArchivePhpCron($options = array(), $archivePhpScript = false)
     {
-        $archivePhpScript = PIWIK_INCLUDE_PATH . '/tests/PHPUnit/proxy/archive.php';
+        $archivePhpScript = $archivePhpScript ?: PIWIK_INCLUDE_PATH . '/tests/PHPUnit/proxy/archive.php';
         $urlToProxy = Fixture::getRootUrl() . 'tests/PHPUnit/proxy/index.php';
 
         // create the command
-        $cmd = "php \"$archivePhpScript\" --url=\"$urlToProxy\" 2>&1";
+        $cmd = "php \"$archivePhpScript\" --url=\"$urlToProxy\"";
+        foreach ($options as $name => $value) {
+            $cmd .= " $name";
+            if ($value !== null) {
+                $cmd .= "=" . escapeshellarg($value);
+            }
+        }
+        $cmd .= " 2>&1";
 
         // run the command
         exec($cmd, $output, $result);
         if ($result !== 0 || stripos($result, "error")) {
-            $message = 'This failed once after a lunar eclipse, and it has again randomly failed.';
-            $message .= "\n\narchive cron failed: " . implode("\n", $output) . "\n\ncommand used: $cmd";
-            $this->markTestSkipped($message);
+            $this->fail("archive cron failed: " . implode("\n", $output) . "\n\ncommand used: $cmd");
         }
 
         return $output;
@@ -159,6 +170,19 @@ class ArchiveCronTest extends SystemTestCase
         } catch (Exception $ex) {
             $this->comparisonFailures[] = $ex;
         }
+    }
+
+    public static function provideContainerConfigBeforeClass()
+    {
+        return array(
+            'Psr\Log\LoggerInterface' => \DI\get('Monolog\Logger'),
+
+            // for some reason, w/o real translations archiving segments in CronArchive fails. the data returned by CliMulti
+            // is a translation token, and nothing else.
+            'Piwik\Translation\Translator' => function (ContainerInterface $c) {
+                return new \Piwik\Translation\Translator($c->get('Piwik\Translation\Loader\LoaderInterface'));
+            }
+        );
     }
 }
 

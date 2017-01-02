@@ -49,6 +49,8 @@ Segmentation = (function($) {
         self.availableMatches["dimension"]["!="] = self.translations['General_OperationIsNot'];
         self.availableMatches["dimension"]["=@"] = self.translations['General_OperationContains'];
         self.availableMatches["dimension"]["!@"] = self.translations['General_OperationDoesNotContain'];
+        self.availableMatches["dimension"]["=^"] = self.translations['General_OperationStartsWith'];
+        self.availableMatches["dimension"]["=$"] = self.translations['General_OperationEndsWith'];
 
         segmentation.prototype.setAvailableSegments = function (segments) {
             this.availableSegments = segments;
@@ -69,26 +71,54 @@ Segmentation = (function($) {
             this.currentSegmentStr = segmentStr;
         };
 
+        segmentation.prototype.setTooltip = function (segmentDescription) {
+
+            var title = _pk_translate('SegmentEditor_ChooseASegment') + '.';
+            title += ' '+ _pk_translate('SegmentEditor_CurrentlySelectedSegment', [segmentDescription]);
+
+            $(this.content).attr('title', title);
+        }
+
         segmentation.prototype.markCurrentSegment = function(){
             var current = this.getSegment();
 
             var segmentationTitle = $(this.content).find(".segmentationTitle");
+            var title;
             if( current != "")
             {
-                var currentDecoded = piwikHelper.htmlDecode(current);
-                var selector = 'div.segmentList ul li[data-definition="'+currentDecoded+'"]';
+                // this code is mad, and may drive you mad.
+                // the whole segmentation editor needs to be rewritten in AngularJS with clean code
+                var selector = 'div.segmentList ul li[data-definition="'+current+'"]';
                 var foundItems = $(selector, this.target);
-                var title = $('<strong></strong>');
-                if( foundItems.length > 0) {
-                    var name = $(foundItems).first().find("span.segname").text();
-                    title.text(name);
-                } else {
-                    title.text("Custom Segment");
+
+                if (foundItems.length === 0) {
+                    try {
+                        currentDecoded = piwikHelper.htmlDecode(current);
+                        selector = 'div.segmentList ul li[data-definition="'+currentDecoded+'"]';
+                        foundItems = $(selector, this.target);
+                    } catch(e) {}
                 }
-                segmentationTitle.html(title);
+                if (foundItems.length === 0) {
+                    try {
+                        currentDecoded = piwikHelper.htmlDecode(decodeURIComponent(current));
+                        selector = 'div.segmentList ul li[data-definition="'+currentDecoded+'"]';
+                        foundItems = $(selector, this.target);
+                    } catch(e) {}
+                }
+
+                if (foundItems.length > 0) {
+                    var idSegment = $(foundItems).first().attr('data-idsegment');
+                    title = getSegmentName(getSegmentFromId(idSegment));
+                } else {
+                    title = _pk_translate('SegmentEditor_CustomSegment');
+                }
+                segmentationTitle.addClass('segment-clicked').html( title );
+                this.setTooltip(title);
             }
             else {
-                $(this.content).find(".segmentationTitle").text(this.translations['SegmentEditor_DefaultAllVisits']);
+                title = this.translations['SegmentEditor_DefaultAllVisits'];
+                segmentationTitle.text(title);
+                this.setTooltip(title);
             }
         };
 
@@ -197,30 +227,70 @@ Segmentation = (function($) {
             var html = self.editorTemplate.find("> .listHtml").clone();
             var segment, injClass;
             var listHtml = '<li data-idsegment="" ' +
-                            (self.currentSegmentStr == "" ? " class='segmentSelected' " : "")
-                            + ' data-definition=""><span class="segname">' + self.translations['SegmentEditor_DefaultAllVisits']
-                            + ' ' + self.translations['General_DefaultAppended']
-                            + '</span></li> ';
+                (self.currentSegmentStr == "" ? " class='segmentSelected' " : "")
+                + ' data-definition=""><span class="segname">' + self.translations['SegmentEditor_DefaultAllVisits']
+                + ' ' + self.translations['General_DefaultAppended']
+                + '</span></li> ';
+
+            var isVisibleToSuperUserNoticeAlreadyDisplayedOnce = false;
+            var isVisibleToSuperUserNoticeShouldBeClosed = false;
+
+            var isSharedWithMeBySuperUserNoticeAlreadyDisplayedOnce = false;
+            var isSharedWithMeBySuperUserNoticeShouldBeClosed = false;
+
             if(self.availableSegments.length > 0) {
+
                 for(var i = 0; i < self.availableSegments.length; i++)
                 {
                     segment = self.availableSegments[i];
+
+                    if(isSegmentSharedWithMeBySuperUser(segment) && !isSharedWithMeBySuperUserNoticeAlreadyDisplayedOnce) {
+                        isSharedWithMeBySuperUserNoticeAlreadyDisplayedOnce = true;
+                        isSharedWithMeBySuperUserNoticeShouldBeClosed = true;
+                        listHtml += '<span class="segmentsSharedWithMeBySuperUser"><hr> ' + _pk_translate('SegmentEditor_SharedWithYou') + ':<br/><br/>';
+                    }
+
+                    if(isSegmentVisibleToSuperUserOnly(segment) && !isVisibleToSuperUserNoticeAlreadyDisplayedOnce) {
+                        // close <span class="segmentsSharedWithMeBySuperUser">
+                        if(isSharedWithMeBySuperUserNoticeShouldBeClosed) {
+                            isSharedWithMeBySuperUserNoticeShouldBeClosed = false;
+                            listHtml += '</span>';
+                        }
+
+                        isVisibleToSuperUserNoticeAlreadyDisplayedOnce = true;
+                        isVisibleToSuperUserNoticeShouldBeClosed = true;
+                        listHtml += '<span class="segmentsVisibleToSuperUser"><hr> ' + _pk_translate('SegmentEditor_VisibleToSuperUser') + ':<br/><br/>';
+                    }
+
+
                     injClass = "";
                     var checkSelected = segment.definition;
                     if(!$.browser.mozilla) {
                         checkSelected = encodeURIComponent(checkSelected);
                     }
-                    
-                    if( checkSelected == self.currentSegmentStr){
+
+                    if( checkSelected == self.currentSegmentStr
+                        || checkSelected == decodeURIComponent(self.currentSegmentStr)
+                        || checkSelected == unescape(decodeURIComponent(self.currentSegmentStr))
+                    ) {
                         injClass = 'class="segmentSelected"';
                     }
                     listHtml += '<li data-idsegment="'+segment.idsegment+'" data-definition="'+ (segment.definition).replace(/"/g, '&quot;') +'" '
-                                +injClass+' title="'+segment.name+'"><span class="segname">'+segment.name+'</span>';
+                        +injClass+' title="'+ getSegmentTooltipEnrichedWithUsername(segment) +'"><span class="segname">'+getSegmentName(segment)+'</span>';
                     if(self.segmentAccess == "write") {
                         listHtml += '<span class="editSegment" title="'+ self.translations['General_Edit'].toLocaleLowerCase() +'"></span>';
                     }
                     listHtml += '</li>';
                 }
+
+                if(isVisibleToSuperUserNoticeShouldBeClosed) {
+                    listHtml += '</span>';
+                }
+
+                if(isSharedWithMeBySuperUserNoticeShouldBeClosed) {
+                    listHtml += '</span>';
+                }
+
                 $(html).find(".segmentList > ul").append(listHtml);
                 if(self.segmentAccess === "write"){
                     $(html).find(".add_new_segment").html(self.translations['SegmentEditor_AddNewSegment']);
@@ -236,20 +306,58 @@ Segmentation = (function($) {
             return html;
         };
 
+        var isSegmentVisibleToSuperUserOnly = function(segment) {
+            return hasSuperUserAccessAndSegmentCreatedByAnotherUser(segment)
+                && segment.enable_all_users == 0;
+        };
+
+        var isSegmentSharedWithMeBySuperUser = function(segment) {
+            return segment.login != piwik.userLogin
+                && segment.enable_all_users == 1;
+        };
+
+        var hasSuperUserAccessAndSegmentCreatedByAnotherUser = function(segment) {
+            return piwik.hasSuperUserAccess && segment.login != piwik.userLogin;
+        };
+
+        var getSegmentTooltipEnrichedWithUsername = function(segment) {
+            var segmentName = segment.name;
+            if(hasSuperUserAccessAndSegmentCreatedByAnotherUser(segment)) {
+                segmentName += ' (';
+                segmentName += _pk_translate('General_CreatedByUser', [segment.login]);
+
+                if(segment.enable_all_users == 0) {
+                    segmentName += ', ' + _pk_translate('SegmentEditor_VisibleToSuperUser');
+                }
+
+                segmentName += ')';
+            }
+            return sanitiseSegmentName(segmentName);
+        };
+
+        var getSegmentName = function(segment) {
+            return sanitiseSegmentName(segment.name);
+        };
+
+        var sanitiseSegmentName = function(segment) {
+            segment = piwikHelper.escape(segment);
+            return segment;
+        }
+
         var getFormHtml = function() {
             var html = self.editorTemplate.find("> .segment-element").clone();
             // set left margin to center form
             var segmentsDropdown = $(html).find(".available_segments_select");
             var segment, newOption;
             newOption = '<option data-idsegment="" data-definition="" title="'
-                        + self.translations['SegmentEditor_AddNewSegment']
-                        + '">' + self.translations['SegmentEditor_AddNewSegment']
-                        + '</option>';
+                + self.translations['SegmentEditor_AddNewSegment']
+                + '">' + self.translations['SegmentEditor_AddNewSegment']
+                + '</option>';
             segmentsDropdown.append(newOption);
             for(var i = 0; i < self.availableSegments.length; i++)
             {
                 segment = self.availableSegments[i];
-                newOption = '<option data-idsegment="'+segment.idsegment+'" data-definition="'+(segment.definition).replace(/"/g, '&quot;')+'" title="'+segment.name+'">'+segment.name+'</option>';
+                newOption = '<option data-idsegment="'+segment.idsegment+'" data-definition="'+(segment.definition).replace(/"/g, '&quot;')+'" title="'+getSegmentTooltipEnrichedWithUsername(segment)+'">'+getSegmentName(segment)+'</option>';
                 segmentsDropdown.append(newOption);
             }
             $(html).find(".segment-content > h3").after(getInitialStateRowsHtml()).show();
@@ -258,13 +366,13 @@ Segmentation = (function($) {
 
         var closeAllOpenLists = function() {
             $(".segmentationContainer", self.target).each(function() {
-                if($(this).closest('.segmentEditorPanel').hasClass("visible"))
+                if($(this).closest('.segmentEditorPanel').hasClass("expanded"))
                     $(this).trigger("click");
             });
         };
 
         var findAndExplodeByMatch = function(metric){
-            var matches = ["==" , "!=" , "<=", ">=", "=@" , "!@","<",">"];
+            var matches = ["==" , "!=" , "<=", ">=", "=@" , "!@","<",">", "=^", "=$"];
             var newMetric = {};
             var minPos = metric.length;
             var match, index;
@@ -322,10 +430,15 @@ Segmentation = (function($) {
         var openEditForm = function(segment){
             addForm("edit", segment);
 
-            $(self.form).find(".segment-content > h3 > span").text(segment.name);
+            $(self.form).find(".segment-content > h3 > span")
+                .html( getSegmentName(segment) )
+                .prop('title', getSegmentTooltipEnrichedWithUsername(segment));
+
             $(self.form).find('.available_segments_select > option[data-idsegment="'+segment.idsegment+'"]').prop("selected",true);
 
-            $(self.form).find('.available_segments a.dropList').text(segment.name);
+            $(self.form).find('.available_segments a.dropList')
+                .html( getSegmentName(segment) )
+                .prop( 'title', getSegmentTooltipEnrichedWithUsername(segment));
 
             if(segment.definition != ""){
                 revokeInitialStateRows();
@@ -338,6 +451,12 @@ Segmentation = (function($) {
             $(self.form).find(".metricList").each( function(){
                 $(this).trigger("change", true);
             });
+            doDragDropBindings();
+        };
+
+        var displayFormAddNewSegment = function (e) {
+            closeAllOpenLists();
+            addForm("new");
             doDragDropBindings();
         };
 
@@ -358,6 +477,13 @@ Segmentation = (function($) {
                 $(self.target).find(".segmentList li:first")
                     .before("<li class=\"filterNoResults grayed\">" + self.translations['General_SearchNoResults'] + "</li>");
             }
+
+            if ($(self.target).find(".segmentList .segmentsVisibleToSuperUser li:visible").length == 0) {
+                $(self.target).find(".segmentList .segmentsVisibleToSuperUser").hide();
+            }
+            if ($(self.target).find(".segmentList .segmentsSharedWithMeBySuperUser li:visible").length == 0) {
+                $(self.target).find(".segmentList .segmentsSharedWithMeBySuperUser").hide();
+            }
         }
 
         var clearFilterSegmentList = function () {
@@ -365,25 +491,29 @@ Segmentation = (function($) {
             $(self.target).find(".segmentList li").each(function () {
                 $(this).show();
             });
+            $(self.target).find(".segmentList .segmentsVisibleToSuperUser").show();
+            $(self.target).find(".segmentList .segmentsSharedWithMeBySuperUser").show();
         }
 
         var bindEvents = function () {
             self.target.on('click', '.segmentationContainer', function (e) {
                 // hide all other modals connected with this widget
-                if (self.content.closest('.segmentEditorPanel').hasClass("visible")) {
+                if (self.content.closest('.segmentEditorPanel').hasClass("expanded")) {
                     if ($(e.target).hasClass("jspDrag") === true
                         || $(e.target).hasClass("segmentFilterContainer") === true
                         || $(e.target).parents().hasClass("segmentFilterContainer") === true
                         || $(e.target).hasClass("filterNoResults")) {
                         e.stopPropagation();
                     } else {
-                        self.jscroll.destroy();
-                        self.target.closest('.segmentEditorPanel').removeClass('visible');
+                        if (self.jscroll) {
+                            self.jscroll.destroy();
+                        }
+                        self.target.closest('.segmentEditorPanel').removeClass('expanded');
                     }
                 } else {
                     // for each visible segmentationContainer -> trigger click event to close and kill scrollpane - very important !
                     closeAllOpenLists();
-                    self.target.closest('.segmentEditorPanel').addClass('visible');
+                    self.target.closest('.segmentEditorPanel').addClass('expanded');
                     self.target.find('.segmentFilter').val(self.translations['General_Search']).trigger('keyup');
                     self.jscroll = self.target.find(".segmentList").jScrollPane({
                         autoReinitialise: true,
@@ -403,23 +533,23 @@ Segmentation = (function($) {
 
             self.target.on("click", ".segmentList li", function (e) {
                 if ($(e.currentTarget).hasClass("grayed") !== true) {
-                    var segment = {};
-                    segment.idsegment = $(this).attr("data-idsegment");
-                    segment.definition = $(this).data("definition");
-                    segment.name = $(this).attr("title");
+                    var idsegment = $(this).attr("data-idsegment");
+                    segmentDefinition = $(this).data("definition");
 
-                    self.setSegment(segment.definition);
+                    if (!piwikHelper.isAngularRenderingThePage()) {
+                        // we update segment on location change success
+                        self.setSegment(segmentDefinition);
+                    }
+
                     self.markCurrentSegment();
-                    self.segmentSelectMethod( segment.definition );
-                    toggleLoadingMessage(segment.definition.length);
+                    self.segmentSelectMethod( segmentDefinition );
+                    toggleLoadingMessage(segmentDefinition.length);
                 }
             });
 
             self.target.on('click', '.add_new_segment', function (e) {
                 e.stopPropagation();
-                closeAllOpenLists();
-                addForm("new");
-                doDragDropBindings();
+                displayFormAddNewSegment(e);
             });
 
             self.target.on('change', "select.metricList", function (e, persist) {
@@ -472,10 +602,6 @@ Segmentation = (function($) {
             //
             // segment editor form events
             //
-
-            self.target.on('click', ".segment-element a:not(.crowdfundingLink)", function (e) {
-                e.preventDefault();
-            });
 
             self.target.on('click',  "a.editSegmentName", function (e) {
                 var oldName = $(e.currentTarget).parents("h3").find("span").text();
@@ -558,9 +684,9 @@ Segmentation = (function($) {
                 var params = {
                     "idsegment" : segmentId
                 };
-                $('.segment-delete-confirm', self.target).find('#name').text( segmentName );
+                $('#segment-delete-confirm').find('#name').text( segmentName );
                 if(segmentId != ""){
-                    piwikHelper.modalConfirm(self.target.find('.segment-delete-confirm'), {
+                    piwikHelper.modalConfirm($('#segment-delete-confirm'), {
                         yes: function(){
                             self.deleteMethod(params);
                         }
@@ -744,20 +870,15 @@ Segmentation = (function($) {
         };
 
         function openEditFormGivenSegment(option) {
-            var segment = {};
-            segment.idsegment = option.attr("data-idsegment");
+            var idsegment = option.attr("data-idsegment");
 
-            var segmentExtra = getSegmentFromId(segment.idsegment);
-            for(var item in segmentExtra)
-            {
-                segment[item] = segmentExtra[item];
+            if(idsegment.length == 0) {
+                displayFormAddNewSegment();
+            } else {
+                var segment = getSegmentFromId(idsegment);
+                segment.definition = option.data("definition");
+                openEditForm(segment);
             }
-
-            segment.name = option.attr("title");
-
-            segment.definition = option.data("definition");
-
-            openEditForm(segment);
         }
 
         var doDragDropBindings = function(){
@@ -811,7 +932,7 @@ Segmentation = (function($) {
             // 1 - do most obvious selection -> mark whole categories matching search string
             // also expand whole category
             $(self.form).find('.segment-nav div > ul > li').each( function(){
-                curStr = normalizeSearchString($(this).find("a.metric_category").text());
+                    curStr = normalizeSearchString($(this).find("a.metric_category").text());
                     if(curStr.indexOf(search) > -1) {
                         $(this).addClass("searchFound");
                         $(this).find("ul").show();
@@ -819,7 +940,7 @@ Segmentation = (function($) {
                         $(this).show();
                     }
                 }
-           );
+            );
 
             // 2 - among all unselected categories find metrics which match and mark parent as search result
             $(self.form).find(".segment-nav div > ul > li:not(.searchFound)").each(function(){
@@ -868,8 +989,8 @@ Segmentation = (function($) {
             }
 
             search = search.replace(/[^a-z0-9 -]/g, '') // remove invalid chars
-            .replace(/\s+/g, '_') // collapse whitespace and replace by underscore
-            .replace(/-+/g, '-'); // collapse dashes
+                .replace(/\s+/g, '_') // collapse whitespace and replace by underscore
+                .replace(/-+/g, '-'); // collapse dashes
             return search;
         };
 
@@ -882,8 +1003,11 @@ Segmentation = (function($) {
             }
             // remove any remaining forms
 
+
             self.form = getFormHtml();
             self.target.prepend(self.form);
+
+            piwikHelper.setMarginLeftToBeInViewport(self.form);
 
             // if there's enough space to the left & not enough space to the right,
             // anchor the form to the right of the selector
@@ -896,7 +1020,12 @@ Segmentation = (function($) {
             placeSegmentationFormControls();
 
             if(mode == "edit") {
-                $(self.form).find('.enable_all_users_select > option[value="'+segment.enable_all_users+'"]').prop("selected",true);
+                var userSelector = $(self.form).find('.enable_all_users_select > option[value="' + segment.enable_all_users + '"]').prop("selected",true);
+
+                // Replace "Visible to me" by "Visible to $login" when user is super user
+                if(hasSuperUserAccessAndSegmentCreatedByAnotherUser(segment)) {
+                    $(self.form).find('.enable_all_users_select > option[value="' + 0 + '"]').text(segment.login);
+                }
                 $(self.form).find('.visible_to_website_select > option[value="'+segment.enable_only_idsite+'"]').prop("selected",true);
                 $(self.form).find('.auto_archive_select > option[value="'+segment.auto_archive+'"]').prop("selected",true);
 
@@ -909,12 +1038,6 @@ Segmentation = (function($) {
             $(self.form).find(".saveAndApply").bind("click", function (e) {
                 e.preventDefault();
                 parseFormAndSave();
-            });
-
-            $(self.form).find('.segment-footer').hover( function() {
-                $('.segmentFooterNote', self.target).fadeIn();
-            }, function() {
-                $('.segmentFooterNote', self.target).fadeOut();
             });
 
             if(typeof mode !== "undefined" && mode == "new")
@@ -980,50 +1103,89 @@ Segmentation = (function($) {
                 jQuery.extend(params, {
                     "idSegment": segmentId
                 });
-                self.updateMethod(params);
+
+                if(segmentStr != getSegmentFromId(segmentId).definition && $('.segment-definition-change-confirm').data('hideMessage') != 1) {
+                    var isBrowserArchivingAvailableForSegments = $('.segment-definition-change-confirm').data('segmentProcessedOnRequest');
+                    var isRealTimeSegment = (autoArchive == 0);
+                    var segmentNotProcessedOnRequest = !isBrowserArchivingAvailableForSegments || !isRealTimeSegment;
+
+                    $('.process-on-request, .no-process-on-request').hide();
+
+                    if (segmentNotProcessedOnRequest) {
+                        $('.no-process-on-request').show();
+                    } else {
+                        $('.process-on-request').show();
+                    }
+
+                    piwikHelper.modalConfirm('.segment-definition-change-confirm', {
+                        yes: function () {
+                            if ($('#hideSegmentMessage:checked').length) {
+                                var ajaxHandler = new ajaxHelper();
+                                ajaxHandler.setLoadingElement();
+                                ajaxHandler.addParams({
+                                    "module": 'API',
+                                    "format": 'json',
+                                    "method": 'UsersManager.setUserPreference',
+                                    "userLogin": piwik.userLogin,
+                                    "preferenceName": "hideSegmentDefinitionChangeMessage",
+                                    "preferenceValue": "1"
+                                }, 'GET');
+                                ajaxHandler.useCallbackInCaseOfError();
+                                ajaxHandler.setCallback(function (response) {
+                                    self.updateMethod(params);
+                                });
+                                ajaxHandler.send(true);
+                            } else {
+                                self.updateMethod(params);
+                            }
+                        }
+                    });
+                } else {
+                    self.updateMethod(params);
+                }
             }
         };
 
         var makeDropList = function(spanId, selectId){
             var select = $(self.form).find(selectId).hide();
             var dropList = $( '<a class="dropList dropdown">' )
-            .insertAfter( select )
-            .text( select.children(':selected').text() )
-            .autocomplete({
-                delay: 0,
-                minLength: 0,
-                appendTo: "body",
-                source: function( request, response ) {
-                    response( select.children( "option" ).map(function() {
-                        var text = $( this ).text();
-                        return {
-                            label: text,
-                            value: this.value,
-                            option: this
-                        };
-                    }) );
-                },
-                select: function( event, ui ) {
-                    event.preventDefault();
-                    ui.item.option.selected = true;
-                    // Mark original select>option
-                    $(spanId + ' option[value="' + ui.item.value + '"]', self.editorTemplate).prop('selected', true);
-                    dropList.text(ui.item.label);
-                    $(self.form).find(selectId).trigger("change");
-                }
-            })
-            .click(function() {
-                // close all other droplists made by this form
-                $("a.dropList").autocomplete("close");
-                //                 close if already visible
-                if ( $(this).autocomplete( "widget" ).is(":visible") ) {
-                    $(this).autocomplete("close");
-                    return;
-                }
-                // pass empty string as value to search for, displaying all results
-                $(this).autocomplete( "search", "" );
+                .insertAfter( select )
+                .text( select.children(':selected').text() )
+                .autocomplete({
+                    delay: 0,
+                    minLength: 0,
+                    appendTo: "body",
+                    source: function( request, response ) {
+                        response( select.children( "option" ).map(function() {
+                            var text = $( this ).text();
+                            return {
+                                label: text,
+                                value: this.value,
+                                option: this
+                            };
+                        }) );
+                    },
+                    select: function( event, ui ) {
+                        event.preventDefault();
+                        ui.item.option.selected = true;
+                        // Mark original select>option
+                        $(spanId + ' option[value="' + ui.item.value + '"]', self.editorTemplate).prop('selected', true);
+                        dropList.text(ui.item.label);
+                        $(self.form).find(selectId).trigger("change");
+                    }
+                })
+                .click(function() {
+                    // close all other droplists made by this form
+                    $("a.dropList").autocomplete("close");
+                    //                 close if already visible
+                    if ( $(this).autocomplete( "widget" ).is(":visible") ) {
+                        $(this).autocomplete("close");
+                        return;
+                    }
+                    // pass empty string as value to search for, displaying all results
+                    $(this).autocomplete( "search", "" );
 
-            });
+                });
             $('body').on('mouseup',function (e) {
                 if (!$(e.target).parents(spanId).length
                     && !$(e.target).is(spanId)
@@ -1063,6 +1225,26 @@ Segmentation = (function($) {
             toggleLoadingMessage(segmentIsSet);
         };
 
+        if (piwikHelper.isAngularRenderingThePage()) {
+            angular.element(document).injector().invoke(function ($rootScope, $location) {
+                $rootScope.$on('$locationChangeSuccess', function () {
+                    var $search = $location.search();
+
+                    var segment = '';
+                    if ('undefined' !== typeof $search.segment && null !== $search.segment) {
+                        segment = $search.segment
+                    }
+
+                    segment = decodeURIComponent(segment);
+
+                    if (self.getSegment() != segment) {
+                        self.setSegment(segment);
+                        self.initHtml();
+                    }
+                });
+            });
+        }
+
         this.initHtml();
         bindEvents();
     };
@@ -1093,16 +1275,48 @@ $(document).ready(function() {
         }
 
         var self = this;
-        this.changeSegment = function(segmentDefinition) {
+
+        this.uriEncodeSegmentDefinition = function (segmentDefinition) {
             segmentDefinition = cleanupSegmentDefinition(segmentDefinition);
             segmentDefinition = encodeURIComponent(segmentDefinition);
+            return segmentDefinition;
+        };
+
+        this.changeSegment = function(segmentDefinition) {
+            if (piwikHelper.isAngularRenderingThePage()) {
+                segmentDefinition = this.uriEncodeSegmentDefinition(segmentDefinition);
+
+                angular.element(document).injector().invoke(function ($location, $rootScope) {
+                    var $search = $location.search();
+
+                    if (segmentDefinition !== $search.segment) {
+                        // eg when using back button the date might be actually already changed in the URL and we do not
+                        // want to change the URL again
+                        $search.segment = segmentDefinition.replace(/%$/, '%25').replace(/%([^\d].)/g, "%25$1");
+                        $location.search($search);
+                        setTimeout(function () {
+                            try {
+                                $rootScope.$apply();
+                            } catch (e) {}
+                        }, 1);
+                    }
+
+                });
+                return false;
+            } else {
+                return this.forceSegmentReload(segmentDefinition);
+            }
+        };
+
+        this.forceSegmentReload = function (segmentDefinition) {
+            segmentDefinition = this.uriEncodeSegmentDefinition(segmentDefinition);
             return broadcast.propagateNewPage('segment=' + segmentDefinition, true);
         };
 
         this.changeSegmentList = function () {};
 
         var cleanupSegmentDefinition = function(definition) {
-            definition = definition.replace("'", "%29");
+            definition = definition.replace("'", "%27");
             definition = definition.replace("&", "%26");
             return definition;
         };
@@ -1126,16 +1340,15 @@ $(document).ready(function() {
                     self.props.availableSegments.push(params);
                     self.rebuild();
 
-                    self.impl.setSegment(params.definition);
                     self.impl.markCurrentSegment();
 
                     self.$element.find('a.close').click();
-                    self.changeSegment(params.definition);
+                    self.forceSegmentReload(params.definition);
 
                     self.changeSegmentList(self.props.availableSegments);
                 }
             });
-            ajaxHandler.send(true);
+            ajaxHandler.send();
         };
 
         var updateSegment = function(params){
@@ -1162,19 +1375,18 @@ $(document).ready(function() {
                         }
                     }
 
-                    self.props.availableSegments[idx] = params;
+                    $.extend( self.props.availableSegments[idx], params);
                     self.rebuild();
 
-                    self.impl.setSegment(params.definition);
                     self.impl.markCurrentSegment();
 
                     self.$element.find('a.close').click();
-                    self.changeSegment(params.definition);
+                    self.forceSegmentReload(params.definition);
 
                     self.changeSegmentList(self.props.availableSegments);
                 }
             });
-            ajaxHandler.send(true);
+            ajaxHandler.send();
         };
 
         var deleteSegment = function(params){
@@ -1207,22 +1419,39 @@ $(document).ready(function() {
                     self.rebuild();
 
                     self.$element.find('a.close').click();
-                    self.changeSegment('');
+                    self.forceSegmentReload('');
+                    
                     $('.ui-dialog-content').dialog('close');
 
                     self.changeSegmentList(self.props.availableSegments);
                 }
             });
 
-            ajaxHandler.send(true);
+            ajaxHandler.send();
         };
 
-        var segmentFromRequest = encodeURIComponent(self.props.selectedSegment)
-                              || broadcast.getValueFromHash('segment')
-                              || broadcast.getValueFromUrl('segment');
-        if($.browser.mozilla) {
-            segmentFromRequest = decodeURIComponent(segmentFromRequest);
+        function getSegmentFromRequest()
+        {
+            var hashStr = broadcast.getHashFromUrl();
+            var segmentFromRequest;
+
+            if (hashStr && hashStr.indexOf('segment=') !== -1) {
+                // needed in case "segment = ''" in hash but set in query via 'segment=foo==bar'.
+                segmentFromRequest = broadcast.getValueFromHash('segment');
+            } else {
+                segmentFromRequest = broadcast.getValueFromHash('segment')
+                    || encodeURIComponent(self.props.selectedSegment)
+                    || broadcast.getValueFromUrl('segment');
+            }
+
+            if ($.browser.mozilla) {
+                segmentFromRequest = decodeURIComponent(segmentFromRequest);
+            }
+
+            return segmentFromRequest;
         }
+
+        var segmentFromRequest = getSegmentFromRequest();
 
         var userSegmentAccess = (this.props.authorizedToCreateSegments) ? "write" : "read";
 
@@ -1234,7 +1463,7 @@ $(document).ready(function() {
             "addMethod": addSegment,
             "updateMethod": updateSegment,
             "deleteMethod": deleteSegment,
-            "segmentSelectMethod": function () { self.changeSegment.apply(this, arguments); },
+            "segmentSelectMethod": function () { self.changeSegment.apply(self, arguments); },
             "currentSegmentStr": segmentFromRequest,
             "translations": this.props.segmentTranslations
         });
@@ -1250,7 +1479,7 @@ $(document).ready(function() {
             }
 
             if ($(e.target).closest('.segmentListContainer').length === 0
-                && self.$element.hasClass("visible")
+                && self.$element.hasClass("expanded")
             ) {
                 $(".segmentationContainer", self.$element).trigger("click");
             }
@@ -1258,8 +1487,6 @@ $(document).ready(function() {
 
         $('body').on('mouseup', this.onMouseUp);
 
-        // re-initialize top controls since the size of the control is not the same after it's
-        // initialized.
         initTopControls();
     };
 

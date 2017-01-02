@@ -9,8 +9,8 @@
 namespace Piwik\Plugins\API;
 
 use Piwik\DeviceDetectorCache;
+use Piwik\Menu\MenuAdmin;
 use Piwik\Menu\MenuTop;
-use Piwik\Menu\MenuUser;
 use Piwik\Piwik;
 use DeviceDetector\Parser\OperatingSystem;
 
@@ -24,12 +24,20 @@ class Menu extends \Piwik\Plugin\Menu
         $this->addTopMenuMobileApp($menu);
     }
 
-    public function configureUserMenu(MenuUser $menu)
+    public function configureAdminMenu(MenuAdmin $menu)
     {
-        $apiUrlParams = $this->urlForAction('listAllAPI', array('segment' => false));
-        $tooltip      = Piwik::translate('API_TopLinkTooltip');
+        $menu->addPlatformItem('General_API',
+            $this->urlForAction('listAllAPI', array('segment' => false)),
+            7,
+            Piwik::translate('API_TopLinkTooltip')
+        );
 
-        $menu->addPlatformItem('General_API', $apiUrlParams, 6, $tooltip);
+        if(Piwik::isUserIsAnonymous()) {
+            $menu->addPlatformItem('API_Glossary',
+                $this->urlForAction('glossary', array('segment' => false)),
+                50
+            );
+        }
     }
 
     private function addTopMenuMobileApp(MenuTop $menu)

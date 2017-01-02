@@ -20,7 +20,7 @@ module.exports = function(config) {
         "libs/bower_components/angular-animate/angular-animate.js",
         'libs/bower_components/angular-mocks/angular-mocks.js',
         'libs/bower_components/jquery/dist/jquery.min.js',
-        "libs/bower_components/jquery-ui/jquery-ui.min.js",
+        "libs/bower_components/jquery-ui/ui/minified/jquery-ui.min.js",
         "plugins/CoreHome/javascripts/require.js",
         "plugins/Morpheus/javascripts/piwikHelper.js",
         "plugins/Morpheus/javascripts/ajaxHelper.js",
@@ -30,7 +30,10 @@ module.exports = function(config) {
         'plugins/CoreHome/angularjs/common/directives/directive.module.js',
         'plugins/CoreHome/angularjs/piwikApp.js',
         'plugins/*/angularjs/**/*.js',
-        'plugins/*/angularjs/**/*.spec.js'
+        'piwik.js',
+        'plugins/AnonymousPiwikUsageMeasurement/javascripts/url.js',
+        'plugins/AnonymousPiwikUsageMeasurement/javascripts/tracking.js',
+        'plugins/*/**/*.spec.js'
     ],
 
     // list of files to exclude
@@ -65,7 +68,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: [],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits

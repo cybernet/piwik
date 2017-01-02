@@ -11,6 +11,7 @@ namespace Piwik\Plugins\Resolution\Reports;
 use Piwik\Piwik;
 use Piwik\Plugin\ViewDataTable;
 use Piwik\Plugins\Resolution\Columns\Configuration;
+use Piwik\Plugin\ReportsProvider;
 
 class GetConfiguration extends Base
 {
@@ -18,10 +19,11 @@ class GetConfiguration extends Base
     {
         parent::init();
         $this->dimension     = new Configuration();
-        $this->name          = Piwik::translate('Resolution_WidgetGlobalVisitors');
+        $this->name          = Piwik::translate('Resolution_Configurations');
         $this->documentation = Piwik::translate('Resolution_WidgetGlobalVisitorsDocumentation', '<br />');
         $this->order = 7;
-        $this->widgetTitle  = 'Resolution_WidgetGlobalVisitors';
+
+        $this->subcategoryId = 'DevicesDetection_Software';
     }
 
     public function configureView(ViewDataTable $view)
@@ -33,4 +35,10 @@ class GetConfiguration extends Base
         $view->requestConfig->filter_limit = 3;
     }
 
+    public function getRelatedReports()
+    {
+        return array(
+            ReportsProvider::factory('Resolution', 'getResolution'),
+        );
+    }
 }

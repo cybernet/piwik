@@ -12,38 +12,46 @@ namespace Piwik\Updates;
 use Piwik\DataAccess\ArchiveTableCreator;
 use Piwik\Updater;
 use Piwik\Updates;
+use Piwik\Updater\Migration\Factory as MigrationFactory;
 
 class Updates_2_10_0_b10 extends Updates
 {
+    /**
+     * @var MigrationFactory
+     */
+    private $migration;
 
-    static function getSql()
+    public function __construct(MigrationFactory $factory)
     {
-        $sqls = array();
+        $this->migration = $factory;
+    }
+
+    public function getMigrations(Updater $updater)
+    {
+        $migrations = array();
 
         $archiveTables = ArchiveTableCreator::getTablesArchivesInstalled();
 
-        $archiveBlobTables = array_filter($archiveTables, function($name) {
+        $archiveBlobTables = array_filter($archiveTables, function ($name) {
             return ArchiveTableCreator::getTypeFromTableName($name) == ArchiveTableCreator::BLOB_TABLE;
         });
 
         foreach ($archiveBlobTables as $table) {
-
-            $sqls["UPDATE " . $table . " SET name = 'DevicePlugins_plugin' WHERE name = 'UserSettings_plugin'"] = false;
+            $migrations[] = $this->migration->db->sql("UPDATE $table SET name = 'DevicePlugins_plugin' WHERE name = 'UserSettings_plugin'");
         }
 
-        return $sqls;
+        return $migrations;
     }
 
-    static function update()
+    public function doUpdate(Updater $updater)
     {
         $pluginManager = \Piwik\Plugin\Manager::getInstance();
 
         try {
             $pluginManager->activatePlugin('DevicePlugins');
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
         }
 
-        Updater::updateDatabase(__FILE__, self::getSql());
+        $updater->executeMigrations(__FILE__, $this->getMigrations($updater));
     }
-
 }

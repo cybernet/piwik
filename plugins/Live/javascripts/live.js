@@ -65,7 +65,14 @@
             ajaxRequest.addParams(this.options.dataUrlParams, 'GET');
             ajaxRequest.setFormat('html');
             ajaxRequest.setCallback(function (r) {
-                that._parseResponse(r);
+                if (that.options.replaceContent) {
+                    $(that.element).html(r);
+                    if (that.options.fadeInSpeed) {
+                        $(that.element).effect("highlight", {}, that.options.fadeInSpeed);
+                    }
+                } else {
+                    that._parseResponse(r);
+                }
 
                 // add default interval to last interval if not updated or reset to default if so
                 if (!that.updated) {
@@ -82,7 +89,7 @@
 
                 if (that.isStarted) {
                     window.clearTimeout(that.updateInterval);
-                    if ($(that.element).closest('body').length) {
+                    if (that.element.length && $.contains(document, that.element[0])) {
                         that.updateInterval = window.setTimeout(function() { that._update() }, that.currentInterval);
                     }
                 }
@@ -211,7 +218,7 @@
 $(function() {
     var refreshWidget = function (element, refreshAfterXSecs) {
         // if the widget has been removed from the DOM, abort
-        if ($(element).parent().length == 0) {
+        if (!element.length || !$.contains(document, element[0])) {
             return;
         }
 
@@ -245,7 +252,7 @@ $(function() {
                 var visitorsCountMessage = translations['one_visitor'];
             }
             else {
-                var visitorsCountMessage = translations['visitors'].replace('%s', visitors);
+                var visitorsCountMessage = sprintf(translations['visitors'], visitors);
             }
             $('.simple-realtime-visitor-counter', element)
               .attr('title', visitorsCountMessage)
@@ -255,20 +262,20 @@ $(function() {
             var metrics = $('.simple-realtime-metric', element);
 
             var visitsText = data['visits'] == 1
-              ? translations['one_visit'] : translations['visits'].replace('%s', data['visits']);
+              ? translations['one_visit'] : sprintf(translations['visits'], data['visits']);
             $(metrics[0]).text(visitsText);
 
             var actionsText = data['actions'] == 1
-              ? translations['one_action'] : translations['actions'].replace('%s', data['actions']);
+              ? translations['one_action'] : sprintf(translations['actions'], data['actions']);
             $(metrics[1]).text(actionsText);
 
             var lastMinutesText = lastMinutes == 1
-              ? translations['one_minute'] : translations['minutes'].replace('%s', lastMinutes);
+              ? translations['one_minute'] : sprintf(translations['minutes'], lastMinutes);
             $(metrics[2]).text(lastMinutesText);
 
             scheduleAnotherRequest();
         });
-        ajaxRequest.send(true);
+        ajaxRequest.send();
     };
 
     var exports = require("piwik/Live");

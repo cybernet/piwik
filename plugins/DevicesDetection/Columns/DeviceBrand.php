@@ -8,7 +8,9 @@
  */
 namespace Piwik\Plugins\DevicesDetection\Columns;
 
+use DeviceDetector\Parser\Device\DeviceParserAbstract;
 use Piwik\Piwik;
+use Piwik\Plugins\DevicesDetection\Segment;
 use Piwik\Tracker\Request;
 use Piwik\Tracker\Visitor;
 use Piwik\Tracker\Action;
@@ -23,6 +25,28 @@ class DeviceBrand extends Base
         return Piwik::translate('DevicesDetection_DeviceBrand');
     }
 
+    protected function configureSegments()
+    {
+        $brands = DeviceParserAbstract::$deviceBrands;
+        $brandList = implode(", ", $brands);
+
+        $segment = new Segment();
+        $segment->setSegment('deviceBrand');
+        $segment->setName('DevicesDetection_DeviceBrand');
+        $segment->setAcceptedValues($brandList);
+        $segment->setSqlFilter(function ($brand) use ($brandList, $brands) {
+            if ($brand == Piwik::translate('General_Unknown')) {
+                return '';
+            }
+            $index = array_search(trim(urldecode($brand)), $brands);
+            if ($index === false) {
+                throw new \Exception("deviceBrand segment must be one of: $brandList");
+            }
+            return $index;
+        });
+        $this->addSegment($segment);
+    }
+
     /**
      * @param Request $request
      * @param Visitor $visitor
@@ -35,5 +59,16 @@ class DeviceBrand extends Base
         $parser    = $this->getUAParser($userAgent);
 
         return $parser->getBrand();
+    }
+
+    /**
+     * @param Request $request
+     * @param Visitor $visitor
+     * @param Action|null $action
+     * @return mixed
+     */
+    public function onAnyGoalConversion(Request $request, Visitor $visitor, $action)
+    {
+        return $visitor->getVisitorColumn($this->columnName);
     }
 }

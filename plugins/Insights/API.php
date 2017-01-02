@@ -39,11 +39,9 @@ class API extends \Piwik\Plugin\API
      */
     private $model;
 
-    protected function __construct()
+    public function __construct(Model $model)
     {
-        parent::__construct();
-
-        $this->model = new Model();
+        $this->model = $model;
     }
 
     private function getOverviewReports()
@@ -83,8 +81,7 @@ class API extends \Piwik\Plugin\API
         Piwik::checkUserHasSomeViewAccess();
 
         try {
-            $model    = new Model();
-            $lastDate = $model->getLastDate($date, $period, 1);
+            $lastDate = $this->model->getLastDate($date, $period, 1);
         } catch (\Exception $e) {
             return false;
         }

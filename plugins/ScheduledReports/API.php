@@ -15,6 +15,9 @@ use Piwik\Config;
 use Piwik\Container\StaticContainer;
 use Piwik\Date;
 use Piwik\Db;
+use Piwik\Development;
+use Piwik\Filesystem;
+use Piwik\Http;
 use Piwik\Log;
 use Piwik\NoAccessException;
 use Piwik\Piwik;
@@ -26,6 +29,8 @@ use Piwik\Site;
 use Piwik\Tracker;
 use Piwik\Translate;
 use Piwik\Translation\Translator;
+use Piwik\Url;
+use Psr\Log\LoggerInterface;
 
 /**
  * The ScheduledReports API lets you manage Scheduled Email reports, as well as generate, download or email any existing report.
@@ -59,6 +64,16 @@ class API extends \Piwik\Plugin\API
 
     // static cache storing reports
     public static $cache = array();
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
 
     /**
      * Creates a new report and schedules it.
@@ -365,6 +380,7 @@ class API extends \Piwik\Plugin\API
                 'apiModule' => $apiModule,
                 'apiAction' => $apiAction,
                 'apiParameters' => $apiParameters,
+                'flat'   => 1,
                 'idGoal' => false,
                 'language' => $language,
                 'serialize' => 0,
@@ -377,7 +393,20 @@ class API extends \Piwik\Plugin\API
                 $params['segment'] = false;
             }
 
-            $processedReport = Request::processRequest('API.getProcessedReport', $params);
+            try {
+                $processedReport = Request::processRequest('API.getProcessedReport', $params);
+            } catch (\Exception $ex) {
+                // NOTE: can't use warning or error because the log message will appear in the UI as a notification
+                $this->logger->info("Error getting '?{report}' when generating scheduled report: {exception}", array(
+                    'report' => Http::buildQuery($params),
+                    'exception' => $ex->getMessage(),
+                ));
+
+                $this->logger->debug($ex);
+
+                continue;
+            }
+
             $processedReport['segment'] = $segment;
 
             // TODO add static method getPrettyDate($period, $date) in Period
@@ -444,19 +473,20 @@ class API extends \Piwik\Plugin\API
         }
 
         // init report renderer
+        $reportRenderer->setIdSite($idSite);
         $reportRenderer->setLocale($language);
 
         // render report
         $description = str_replace(array("\r", "\n"), ' ', $report['description']);
 
-        list($reportSubject, $reportTitle) = self::getReportSubjectAndReportTitle(Site::getNameFor($idSite), $report['reports']);
+        list($reportSubject, $reportTitle) = self::getReportSubjectAndReportTitle(Common::unsanitizeInputValue(Site::getNameFor($idSite)), $report['reports']);
+
+        // if reporting for a segment, use the segment's name in the title
+        if(is_array($segment) && strlen($segment['name'])) {
+            $reportTitle .= " - ".$segment['name'];
+        }
         $filename = "$reportTitle - $prettyDate - $description";
 
-	// if reporting for a segment, use the segment's name in the title
-	if(is_array($segment) && strlen($segment['name'])) {
-		$reportTitle .= " - ".$segment['name'];
-	}
-	
         $reportRenderer->renderFrontPage($reportTitle, $prettyDate, $description, $reportMetadata, $segment);
         array_walk($processedReports, array($reportRenderer, 'renderReport'));
 
@@ -582,10 +612,9 @@ class API extends \Piwik\Plugin\API
         $now = Date::now()->getDatetime();
         $this->getModel()->updateReport($report['idreport'], array('ts_last_sent' => $now));
 
-        // If running from piwik.php with debug, do not delete the PDF after sending the email
-        $tracker = new Tracker();
-        if (!$tracker->isDebugModeEnabled()) {
+        if (!Development::isEnabled()) {
             @chmod($outputFilename, 0600);
+            Filesystem::deleteFileIfExists($outputFilename);
         }
     }
 
@@ -708,7 +737,7 @@ class API extends \Piwik\Plugin\API
     private static function validateReportHour($hour)
     {
         if (!is_numeric($hour) || $hour < 0 || $hour > 23) {
-            throw new Exception('Invalid hour schedule. Should be anything from 0 to 23 inclusive.');
+            throw new Exception('Invalid hour schedule. Should be anything from 0 to 23 inclusive.');
         }
     }
 

@@ -8,7 +8,6 @@
 
 namespace Piwik\Plugins\Goals\tests\Integration;
 
-use Piwik\Access;
 use Piwik\Piwik;
 use Piwik\Plugins\Goals\API;
 use Piwik\Tests\Framework\Fixture;
@@ -51,16 +50,23 @@ class APITest extends IntegrationTestCase
 
     public function test_addGoal_shouldSucceed_IfOnlyMinimumFieldsGiven()
     {
-        $idGoal = $this->api->addGoal($this->idSite, 'MyName', 'url', 'http://www.test.de/?pk_campaign=1', 'exact');
+        $idGoal = $this->api->addGoal($this->idSite, 'MyName', 'url', 'http://www.test.de/?pk_campaign=1', 'exact', false, false, false, 'test description');
 
-        $this->assertGoal($idGoal, 'MyName', 'url', 'http://www.test.de/?pk_campaign=1', 'exact', 0, 0, 0);
+        $this->assertGoal($idGoal, 'MyName', 'test description', 'url', 'http://www.test.de/?pk_campaign=1', 'exact', 0, 0, 0);
     }
 
     public function test_addGoal_ShouldSucceed_IfAllFieldsGiven()
     {
         $idGoal = $this->api->addGoal($this->idSite, 'MyName', 'url', 'http://www.test.de', 'exact', true, 50, true);
 
-        $this->assertGoal($idGoal, 'MyName', 'url', 'http://www.test.de', 'exact', 1, 50, 1);
+        $this->assertGoal($idGoal, 'MyName', '', 'url', 'http://www.test.de', 'exact', 1, 50, 1);
+    }
+
+    public function test_addGoal_ShouldSucceed_IfExactPageTitle()
+    {
+        $idGoal = $this->api->addGoal($this->idSite, 'MyName', 'title', 'normal title', 'exact', true, 50, true);
+
+        $this->assertGoal($idGoal, 'MyName', '', 'title', 'normal title', 'exact', 1, 50, 1);
     }
 
     /**
@@ -137,7 +143,7 @@ class APITest extends IntegrationTestCase
         $idGoal = $this->createAnyGoal();
         $this->api->updateGoal($this->idSite, $idGoal, 'UpdatedName', 'file', 'http://www.updatetest.de', 'contains', true, 999, true);
 
-        $this->assertGoal($idGoal, 'UpdatedName', 'file', 'http://www.updatetest.de', 'contains', 1, 999, 1);
+        $this->assertGoal($idGoal, 'UpdatedName', '', 'file', 'http://www.updatetest.de', 'contains', 1, 999, 1);
     }
 
     public function test_updateGoal_shouldUpdateMinimalFields_ShouldLeaveOtherFieldsUntouched()
@@ -145,7 +151,7 @@ class APITest extends IntegrationTestCase
         $idGoal = $this->createAnyGoal();
         $this->api->updateGoal($this->idSite, $idGoal, 'UpdatedName', 'file', 'http://www.updatetest.de', 'contains');
 
-        $this->assertGoal($idGoal, 'UpdatedName', 'file', 'http://www.updatetest.de', 'contains', 0, 0, 0);
+        $this->assertGoal($idGoal, 'UpdatedName', '', 'file', 'http://www.updatetest.de', 'contains', 0, 0, 0);
     }
 
     public function test_deleteGoal_shouldNotDeleteAGoal_IfGoalIdDoesNotExist()
@@ -181,6 +187,43 @@ class APITest extends IntegrationTestCase
         $this->assertHasNoGoals();
     }
 
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage checkUserHasViewAccess Fake exception
+     */
+    public function test_getGoal_shouldThrowException_IfNotEnoughPermission()
+    {
+        $idGoal = $this->createAnyGoal();
+        $this->assertSame(1, $idGoal);
+        $this->setNonAdminUser();
+        $this->api->getGoal($this->idSite, $idGoal);
+    }
+
+    public function test_getGoal_shouldReturnNullIfItDoesNotExist()
+    {
+        $this->assertNull($this->api->getGoal($this->idSite, $idGoal = 99));
+    }
+
+    public function test_getGoal_shouldReturnExistingGoal()
+    {
+        $idGoal = $this->createAnyGoal();
+        $this->assertSame(1, $idGoal);
+        $goal = $this->api->getGoal($this->idSite, $idGoal);
+        $this->assertEquals(array(
+            'idsite' => '1',
+            'idgoal' => '1',
+            'name' => 'MyName1',
+            'description' => '',
+            'match_attribute' => 'event_action',
+            'pattern' => 'test',
+            'pattern_type' => 'exact',
+            'case_sensitive' => '0',
+            'allow_multiple' => '0',
+            'revenue' => '0',
+            'deleted' => '0',
+        ), $goal);
+    }
+
     private function assertHasGoals()
     {
         $goals = $this->getGoals();
@@ -193,12 +236,13 @@ class APITest extends IntegrationTestCase
         $this->assertEmpty($goals);
     }
 
-    private function assertGoal($idGoal, $name, $url, $pattern, $patternType, $caseSenstive = 0, $revenue = 0, $allowMultiple = 0)
+    private function assertGoal($idGoal, $name, $description, $url, $pattern, $patternType, $caseSenstive = 0, $revenue = 0, $allowMultiple = 0)
     {
         $expected = array($idGoal => array(
             'idsite' => $this->idSite,
             'idgoal' => $idGoal,
             'name' => $name,
+            'description' => $description,
             'match_attribute' => $url,
             'pattern' => $pattern,
             'pattern_type' => $patternType,
@@ -225,11 +269,15 @@ class APITest extends IntegrationTestCase
 
     protected function setNonAdminUser()
     {
-        $pseudoMockAccess = new FakeAccess;
-        FakeAccess::setSuperUserAccess(false);
+        FakeAccess::$superUser = false;
         FakeAccess::$idSitesView = array(99);
         FakeAccess::$identity = 'aUser';
-        Access::setSingletonInstance($pseudoMockAccess);
     }
 
+    public function provideContainerConfig()
+    {
+        return array(
+            'Piwik\Access' => new FakeAccess()
+        );
+    }
 }

@@ -8,6 +8,7 @@
 
 namespace Piwik\Plugins\LanguagesManager\Test\Integration;
 
+use Piwik\Cache;
 use Piwik\Container\StaticContainer;
 use Piwik\Intl\Data\Provider\LanguageDataProvider;
 use Piwik\Plugins\LanguagesManager\API;
@@ -19,6 +20,7 @@ use Piwik\Plugins\LanguagesManager\TranslationWriter\Filter\UnnecassaryWhitespac
 use Piwik\Plugins\LanguagesManager\TranslationWriter\Validate\CoreTranslations;
 use Piwik\Plugins\LanguagesManager\TranslationWriter\Validate\NoScripts;
 use Piwik\Plugins\LanguagesManager\TranslationWriter\Writer;
+use Piwik\Translate;
 
 /**
  * @group LanguagesManager
@@ -94,10 +96,17 @@ class LanguagesManagerTest extends \PHPUnit_Framework_TestCase
 
         if ($translationWriter->wasFiltered()) {
 
+            if (!$translationWriter->hasTranslations()) {
+                $this->markTestSkipped('Translation file errors detected in ' . $language . "...\n"
+                    . "File would be empty after filtering. You may remove it manually to fix this test.\n"
+                );
+                return;
+            }
+
             $translationWriter->saveTemporary();
             $this->markTestSkipped(implode("\n", $translationWriter->getFilterMessages()) . "\n"
                 . 'Translation file errors detected in ' . $language . "...\n"
-                . "To synchronise the language files with the english strings, you can manually edit the language files or run the following command may work if you have access to oTrance: \n"
+                . "To synchronise the language files with the english strings, you can manually edit the language files or run the following command may work if you have access to Transifex: \n"
                 . "$ ./console translations:update [--plugin=XYZ] \n"
             );
         }
@@ -126,6 +135,53 @@ class LanguagesManagerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * check all english translations do not contain more than one
+     *
+     * @group Plugins
+     * @group numbered
+     */
+    function testTranslationsUseNumberedPlaceholders()
+    {
+        Cache::flushAll();
+        $translator = StaticContainer::get('Piwik\Translation\Translator');
+        $translator->reset();
+        Translate::loadAllTranslations();
+        $translations = $translator->getAllTranslations();
+        foreach ($translations AS $plugin => $pluginTranslations) {
+            foreach ($pluginTranslations as $key => $pluginTranslation) {
+                $this->assertLessThanOrEqual(1, substr_count($pluginTranslation, '%s'),
+                    sprintf('%s.%s must use numbered placeholders instead of multiple %%s', $plugin, $key));
+            }
+        }
+    }
+
+    /**
+     * check all english translations do not contain unescaped % symbols
+     *
+     * @group Plugins
+     * @group numbered2
+     */
+    function testTranslationsUseEscapedPercentSigns()
+    {
+        Cache::flushAll();
+        $translator = StaticContainer::get('Piwik\Translation\Translator');
+        $translator->reset();
+        Translate::loadAllTranslations();
+        $translations = $translator->getAllTranslations();
+        foreach ($translations AS $plugin => $pluginTranslations) {
+            if ($plugin == 'Intl') {
+                continue; // skip generated stuff
+            }
+            foreach ($pluginTranslations as $key => $pluginTranslation) {
+                $pluginTranslation = preg_replace('/(%(?:[1-9]\$)?[a-z])/', '', $pluginTranslation); // remove placeholders
+                $pluginTranslation = str_replace('%%', '', $pluginTranslation); // remove already escaped symbols
+                $this->assertEquals(0, substr_count($pluginTranslation, '%'),
+                    sprintf('%s.%s must use escaped %% symbols', $plugin, $key));
+            }
+        }
+    }
+
+    /**
      * test English short name for language
      *
      * @group Plugins
@@ -139,9 +195,9 @@ class LanguagesManagerTest extends \PHPUnit_Framework_TestCase
         $languagesReference = $dataProvider->getLanguageList();
 
         foreach ($languages as $language) {
-            $data = file_get_contents(PIWIK_INCLUDE_PATH . "/lang/$language.json");
+            $data = file_get_contents(PIWIK_INCLUDE_PATH . "/plugins/Intl/lang/$language.json");
             $translations = json_decode($data, true);
-            $name = $translations['General']['EnglishLanguageName'];
+            $name = $translations['Intl']['EnglishLanguageName'];
 
             if ($language != 'en') {
                 $this->assertFalse($name == 'English', "for $language");

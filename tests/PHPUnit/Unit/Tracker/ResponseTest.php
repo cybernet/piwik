@@ -12,12 +12,11 @@ use Piwik\Common;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tracker\Response;
 use Piwik\Tests\Framework\Mock\Tracker;
-use Piwik\Tests\Framework\TestCase\UnitTestCase;
 use Exception;
 
 class TestResponse extends Response {
 
-    protected function logExceptionToErrorLog(Exception $e)
+    protected function logExceptionToErrorLog($e)
     {
         // prevent console from outputting the error_log message
     }
@@ -34,7 +33,7 @@ class TestResponse extends Response {
  * @group Plugins
  * @group Tracker
  */
-class ResponseTest extends UnitTestCase
+class ResponseTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var TestResponse
@@ -128,7 +127,7 @@ class ResponseTest extends UnitTestCase
         $tracker->setCountOfLoggedRequests(0);
         $this->response->outputResponse($tracker);
 
-        $this->assertEquals("<a href='/'>Piwik</a> is a free/libre web <a href='http://piwik.org'>analytics</a> that lets you keep control of your data.",
+        $this->assertEquals("This resource is part of Piwik. Keep full control of your data with the leading free and open source <a href='https://piwik.org' target='_blank'>digital analytics platform</a> for web and mobile.",
             $this->response->getOutput());
     }
 

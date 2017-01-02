@@ -26,11 +26,12 @@ class TrackerCodeGeneratorTest extends IntegrationTestCase
             $visitorCustomVariables = array(array("name", "value"), array("name 2", "value 2")),
             $pageCustomVariables = array(array("page cvar", "page cvar value")),
             $customCampaignNameQueryParam = "campaignKey", $customCampaignKeywordParam = "keywordKey",
-            $doNotTrack = true);
+            $doNotTrack = true, $disableCookies = false, $trackNoScript = true);
 
         $expected = "&lt;!-- Piwik --&gt;
 &lt;script type=&quot;text/javascript&quot;&gt;
   var _paq = _paq || [];
+  // tracker methods like &quot;setCustomDimension&quot; should be called before &quot;trackPageView&quot;
   _paq.push([\"setDocumentTitle\", document.domain + \"/\" + document.title]);
   // you can set up to 5 custom variables for each visitor
   _paq.push([\"setCustomVariable\", 1, \"name\", \"value\", \"visit\"]);
@@ -45,12 +46,38 @@ class TrackerCodeGeneratorTest extends IntegrationTestCase
   (function() {
     var u=&quot;//localhost/piwik/&quot;;
     _paq.push(['setTrackerUrl', u+'piwik.php']);
-    _paq.push(['setSiteId', 1]);
+    _paq.push(['setSiteId', '1']);
     var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
     g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
   })();
 &lt;/script&gt;
-&lt;noscript&gt;&lt;p&gt;&lt;img src=&quot;//localhost/piwik/piwik.php?idsite=1&quot; style=&quot;border:0;&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;&lt;/noscript&gt;
+&lt;noscript&gt;&lt;p&gt;&lt;img src=&quot;//localhost/piwik/piwik.php?idsite=1&amp;rec=1&quot; style=&quot;border:0;&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;&lt;/noscript&gt;
+&lt;!-- End Piwik Code --&gt;
+";
+
+        $this->assertEquals($expected, $jsTag);
+    }
+
+    public function testJavascriptTrackingCode_noScriptTrackingDisabled_defaultTrackingCode()
+    {
+        $generator = new TrackerCodeGenerator();
+
+        $jsTag = $generator->generate($idSite = 1, $piwikUrl = 'http://localhost/piwik');
+
+        $expected = "&lt;!-- Piwik --&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+  var _paq = _paq || [];
+  // tracker methods like &quot;setCustomDimension&quot; should be called before &quot;trackPageView&quot;
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u=&quot;//localhost/piwik/&quot;;
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', '1']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+&lt;/script&gt;
 &lt;!-- End Piwik Code --&gt;
 ";
 
@@ -78,6 +105,7 @@ class TrackerCodeGeneratorTest extends IntegrationTestCase
         $expected = "&lt;!-- Piwik --&gt;
 &lt;script type=&quot;text/javascript&quot;&gt;
   var _paq = _paq || [];
+  // tracker methods like &quot;setCustomDimension&quot; should be called before &quot;trackPageView&quot;
   _paq.push([\"setDocumentTitle\", document.domain + \"/\" + document.title]);
   // you can set up to 5 custom variables for each visitor
   _paq.push([\"setCustomVariable\", 1, \"name\", \"value\", \"visit\"]);
@@ -92,12 +120,11 @@ class TrackerCodeGeneratorTest extends IntegrationTestCase
   (function() {
     var u=&quot;https://localhost/piwik/&quot;;
     _paq.push(['setTrackerUrl', u+'piwik.php']);
-    _paq.push(['setSiteId', 1]);
+    _paq.push(['setSiteId', '1']);
     var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
     g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
   })();
 &lt;/script&gt;
-&lt;noscript&gt;&lt;p&gt;&lt;img src=&quot;https://localhost/piwik/piwik.php?idsite=1&quot; style=&quot;border:0;&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;&lt;/noscript&gt;
 &lt;!-- End Piwik Code --&gt;
 ";
 
@@ -125,6 +152,7 @@ class TrackerCodeGeneratorTest extends IntegrationTestCase
         $expected = "&lt;!-- Piwik --&gt;
 &lt;script type=&quot;text/javascript&quot;&gt;
   var _paq = _paq || [];
+  // tracker methods like &quot;setCustomDimension&quot; should be called before &quot;trackPageView&quot;
   _paq.push([\"setDocumentTitle\", document.domain + \"/\" + document.title]);
   // you can set up to 5 custom variables for each visitor
   _paq.push([\"setCustomVariable\", 1, \"name\", \"value\", \"visit\"]);
@@ -140,14 +168,91 @@ class TrackerCodeGeneratorTest extends IntegrationTestCase
     var u=&quot;//localhost/piwik/&quot;;
     _paq.push(['setAPIUrl', 'http://localhost/statistics']);
     _paq.push(['setTrackerUrl', u+'piwik.php']);
-    _paq.push(['setSiteId', 1]);
+    _paq.push(['setSiteId', '1']);
     var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
     g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
   })();
 &lt;/script&gt;
-&lt;noscript&gt;&lt;p&gt;&lt;img src=&quot;//localhost/piwik/piwik.php?idsite=1&quot; style=&quot;border:0;&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;&lt;/noscript&gt;
 &lt;!-- End Piwik Code --&gt;
 ";
+
+        $this->assertEquals($expected, $jsTag);
+    }
+
+    /**
+     * Tests the generated JS code with options before tracker url
+     */
+    public function testJavascriptTrackingCode_loadSync()
+    {
+        $generator = new TrackerCodeGenerator();
+
+        Piwik::addAction('Piwik.getJavascriptCode', function (&$codeImpl) {
+            $codeImpl['loadAsync'] = false;
+        });
+
+        $jsTag = $generator->generate($idSite = 1, $piwikUrl = 'http://localhost/piwik',
+            $mergeSubdomains = true, $groupPageTitlesByDomain = true, $mergeAliasUrls = true);
+
+        $expected = "&lt;!-- Piwik --&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+  var _paq = _paq || [];
+  // tracker methods like &quot;setCustomDimension&quot; should be called before &quot;trackPageView&quot;
+  _paq.push([\"setDocumentTitle\", document.domain + \"/\" + document.title]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u=&quot;//localhost/piwik/&quot;;
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', '1']);
+    
+  })();
+&lt;/script&gt;
+&lt;script type='text/javascript' src=&quot;//localhost/piwik/piwik.js&quot;&gt;&lt;/script&gt;
+&lt;!-- End Piwik Code --&gt;
+";
+
+        $this->assertEquals($expected, $jsTag);
+    }
+
+    public function testStringsAreEscaped()
+    {
+        $generator = new TrackerCodeGenerator();
+
+        $jsTag = $generator->generate(
+            $idSite = 1,
+            $piwikUrl = 'abc"def',
+            $mergeSubdomains = true,
+            $groupPageTitlesByDomain = true,
+            $mergeAliasUrls = true,
+            $visitorCustomVariables = array(array('abc"def', 'abc"def')),
+            $pageCustomVariables = array(array('abc"def', 'abc"def')),
+            $customCampaignNameQueryParam = 'abc"def',
+            $customCampaignKeywordParam = 'abc"def'
+        );
+
+        $expected = '&lt;!-- Piwik --&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+  var _paq = _paq || [];
+  // tracker methods like &quot;setCustomDimension&quot; should be called before &quot;trackPageView&quot;
+  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+  // you can set up to 5 custom variables for each visitor
+  _paq.push(["setCustomVariable", 1, "abc\"def", "abc\"def", "visit"]);
+  // you can set up to 5 custom variables for each action (page view, download, click, site search)
+  _paq.push(["setCustomVariable", 1, "abc\"def", "abc\"def", "page"]);
+  _paq.push(["setCampaignNameKey", "abc\"def"]);
+  _paq.push(["setCampaignKeywordKey", "abc\"def"]);
+  _paq.push([\'trackPageView\']);
+  _paq.push([\'enableLinkTracking\']);
+  (function() {
+    var u=&quot;//abc&quot;def/&quot;;
+    _paq.push([\'setTrackerUrl\', u+\'piwik.php\']);
+    _paq.push([\'setSiteId\', \'1\']);
+    var d=document, g=d.createElement(\'script\'), s=d.getElementsByTagName(\'script\')[0];
+    g.type=\'text/javascript\'; g.async=true; g.defer=true; g.src=u+\'piwik.js\'; s.parentNode.insertBefore(g,s);
+  })();
+&lt;/script&gt;
+&lt;!-- End Piwik Code --&gt;
+';
 
         $this->assertEquals($expected, $jsTag);
     }

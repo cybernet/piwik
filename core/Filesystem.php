@@ -10,6 +10,7 @@ namespace Piwik;
 
 use Exception;
 use Piwik\Container\StaticContainer;
+use Piwik\Plugins\Installation\ServerFilesGenerator;
 use Piwik\Tracker\Cache as TrackerCache;
 use Piwik\Cache as PiwikCache;
 
@@ -94,6 +95,8 @@ class Filesystem
                 // enough! we're not going to make the directory world-writeable
             }
         }
+
+        self::createIndexFilesToPreventDirectoryListing($path);
     }
 
     /**
@@ -118,8 +121,9 @@ class Filesystem
         // and the return code 1. if NFS, it will return 0 and at least 2 lines of text.
         $command = "df -T -t nfs \"$sessionsPath\" 2>&1";
 
-        if (function_exists('exec')) // use exec
-        {
+        if (function_exists('exec')) {
+            // use exec
+
             $output = $returnCode = null;
             @exec($command, $output, $returnCode);
 
@@ -129,13 +133,16 @@ class Filesystem
             ) {
                 return true;
             }
-        } else if (function_exists('shell_exec')) // use shell_exec
-        {
+        } elseif (function_exists('shell_exec')) {
+            // use shell_exec
+
             $output = @shell_exec($command);
             if ($output) {
-                $output = explode("\n", $output);
-                if (count($output) > 1) // check if filesystem is NFS
-                {
+                $commandFailed = (false !== strpos($output, "no file systems processed"));
+                $output = explode("\n", trim($output));
+                if (!$commandFailed
+                    && count($output) > 1) {
+                    // check if filesystem is NFS
                     return true;
                 }
             }
@@ -318,7 +325,6 @@ class Filesystem
 
         if (!empty($path_parts['extension'])
             && in_array($path_parts['extension'], $phpExtensions)) {
-
             return true;
         }
 
@@ -440,8 +446,7 @@ class Filesystem
      */
     private static function getChmodForPath($path)
     {
-        $pathIsTmp = StaticContainer::get('path.tmp');
-        if (strpos($path, $pathIsTmp) === 0) {
+        if (self::isPathWithinTmpFolder($path)) {
             // tmp/* folder
             return 0750;
         }
@@ -464,7 +469,6 @@ class Filesystem
         }
 
         if (function_exists('xcache_clear_cache') && defined('XC_TYPE_VAR')) {
-
             if (ini_get('xcache.admin.enable_auth')) {
                 // XCache will not be cleared because "xcache.admin.enable_auth" is enabled in php.ini.
             } else {
@@ -476,7 +480,6 @@ class Filesystem
     private static function havePhpFilesSameContent($file1, $file2)
     {
         if (self::hasPHPExtension($file1)) {
-
             $sourceMd5 = md5_file($file1);
             $destMd5   = md5_file($file2);
 
@@ -504,4 +507,33 @@ class Filesystem
         return true;
     }
 
+    /**
+     * @param $path
+     * @return bool
+     */
+    private static function isPathWithinTmpFolder($path)
+    {
+        $pathIsTmp = StaticContainer::get('path.tmp');
+        $isPathWithinTmpFolder = strpos($path, $pathIsTmp) === 0;
+        return $isPathWithinTmpFolder;
+    }
+
+    /**
+     * in tmp/ (sub-)folder(s) we create empty index.htm|php files
+     *
+     * @param $path
+     */
+    private static function createIndexFilesToPreventDirectoryListing($path)
+    {
+        if (!self::isPathWithinTmpFolder($path)) {
+            return;
+        }
+        $filesToCreate = array(
+            $path . '/index.htm',
+            $path . '/index.php'
+        );
+        foreach ($filesToCreate as $file) {
+            @file_put_contents($file, 'Nothing to see here.');
+        }
+    }
 }

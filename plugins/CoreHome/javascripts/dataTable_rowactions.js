@@ -221,6 +221,11 @@ DataTable_RowAction.prototype.getLabelFromTr = function (tr) {
     return value;
 };
 
+/** Get row metadata object */
+DataTable_RowAction.prototype.getRowMetadata = function (tr) {
+    return tr.data('row-metadata') || {};
+};
+
 /**
  * Base method for opening popovers.
  * This method will remember the parameter in the url and call doOpenPopover().
@@ -360,7 +365,7 @@ DataTable_RowActions_RowEvolution.prototype.showRowEvolution = function (apiMeth
 
         if (self.dataTable !== null) {
             // remember label for multi row evolution
-            box.find('a.rowevolution-startmulti').click(function () {
+            box.find('.rowevolution-startmulti').click(function () {
                 Piwik_Popover.onClose(false); // unbind listener that resets multiEvolutionRows
                 Piwik_Popover.close();
                 return false;
@@ -385,6 +390,22 @@ DataTable_RowActions_RowEvolution.prototype.showRowEvolution = function (apiMeth
     requestParams.module = 'CoreHome';
     requestParams.action = 'getRowEvolutionPopover';
     requestParams.colors = JSON.stringify(piwik.getSparklineColors());
+
+    var idDimension;
+
+    if (broadcast.getValueFromUrl('module') === 'Widgetize') {
+        idDimension = broadcast.getValueFromUrl('subcategory');
+    } else {
+        idDimension = broadcast.getValueFromHash('subcategory');
+    }
+
+    if (idDimension && ('' + idDimension).indexOf('customdimension') === 0) {
+        idDimension = ('' + idDimension).replace('customdimension', '');
+        idDimension = parseInt(idDimension, 10);
+        if (idDimension > 0) {
+            requestParams.idDimension = idDimension;
+        }
+    }
 
     $.extend(requestParams, extraParams);
 

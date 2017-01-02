@@ -7,25 +7,13 @@
  *
  */
 namespace Piwik\Menu;
+
 use Piwik\Piwik;
 
 /**
  * Contains menu entries for the Top menu (the menu at the very top of the page).
  * Plugins can implement the `configureTopMenu()` method of the `Menu` plugin class to add, rename of remove
  * items. If your plugin does not have a `Menu` class yet you can create one using `./console generate:menu`.
- *
- * **Example**
- *
- *     public function configureTopMenu(MenuTop $menu)
- *     {
- *         $menu->add(
- *             'MyPlugin_MyTranslatedMenuCategory',
- *             'MyPlugin_MyTranslatedMenuName',
- *             array('module' => 'MyPlugin', 'action' => 'index'),
- *             Piwik::isUserHasSomeAdminAccess(),
- *             $order = 2
- *         );
- *     }
  *
  * @method static \Piwik\Menu\MenuTop getInstance()
  */
@@ -48,6 +36,8 @@ class MenuTop extends MenuAbstract
                 $this->menu[$menuName]['_name'] = $menuName;
                 $this->menu[$menuName]['_html'] = $data;
                 $this->menu[$menuName]['_order'] = $order;
+                $this->menu[$menuName]['_url'] = null;
+                $this->menu[$menuName]['_icon'] = '';
                 $this->menu[$menuName]['_hasSubmenu'] = false;
                 $this->menu[$menuName]['_tooltip'] = $tooltip;
             }
@@ -62,12 +52,6 @@ class MenuTop extends MenuAbstract
     public function getMenu()
     {
         if (!$this->menu) {
-
-            /**
-             * @ignore
-             * @deprecated
-             */
-            Piwik::postEvent('Menu.Top.addItems', array());
 
             foreach ($this->getAllMenus() as $menu) {
                 $menu->configureTopMenu($this);

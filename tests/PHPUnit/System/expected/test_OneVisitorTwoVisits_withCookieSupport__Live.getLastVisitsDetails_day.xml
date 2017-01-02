@@ -21,10 +21,12 @@
 				<type>action</type>
 				<url>http://example.org/store/purchase.htm</url>
 				<pageTitle>Checkout/Purchasing...</pageTitle>
-				<pageIdAction>12</pageIdAction>
+				<pageIdAction>13</pageIdAction>
 				
 				<pageId>9</pageId>
+				<generationTimeMilliseconds>134</generationTimeMilliseconds>
 				<generationTime>0.13s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<icon />
 				
 			</row>
@@ -51,6 +53,7 @@
 		<visitDurationPretty>0s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>1</actions>
+		<interactions>1</interactions>
 		<referrerType>search</referrerType>
 		<referrerTypeName>Search Engines</referrerTypeName>
 		<referrerName>Yahoo!</referrerName>
@@ -59,7 +62,12 @@
 		<referrerUrl>http://search.yahoo.com/search?p=purchase</referrerUrl>
 		<referrerSearchEngineUrl>http://search.yahoo.com</referrerSearchEngineUrl>
 		<referrerSearchEngineIcon>plugins/Referrers/images/searchEngines/search.yahoo.com.png</referrerSearchEngineIcon>
+		<languageCode>fr</languageCode>
+		<language>French</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -87,9 +95,6 @@
 		<visitLocalTime>12:34:06</visitLocalTime>
 		<visitLocalHour>12</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>1024x768</resolution>
@@ -123,7 +128,9 @@
 				<pageIdAction>2</pageIdAction>
 				
 				<pageId>1</pageId>
+				<generationTimeMilliseconds>234</generationTimeMilliseconds>
 				<generationTime>0.23s</generationTime>
+				<interactionPosition>1</interactionPosition>
 				<timeSpent>180</timeSpent>
 				<timeSpentPretty>3 min 0s</timeSpentPretty>
 				<icon />
@@ -136,7 +143,9 @@
 				<pageIdAction>4</pageIdAction>
 				
 				<pageId>2</pageId>
+				<generationTimeMilliseconds>224</generationTimeMilliseconds>
 				<generationTime>0.22s</generationTime>
+				<interactionPosition>2</interactionPosition>
 				<timeSpent>180</timeSpent>
 				<timeSpentPretty>3 min 0s</timeSpentPretty>
 				<icon />
@@ -144,11 +153,12 @@
 			</row>
 			<row>
 				<type>outlink</type>
-				<url>http://dev.piwik.org/svn</url>
+				<url>https://outlinks.org/#!outlink-with-fragment-&lt;script&gt;</url>
 				<pageTitle />
 				<pageIdAction>5</pageIdAction>
 				
 				<pageId>3</pageId>
+				<interactionPosition />
 				<timeSpent>360</timeSpent>
 				<timeSpentPretty>6 min 0s</timeSpentPretty>
 				<icon>plugins/Morpheus/images/link.gif</icon>
@@ -161,6 +171,7 @@
 				<pageIdAction>6</pageIdAction>
 				
 				<pageId>4</pageId>
+				<interactionPosition />
 				<timeSpent>72</timeSpent>
 				<timeSpentPretty>1 min 12s</timeSpentPretty>
 				<icon>plugins/Morpheus/images/download.png</icon>
@@ -168,11 +179,12 @@
 			</row>
 			<row>
 				<type>outlink</type>
-				<url>http://outlinks.org/other_outlink</url>
+				<url>http://outlinks.org/other_outlink#fragment&amp;pk_campaign=Open%20partnership</url>
 				<pageTitle />
 				<pageIdAction>7</pageIdAction>
 				
 				<pageId>5</pageId>
+				<interactionPosition />
 				<timeSpent>108</timeSpent>
 				<timeSpentPretty>1 min 48s</timeSpentPretty>
 				<icon>plugins/Morpheus/images/link.gif</icon>
@@ -182,9 +194,10 @@
 				<type>outlink</type>
 				<url>http://dev.piwik.org/svn</url>
 				<pageTitle />
-				<pageIdAction>5</pageIdAction>
+				<pageIdAction>8</pageIdAction>
 				
 				<pageId>6</pageId>
+				<interactionPosition />
 				<timeSpent>72</timeSpent>
 				<timeSpentPretty>1 min 12s</timeSpentPretty>
 				<icon>plugins/Morpheus/images/link.gif</icon>
@@ -194,7 +207,7 @@
 				<type>goal</type>
 				<goalName>triggered js</goalName>
 				<goalId>1</goalId>
-				<revenue>0</revenue>
+				<revenue>42</revenue>
 				<goalPageId />
 				
 				<url>http://example.org/</url>
@@ -208,7 +221,9 @@
 				
 				<pageId>7</pageId>
 				<siteSearchKeyword>Banks Own The World</siteSearchKeyword>
+				<generationTimeMilliseconds>812</generationTimeMilliseconds>
 				<generationTime>0.81s</generationTime>
+				<interactionPosition>3</interactionPosition>
 				<timeSpent>108</timeSpent>
 				<timeSpentPretty>1 min 48s</timeSpentPretty>
 				<icon>plugins/Morpheus/images/search_ico.png</icon>
@@ -218,10 +233,12 @@
 				<type>action</type>
 				<url>http://example.org/index.htm</url>
 				<pageTitle>Looking at homepage after site search...</pageTitle>
-				<pageIdAction>10</pageIdAction>
+				<pageIdAction>11</pageIdAction>
 				
 				<pageId>8</pageId>
+				<generationTimeMilliseconds>24</generationTimeMilliseconds>
 				<generationTime>0.02s</generationTime>
+				<interactionPosition>4</interactionPosition>
 				<icon />
 				
 			</row>
@@ -248,6 +265,7 @@
 		<visitDurationPretty>27 min 1s</visitDurationPretty>
 		<searches>1</searches>
 		<actions>8</actions>
+		<interactions>4</interactions>
 		<referrerType>website</referrerType>
 		<referrerTypeName>Websites</referrerTypeName>
 		<referrerName>referrer.com</referrerName>
@@ -256,7 +274,12 @@
 		<referrerUrl>http://referrer.com/page.htm?param=valuewith some spaces</referrerUrl>
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode>fr</languageCode>
+		<language>French</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -284,9 +307,6 @@
 		<visitLocalTime>12:34:06</visitLocalTime>
 		<visitLocalHour>12</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 		</customVariables>
 		<resolution>1024x768</resolution>

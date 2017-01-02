@@ -1,5 +1,6 @@
 {
     "Events": {
+        "PluginDescription": "Spor begivenheder og få rapporter om dine besøgendes aktiviteter.",
         "AvgEventValue": "Genomsnitlig værdi for hændelsen er: %s",
         "AvgValue": "Gennemsnitsværdi",
         "AvgValueDocumentation": "Gennemsnittet af alle værdier for denne hændelse",
@@ -14,7 +15,7 @@
         "EventsWithValue": "Hændelser med en værdi",
         "EventsWithValueDocumentation": "Antal hændelser, hvor en hændelseværdi blev fastsat",
         "EventValue": "Hændelsesværdi",
-        "EventValueTooltip": "Samlet hændelsesværdi er summen af ​​%s hændelsesværdier %s mellem mindst %s og maksimalt %s.",
+        "EventValueTooltip": "Samlet hændelsesværdi er summen af ​​%1$s hændelsesværdier %2$s mellem mindst %3$s og maksimalt %4$s.",
         "MaxValue": "Max værdi",
         "MaxValueDocumentation": "Den maksimale værdi for hændelsen",
         "MinValue": "Min værdi",

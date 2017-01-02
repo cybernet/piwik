@@ -20,6 +20,7 @@ use Piwik\Plugins\UsersManager\API as APIUsersManager;
 use Piwik\Plugins\UsersManager\Model as UserModel;
 use Piwik\ReportRenderer;
 use Piwik\Scheduler\Schedule\Schedule;
+use Piwik\SettingsPiwik;
 use Piwik\Tracker;
 use Piwik\View;
 use Zend_Mime;
@@ -70,12 +71,13 @@ class ScheduledReports extends \Piwik\Plugin
     const OPTION_KEY_LAST_SENT_DATERANGE = 'report_last_sent_daterange_';
 
     /**
-     * @see Piwik\Plugin::getListHooksRegistered
+     * @see Piwik\Plugin::registerEvents
      */
-    public function getListHooksRegistered()
+    public function registerEvents()
     {
         return array(
             'AssetManager.getJavaScriptFiles'           => 'getJsFiles',
+            'AssetManager.getStylesheetFiles'           => 'getStylesheetFiles',
             'MobileMessaging.deletePhoneNumber'         => 'deletePhoneNumber',
             'ScheduledReports.getReportParameters'      => 'getReportParameters',
             'ScheduledReports.validateReportParameters' => 'validateReportParameters',
@@ -109,6 +111,7 @@ class ScheduledReports extends \Piwik\Plugin
     {
         $translationKeys[] = "ScheduledReports_ReportSent";
         $translationKeys[] = "ScheduledReports_ReportUpdated";
+        $translationKeys[] = "ScheduledReports_ReportHourWithUTC";
     }
 
     /**
@@ -126,7 +129,13 @@ class ScheduledReports extends \Piwik\Plugin
 
     public function getJsFiles(&$jsFiles)
     {
-        $jsFiles[] = "plugins/ScheduledReports/javascripts/pdf.js";
+        $jsFiles[] = "plugins/ScheduledReports/angularjs/manage-scheduled-report/manage-scheduled-report.controller.js";
+        $jsFiles[] = "plugins/ScheduledReports/angularjs/manage-scheduled-report/manage-scheduled-report.directive.js";
+    }
+
+    public function getStylesheetFiles(&$stylesheets)
+    {
+        $stylesheets[] = 'plugins/ScheduledReports/stylesheets/scheduledreports.less';
     }
 
     public function validateReportParameters(&$parameters, $reportType)
@@ -315,12 +324,21 @@ class ScheduledReports extends \Piwik\Plugin
             $segmentInfo = Piwik::translate('ScheduledReports_SegmentAppliedToReports', $segment['name']);
         }
 
+        $messageFindAttached = Piwik::translate('ScheduledReports_PleaseFindAttachedFile', array($periods[$report['period']], $reportTitle));
+        $messageFindBelow    = Piwik::translate('ScheduledReports_PleaseFindBelow', array($periods[$report['period']], $reportTitle));
+        $messageSentFrom     = '';
+
+        $piwikUrl = SettingsPiwik::getPiwikUrl();
+        if (!empty($piwikUrl)) {
+            $messageSentFrom = Piwik::translate('ScheduledReports_SentFromX', $piwikUrl);
+        }
+
         switch ($report['format']) {
             case 'html':
 
                 // Needed when using images as attachment with cid
                 $mail->setType(Zend_Mime::MULTIPART_RELATED);
-                $message .= "<br/>" . Piwik::translate('ScheduledReports_PleaseFindBelow', array($periods[$report['period']], $reportTitle));
+                $message .= "<br/>$messageFindBelow<br/>$messageSentFrom";
 
                 if ($displaySegmentInfo) {
                     $message .= " " . $segmentInfo;
@@ -330,7 +348,7 @@ class ScheduledReports extends \Piwik\Plugin
                 break;
 
             case 'csv':
-                $message .= "\n" . Piwik::translate('ScheduledReports_PleaseFindAttachedFile', array($periods[$report['period']], $reportTitle));
+                $message .= "\n$messageFindAttached\n$messageSentFrom";
 
                 if ($displaySegmentInfo) {
                     $message .= " " . $segmentInfo;
@@ -348,7 +366,7 @@ class ScheduledReports extends \Piwik\Plugin
 
             default:
             case 'pdf':
-                $message .= "\n" . Piwik::translate('ScheduledReports_PleaseFindAttachedFile', array($periods[$report['period']], $reportTitle));
+                $message .= "\n$messageFindAttached\n$messageSentFrom";
 
                 if ($displaySegmentInfo) {
                     $message .= " " . $segmentInfo;
@@ -417,7 +435,7 @@ class ScheduledReports extends \Piwik\Plugin
                 // If running from piwik.php with debug, we ignore the 'email not sent' error
                 $tracker = new Tracker();
                 if (!$tracker->isDebugModeEnabled()) {
-                    throw new Exception("An error occured while sending '$filename' " .
+                    throw new Exception("An error occurred while sending '$filename' " .
                         " to " . implode(', ', $mail->getRecipients()) .
                         ". Error was '" . $e->getMessage() . "'");
                 }

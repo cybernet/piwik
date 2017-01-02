@@ -25,7 +25,7 @@ class Insight extends Visualization
     const ID = 'insightsVisualization';
     const TEMPLATE_FILE     = '@Insights/insightVisualization.twig';
     const FOOTER_ICON_TITLE = 'Insights';
-    const FOOTER_ICON       = 'plugins/Insights/images/idea.png';
+    const FOOTER_ICON       = 'icon-insights';
 
     public function beforeLoadDataTable()
     {
@@ -39,6 +39,10 @@ class Insight extends Visualization
 
         $report = $this->requestConfig->apiMethodToRequestDataTable;
         $report = str_replace('.', '_', $report);
+
+        if (!empty($this->requestConfig->request_parameters_to_modify['reportUniqueId'])) {
+            $report = $this->requestConfig->request_parameters_to_modify['reportUniqueId'];
+        }
 
         $this->requestConfig->apiMethodToRequestDataTable = 'Insights.getInsights';
 

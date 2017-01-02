@@ -1,7 +1,8 @@
 {
     "Actions": {
-        "AvgGenerationTimeTooltip": "Average based on %s hit(s) %s between %s and %s",
+        "AvgGenerationTimeTooltip": "Average based on %1$s hit(s) %2$s between %3$s and %4$s",
         "ColumnClickedURL": "Clicked URL",
+        "ColumnActionURL": "Action URL",
         "ColumnClicks": "Clicks",
         "ColumnClicksDocumentation": "The number of times this link was clicked.",
         "ColumnDownloadURL": "Download URL",
@@ -17,7 +18,7 @@
         "ColumnSearchCategory": "Search Category",
         "ColumnSearches": "Searches",
         "ColumnSearchesDocumentation": "The number of visits that searched for this keyword on your website's search engine.",
-        "ColumnSearchExits": "% Search Exits",
+        "ColumnSearchExits": "%% Search Exits",
         "ColumnSearchExitsDocumentation": "The percentage of visits that left the website after searching for this Keyword on your Site Search engine.",
         "ColumnSearchResultsCount": "Search Results Count",
         "ColumnSiteSearchKeywords": "Unique Keywords",
@@ -25,6 +26,8 @@
         "ColumnUniqueClicksDocumentation": "The number of visits that involved a click on this link. If a link was clicked multiple times during one visit, it is only counted once.",
         "ColumnUniqueDownloads": "Unique Downloads",
         "ColumnUniqueOutlinks": "Unique Outlinks",
+        "ColumnIdPageview": "Pageview ID",
+        "ColumnInteractionPosition": "Interaction Position",
         "DownloadsReportDocumentation": "In this report, you can see which files your visitors have downloaded. %s What Piwik counts as a download is the click on a download link. Whether the download was completed or not isn't known to Piwik.",
         "EntryPagesReportDocumentation": "This report contains information about the entry pages that were used during the specified period. An entry page is the first page that a user views during his visit. %s The entry URLs are displayed as a folder structure.",
         "EntryPageTitles": "Entry page titles",
@@ -37,7 +40,7 @@
         "OutlinkDocumentation": "An outlink is a link that leads the visitor away from your website (to another domain).",
         "OutlinksReportDocumentation": "This report shows a hierarchical list of outlink URLs that were clicked by your visitors.",
         "PagesReportDocumentation": "This report contains information about the page URLs that have been visited. %s The table is organized hierarchically, the URLs are displayed as a folder structure.",
-        "PageTitlesReportDocumentation": "This report contains information about the titles of the pages that have been visited. %s The page title is the HTML %s Tag that most browsers show in their window title.",
+        "PageTitlesReportDocumentation": "This report contains information about the titles of the pages that have been visited. %1$s The page title is the HTML %2$s Tag that most browsers show in their window title.",
         "PageUrls": "Page URLs",
         "PluginDescription": "Reports about the page views and page titles. Lets you measure your internal website's search engine. Automatically tracks clicks on external links and file downloads. ",
         "SiteSearchCategories1": "This report lists the Categories that visitors selected when they made a Search on your website.",
@@ -60,6 +63,7 @@
         "WidgetPageUrlsFollowingSearch": "Pages Following a Site Search",
         "WidgetSearchCategories": "Search Categories",
         "WidgetSearchKeywords": "Site Search Keywords",
-        "WidgetSearchNoResultKeywords": "Search Keywords with No Results"
+        "WidgetSearchNoResultKeywords": "Search Keywords with No Results",
+        "ActionType": "Action Type"
     }
 }

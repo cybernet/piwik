@@ -13,17 +13,23 @@ use Piwik\Metrics\Formatter;
 use Piwik\Piwik;
 use Piwik\Plugin\Report;
 use Piwik\Plugins\Live\Controller;
-use Piwik\Plugins\Live\VisitorLog;
 use Piwik\API\Request;
+use Piwik\Report\ReportWidgetFactory;
 use Piwik\View;
+use Piwik\Widget\WidgetsList;
 
 class GetSimpleLastVisitCount extends Base
 {
     protected function init()
     {
         parent::init();
-        $this->widgetTitle = 'Live_RealTimeVisitorCount';
         $this->order = 3;
+    }
+
+    public function configureWidgets(WidgetsList $widgetsList, ReportWidgetFactory $factory)
+    {
+        $widget = $factory->createWidget()->setName('Live_RealTimeVisitorCount')->setOrder(15);
+        $widgetsList->addWidgetConfig($widget);
     }
 
     public function render()
@@ -48,8 +54,8 @@ class GetSimpleLastVisitCount extends Base
             'visits'      => Piwik::translate('General_NVisits'),
             'one_action'  => Piwik::translate('General_OneAction'),
             'actions'     => Piwik::translate('VisitsSummary_NbActionsDescription'),
-            'one_minute'  => Piwik::translate('General_OneMinute'),
-            'minutes'     => Piwik::translate('General_NMinutes')
+            'one_minute'  => Piwik::translate('Intl_OneMinute'),
+            'minutes'     => Piwik::translate('Intl_NMinutes')
         );
 
         return $view->render();

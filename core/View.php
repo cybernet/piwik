@@ -10,6 +10,7 @@ namespace Piwik;
 
 use Exception;
 use Piwik\AssetManager\UIAssetCacheBuster;
+use Piwik\Container\StaticContainer;
 use Piwik\Plugins\UsersManager\API as APIUsersManager;
 use Piwik\View\ViewInterface;
 use Twig_Environment;
@@ -85,6 +86,8 @@ if (!defined('PIWIK_USER_PATH')) {
  *                  which is outputted in the template, eg, `{{ postEvent('MyPlugin.event') }}`
  * - **isPluginLoaded**: Returns true if the supplied plugin is loaded, false if otherwise.
  *                       `{% if isPluginLoaded('Goals') %}...{% endif %}`
+ * - **areAdsForProfessionalServicesEnabled**: Returns true if it is ok to show some advertising in the UI for providers of Professional Support for Piwik (from Piwik 2.16.0)
+ * - **isMultiServerEnvironment**: Returns true if Piwik is used on more than one server (since Piwik 2.16.1)
  *
  * ### Examples
  *
@@ -114,6 +117,7 @@ class View implements ViewInterface
     protected $templateVars = array();
     private $contentType = 'text/html; charset=utf-8';
     private $xFrameOptions = null;
+    private $enableCacheBuster = true;
 
     /**
      * Constructor.
@@ -141,6 +145,14 @@ class View implements ViewInterface
         } catch (Exception $ex) {
             // pass (occurs when DB cannot be connected to, perhaps piwik URL cache should be stored in config file...)
         }
+    }
+
+    /**
+     * Disables the cache buster (adding of ?cb=...) to JavaScript and stylesheet files
+     */
+    public function disableCacheBuster()
+    {
+        $this->enableCacheBuster = false;
     }
 
     /**
@@ -192,7 +204,7 @@ class View implements ViewInterface
     /**
      * Returns true if a template variable has been set or not.
      *
-     * @param $name The name of the template variable.
+     * @param string $name The name of the template variable.
      * @return bool
      */
     public function __isset($name)
@@ -226,7 +238,17 @@ class View implements ViewInterface
             $this->latest_version_available = UpdateCheck::isNewestVersionAvailable();
             $this->disableLink = Common::getRequestVar('disableLink', 0, 'int');
             $this->isWidget = Common::getRequestVar('widget', 0, 'int');
-            $this->cacheBuster = UIAssetCacheBuster::getInstance()->piwikVersionBasedCacheBuster();
+            $this->isMultiServerEnvironment = SettingsPiwik::isMultiServerEnvironment();
+
+            $piwikAds = StaticContainer::get('Piwik\ProfessionalServices\Advertising');
+            $this->areAdsForProfessionalServicesEnabled = $piwikAds->areAdsForProfessionalServicesEnabled();
+
+            if (Development::isEnabled()) {
+                $cacheBuster = rand(0, 10000);
+            } else {
+                $cacheBuster = UIAssetCacheBuster::getInstance()->piwikVersionBasedCacheBuster();
+            }
+            $this->cacheBuster = $cacheBuster;
 
             $this->loginModule = Piwik::getLoginPluginName();
 
@@ -241,10 +263,21 @@ class View implements ViewInterface
         ProxyHttp::overrideCacheControlHeaders('no-store');
 
         Common::sendHeader('Content-Type: ' . $this->contentType);
-        // always sending this header, sometimes empty, to ensure that Dashboard embed loads (which could call this header() multiple times, the last one will prevail)
+        // always sending this header, sometimes empty, to ensure that Dashboard embed loads
+        // - when calling sendHeader() multiple times, the last one prevails
         Common::sendHeader('X-Frame-Options: ' . (string)$this->xFrameOptions);
 
         return $this->renderTwigTemplate();
+    }
+
+    /**
+     * @internal
+     * @ignore
+     * @return Twig_Environment
+     */
+    public function getTwig()
+    {
+        return $this->twig;
     }
 
     protected function renderTwigTemplate()
@@ -259,7 +292,9 @@ class View implements ViewInterface
             throw $ex;
         }
 
-        $output = $this->applyFilter_cacheBuster($output);
+        if ($this->enableCacheBuster) {
+            $output = $this->applyFilter_cacheBuster($output);
+        }
 
         $helper = new Theme;
         $output = $helper->rewriteAssetsPathToTheme($output);
@@ -365,7 +400,7 @@ class View implements ViewInterface
      * @ignore
      */
     public static function clearCompiledTemplates()
-    {        
+    {
         $twig = new Twig();
         $environment = $twig->getTwigEnvironment();
         $environment->clearTemplateCache();

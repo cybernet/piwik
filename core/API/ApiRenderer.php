@@ -28,7 +28,9 @@ abstract class ApiRenderer
         $this->init();
     }
 
-    protected function init() {}
+    protected function init()
+    {
+    }
 
     abstract public function sendHeader();
 
@@ -37,7 +39,12 @@ abstract class ApiRenderer
         return 'Success:' . $message;
     }
 
-    public function renderException($message, \Exception $exception)
+    /**
+     * @param $message
+     * @param Exception|\Throwable $exception
+     * @return mixed
+     */
+    public function renderException($message, $exception)
     {
         return $message;
     }
@@ -84,8 +91,15 @@ abstract class ApiRenderer
             $format = 'json';
         }
 
+        $idSite = Common::getRequestVar('idSite', 0, 'int', $this->request);
+
+        if (empty($idSite)) {
+            $idSite = 'all';
+        }
+
         $renderer = Renderer::factory($format);
         $renderer->setTable($dataTable);
+        $renderer->setIdSite($idSite);
         $renderer->setRenderSubTables(Common::getRequestVar('expanded', false, 'int', $this->request));
         $renderer->setHideIdSubDatableFromResponse(Common::getRequestVar('hideIdSubDatable', false, 'int', $this->request));
 
@@ -126,5 +140,4 @@ abstract class ApiRenderer
 
         return strtolower(end($klass));
     }
-
 }

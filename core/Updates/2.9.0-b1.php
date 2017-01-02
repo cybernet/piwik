@@ -11,36 +11,41 @@ namespace Piwik\Updates;
 use Piwik\Common;
 use Piwik\Db;
 use Piwik\Option;
-use Piwik\Plugin\Manager;
 use Piwik\Updater;
 use Piwik\Updates;
+use Piwik\Updater\Migration\Factory as MigrationFactory;
 
 class Updates_2_9_0_b1 extends Updates
 {
-    static function getSql()
-    {
-        $sql = array();
-        $sql = self::updateBrowserEngine($sql);
+    /**
+     * @var MigrationFactory
+     */
+    private $migration;
 
-        return $sql;
+    public function __construct(MigrationFactory $factory)
+    {
+        $this->migration = $factory;
     }
 
-    static function update()
+    public function getMigrations(Updater $updater)
     {
-        Updater::updateDatabase(__FILE__, self::getSql());
+        $migrations = array();
+        $migrations = $this->updateBrowserEngine($migrations);
+        $migrations[] = $this->migration->plugin->activate('TestRunner');
+
+        return $migrations;
+    }
+
+    public function doUpdate(Updater $updater)
+    {
+        $updater->executeMigrations(__FILE__, $this->getMigrations($updater));
 
         self::updateIPAnonymizationSettings();
-
-        try {
-            Manager::getInstance()->activatePlugin('TestRunner');
-        } catch (\Exception $e) {
-
-        }
     }
 
-    private static function updateBrowserEngine($sql)
+    private function updateBrowserEngine($sql)
     {
-        $sql[sprintf("ALTER TABLE `%s` ADD COLUMN `config_browser_engine` VARCHAR(10) NOT NULL", Common::prefixTable('log_visit'))] = 1060;
+        $sql[] = $this->migration->db->addColumn('log_visit', 'config_browser_engine', 'VARCHAR(10) NOT NULL');
 
         $browserEngineMatch = array(
             'Trident' => array('IE'),
@@ -54,13 +59,12 @@ class Updates_2_9_0_b1 extends Updates
         $engineUpdate = "''";
         $ifFragment = "IF (`config_browser_name` IN ('%s'), '%s', %s)";
 
-        foreach ($browserEngineMatch AS $engine => $browsers) {
-
+        foreach ($browserEngineMatch as $engine => $browsers) {
             $engineUpdate = sprintf($ifFragment, implode("','", $browsers), $engine, $engineUpdate);
         }
 
         $engineUpdate = sprintf("UPDATE %s SET `config_browser_engine` = %s", Common::prefixTable('log_visit'), $engineUpdate);
-        $sql[$engineUpdate] = false;
+        $sql[] = $this->migration->db->sql($engineUpdate);
 
         $archiveBlobTables = Db::get()->fetchCol("SHOW TABLES LIKE '%archive_blob%'");
 
@@ -68,7 +72,8 @@ class Updates_2_9_0_b1 extends Updates
         foreach ($archiveBlobTables as $table) {
 
             // try to rename old archives
-            $sql[sprintf("UPDATE IGNORE %s SET name='DevicesDetection_browserEngines' WHERE name = 'UserSettings_browserType'", $table)] = false;
+            $query = sprintf("UPDATE IGNORE %s SET name='DevicesDetection_browserEngines' WHERE name = 'UserSettings_browserType'", $table);
+            $sql[] = $this->migration->db->sql($query);
         }
 
         return $sql;

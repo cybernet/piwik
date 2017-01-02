@@ -8,6 +8,7 @@
 namespace Piwik\Tests\Fixtures;
 
 use Exception;
+use Piwik\API\Request;
 use Piwik\AssetManager;
 use Piwik\Access;
 use Piwik\Common;
@@ -16,19 +17,22 @@ use Piwik\Db;
 use Piwik\DbHelper;
 use Piwik\FrontController;
 use Piwik\Option;
+use Piwik\Piwik;
+use Piwik\Plugins\PrivacyManager\IPAnonymizer;
 use Piwik\Plugins\SegmentEditor\API as APISegmentEditor;
+use Piwik\Plugins\UserCountry\LocationProvider;
 use Piwik\Plugins\UsersManager\API as UsersManagerAPI;
 use Piwik\Plugins\SitesManager\API as SitesManagerAPI;
-use Piwik\WidgetsList;
-use Piwik\Tests\Framework\OverrideLogin;
-use Piwik\Tests\Framework\TestCase\SystemTestCase;
+use Piwik\Tests\Framework\Fixture;
+use Piwik\Plugins\VisitsSummary\API as VisitsSummaryAPI;
+use Piwik\Config as PiwikConfig;
 
 /**
  * Fixture for UI tests.
  */
 class UITestFixture extends SqlDump
 {
-    const FIXTURE_LOCATION = '/tests/resources/OmniFixture-dump.sql.gz';
+    const FIXTURE_LOCATION = '/tests/resources/OmniFixture-dump.sql';
 
     public function __construct()
     {
@@ -38,15 +42,23 @@ class UITestFixture extends SqlDump
 
     public function setUp()
     {
+        self::downloadGeoIpDbs();
+
         parent::setUp();
 
+        self::resetPluginsInstalledConfig();
         self::updateDatabase();
+        self::installAndActivatePlugins($this->getTestEnvironment());
 
         // make sure site has an early enough creation date (for period selector tests)
         Db::get()->update(Common::prefixTable("site"),
             array('ts_created' => '2011-01-01'),
             "idsite = 1"
         );
+
+        // for proper geolocation
+        LocationProvider::setCurrentProvider(LocationProvider\GeoIp\Php::ID);
+        IPAnonymizer::deactivate();
 
         $this->addOverlayVisits();
         $this->addNewSitesForSiteSelector();
@@ -62,6 +74,10 @@ class UITestFixture extends SqlDump
 
     public function performSetUp($setupEnvironmentOnly = false)
     {
+        $this->extraTestEnvVars = array(
+            'loadRealTranslations' => 1,
+        );
+
         parent::performSetUp($setupEnvironmentOnly);
 
         $this->createSegments();
@@ -82,6 +98,12 @@ class UITestFixture extends SqlDump
 
         $this->testEnvironment->forcedNowTimestamp = $forcedNowTimestamp;
         $this->testEnvironment->save();
+
+        // launch archiving so tests don't run out of time
+        print("Archiving in fixture set up...");
+        VisitsSummaryAPI::getInstance()->get('all', 'year', '2012-08-09');
+        VisitsSummaryAPI::getInstance()->get('all', 'year', '2012-08-09', urlencode(OmniFixture::DEFAULT_SEGMENT));
+        print("Done.");
     }
 
     private function addOverlayVisits()
@@ -106,13 +128,31 @@ class UITestFixture extends SqlDump
             array('page-6.html', 'page-3.html', ''),
         );
 
+        $ips = array( // ip's chosen for geolocation data
+            "20.56.34.67",
+            "24.17.88.121",
+            "24.12.45.67",
+            "24.120.12.5",
+            "24.100.12.5",
+            "24.110.12.5",
+            "24.17.88.122",
+            "24.12.45.68",
+            "24.17.88.123",
+            "24.18.127.34",
+            "18.50.45.71",
+            "24.20.127.34",
+            "24.23.40.34",
+            "18.50.45.70",
+            "24.50.12.5",
+        );
+
         $date = Date::factory('yesterday');
         $t = self::getTracker($idSite = 3, $dateTime = $date->getDatetime(), $defaultInit = true);
         $t->enableBulkTracking();
 
         foreach ($visitProfiles as $visitCount => $visit) {
             $t->setNewVisitorId();
-            $t->setIp("123.234.23.$visitCount");
+            $t->setIp($ips[$visitCount]);
 
             foreach ($visit as $idx => $action) {
                 $t->setForceVisitDateTime($date->addHour($visitCount)->addHour(0.01 * $idx)->getDatetime());
@@ -192,12 +232,13 @@ class UITestFixture extends SqlDump
 
         $oldGet = $_GET;
         $_GET['idSite'] = 1;
+        $_GET['token_auth'] = Piwik::getCurrentUserTokenAuth();
 
         // collect widgets & sort them so widget order is not important
-        $allWidgets = array();
-        foreach (WidgetsList::get() as $category => $widgets) {
-            $allWidgets = array_merge($allWidgets, $widgets);
-        }
+        $allWidgets = Request::processRequest('API.getWidgetMetadata', array(
+            'idSite' => 1
+        ));
+
         usort($allWidgets, function ($lhs, $rhs) {
             return strcmp($lhs['uniqueId'], $rhs['uniqueId']);
         });
@@ -262,11 +303,12 @@ class UITestFixture extends SqlDump
         $dashboard = array(
             array(
                 array(
-                    'uniqueId' => "widgetVisitsSummarygetEvolutionGraphcolumnsArray",
+                    'uniqueId' => "widgetVisitsSummarygetEvolutionGraphforceView1viewDataTablegraphEvolution",
                     'parameters' => array(
                         'module' => 'VisitsSummary',
                         'action' => 'getEvolutionGraph',
-                        'columns' => 'nb_visits'
+                        'forceView' => '1',
+                        'viewDataTable' => 'graphEvolution'
                     )
                 )
             ),
@@ -297,11 +339,5 @@ class UITestFixture extends SqlDump
             "From Europe", "continentCode==eur", $idSite = 1, $autoArchive = false, $enabledAllUsers = true);
         APISegmentEditor::getInstance()->add(
             "Multiple actions", "actions>=2", $idSite = 1, $autoArchive = false, $enabledAllUsers = true);
-    }
-
-    public static function createAccessInstance()
-    {
-        Access::setSingletonInstance($access = new OverrideLogin());
-        \Piwik\Piwik::postEvent('Request.initAuthenticationObject');
     }
 }

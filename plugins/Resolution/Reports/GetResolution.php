@@ -11,6 +11,7 @@ namespace Piwik\Plugins\Resolution\Reports;
 use Piwik\Piwik;
 use Piwik\Plugin\ViewDataTable;
 use Piwik\Plugins\Resolution\Columns\Resolution;
+use Piwik\Plugin\ReportsProvider;
 
 class GetResolution extends Base
 {
@@ -20,8 +21,9 @@ class GetResolution extends Base
         $this->dimension     = new Resolution();
         $this->name          = Piwik::translate('Resolution_WidgetResolutions');
         $this->documentation = ''; // TODO
-        $this->order = 0;
-        $this->widgetTitle  = 'Resolution_WidgetResolutions';
+        $this->order = 8;
+
+        $this->subcategoryId = 'DevicesDetection_Devices';
     }
 
     public function configureView(ViewDataTable $view)
@@ -31,4 +33,10 @@ class GetResolution extends Base
         $view->config->addTranslation('label', $this->dimension->getName());
     }
 
+    public function getRelatedReports()
+    {
+        return array(
+            ReportsProvider::factory('Resolution', 'getConfiguration'),
+        );
+    }
 }

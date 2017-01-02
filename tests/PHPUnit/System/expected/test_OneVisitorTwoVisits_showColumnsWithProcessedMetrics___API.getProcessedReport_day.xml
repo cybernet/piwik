@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <result>
 	<website>new name</website>
-	<prettyDate>Saturday 6 March 2010</prettyDate>
+	<prettyDate>Saturday, March 6, 2010</prettyDate>
 	<metadata>
-		<category>Visits Summary</category>
-		<name>Visits by Server Time</name>
+		<category>Visitors</category>
+		<subcategory>Times</subcategory>
+		<name>Visits per server time</name>
 		<module>VisitTime</module>
 		<action>getVisitInformationPerServerTime</action>
 		<dimension>Server time</dimension>
@@ -229,5 +230,6 @@
 	</reportMetadata>
 	<reportTotal>
 		<nb_visits>2</nb_visits>
+		<revenue>43</revenue>
 	</reportTotal>
 </result>

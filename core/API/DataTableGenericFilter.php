@@ -10,7 +10,6 @@ namespace Piwik\API;
 
 use Exception;
 use Piwik\Common;
-use Piwik\DataTable\Filter\AddColumnsProcessedMetricsGoal;
 use Piwik\DataTable;
 use Piwik\Plugin\ProcessedMetric;
 use Piwik\Plugin\Report;
@@ -25,13 +24,24 @@ class DataTableGenericFilter
     private $disabledFilters = array();
 
     /**
+     * @var Report
+     */
+    private $report;
+
+    /**
+     * @var array
+     */
+    private $request;
+
+    /**
      * Constructor
      *
      * @param $request
      */
-    function __construct($request)
+    public function __construct($request, $report)
     {
         $this->request = $request;
+        $this->report  = $report;
     }
 
     /**
@@ -88,6 +98,9 @@ class DataTableGenericFilter
                   array(
                       'filter_sort_column' => array('string'),
                       'filter_sort_order'  => array('string', 'desc'),
+                      $naturalSort = true,
+                      $recursiveSort = true,
+                      $doSortBySecondaryColumn = true
                   )),
             array('Truncate',
                   array(
@@ -100,6 +113,22 @@ class DataTableGenericFilter
                       'keep_summary_row' => array('integer', '0'),
                   ))
         );
+    }
+
+    private function getGenericFiltersHavingDefaultValues()
+    {
+        $filters = self::getGenericFiltersInformation();
+
+        if ($this->report && $this->report->getDefaultSortColumn()) {
+            foreach ($filters as $index => $filter) {
+                if ($filter[0] === 'Sort') {
+                    $filters[$index][1]['filter_sort_column'] = array('string', $this->report->getDefaultSortColumn());
+                    $filters[$index][1]['filter_sort_order']  = array('string', $this->report->getDefaultSortOrder());
+                }
+            }
+        }
+
+        return $filters;
     }
 
     /**
@@ -119,7 +148,7 @@ class DataTableGenericFilter
             return;
         }
 
-        $genericFilters = self::getGenericFiltersInformation();
+        $genericFilters = $this->getGenericFiltersHavingDefaultValues();
 
         $filterApplied = false;
         foreach ($genericFilters as $filterMeta) {
@@ -133,22 +162,27 @@ class DataTableGenericFilter
             }
 
             foreach ($filterParams as $name => $info) {
-                // parameter type to cast to
-                $type = $info[0];
+                if (!is_array($info)) {
+                    // hard coded value that cannot be changed via API, see eg $naturalSort = true in 'Sort'
+                    $filterParameters[] = $info;
+                } else {
+                    // parameter type to cast to
+                    $type = $info[0];
 
-                // default value if specified, when the parameter doesn't have a value
-                $defaultValue = null;
-                if (isset($info[1])) {
-                    $defaultValue = $info[1];
-                }
+                    // default value if specified, when the parameter doesn't have a value
+                    $defaultValue = null;
+                    if (isset($info[1])) {
+                        $defaultValue = $info[1];
+                    }
 
-                try {
-                    $value = Common::getRequestVar($name, $defaultValue, $type, $this->request);
-                    settype($value, $type);
-                    $filterParameters[] = $value;
-                } catch (Exception $e) {
-                    $exceptionRaised = true;
-                    break;
+                    try {
+                        $value = Common::getRequestVar($name, $defaultValue, $type, $this->request);
+                        settype($value, $type);
+                        $filterParameters[] = $value;
+                    } catch (Exception $e) {
+                        $exceptionRaised = true;
+                        break;
+                    }
                 }
             }
 

@@ -23,7 +23,7 @@ class HtmlTable extends Visualization
 {
     const ID = 'table';
     const TEMPLATE_FILE     = "@CoreVisualizations/_dataTableViz_htmlTable.twig";
-    const FOOTER_ICON       = 'plugins/Morpheus/images/table.png';
+    const FOOTER_ICON       = 'icon-table';
     const FOOTER_ICON_TITLE = 'General_DisplaySimpleTable';
 
     public static function getDefaultConfig()
@@ -70,6 +70,25 @@ class HtmlTable extends Visualization
             $dataTable = $request->process();
             $this->assignTemplateVar('siteSummary', $dataTable);
         }
+
+        if ($this->isPivoted()) {
+            $this->config->columns_to_display = $this->dataTable->getColumns();
+        }
     }
 
+    public function beforeGenericFiltersAreAppliedToLoadedDataTable()
+    {
+        if ($this->isPivoted()) {
+            $this->config->columns_to_display = $this->dataTable->getColumns();
+
+            $this->dataTable->applyQueuedFilters();
+        }
+
+        parent::beforeGenericFiltersAreAppliedToLoadedDataTable();
+    }
+
+    protected function isPivoted()
+    {
+        return $this->requestConfig->pivotBy || Common::getRequestVar('pivotBy', '');
+    }
 }

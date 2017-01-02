@@ -13,19 +13,15 @@ use Piwik\Common;
 use Piwik\IP;
 use Piwik\Option;
 use Piwik\Piwik;
+use Piwik\Plugin;
 use Piwik\Plugins\UserCountry\LocationProvider\DefaultProvider;
+use Piwik\Plugin\Manager as PluginManager;
 use Piwik\Tracker\Cache;
-use ReflectionClass;
 
 /**
- * @see plugins/UserCountry/LocationProvider/Default.php
+ * @see plugins/UserCountry/functions.php
  */
-require_once PIWIK_INCLUDE_PATH . '/plugins/UserCountry/LocationProvider/Default.php';
-
-/**
- * @see plugins/UserCountry/LocationProvider/GeoIp.php
- */
-require_once PIWIK_INCLUDE_PATH . '/plugins/UserCountry/LocationProvider/GeoIp.php';
+require_once PIWIK_INCLUDE_PATH . '/plugins/UserCountry/functions.php';
 
 /**
  * The base class of all LocationProviders.
@@ -143,19 +139,33 @@ abstract class LocationProvider
     {
         if (is_null(self::$providers)) {
             self::$providers = array();
-            foreach (get_declared_classes() as $klass) {
-                if (is_subclass_of($klass, 'Piwik\Plugins\UserCountry\LocationProvider')) {
-                    $klassInfo = new ReflectionClass($klass);
-                    if ($klassInfo->isAbstract()) {
-                        continue;
-                    }
-
-                    self::$providers[] = new $klass;
+            $plugins   = PluginManager::getInstance()->getPluginsLoadedAndActivated();
+            foreach ($plugins as $plugin) {
+                foreach (self::getLocationProviders($plugin) as $instance) {
+                    self::$providers[] = $instance;
                 }
             }
         }
 
         return self::$providers;
+    }
+
+    /**
+     * Get all lo that are defined by the given plugin.
+     *
+     * @param Plugin $plugin
+     * @return LocationProvider[]
+     */
+    protected static function getLocationProviders(Plugin $plugin)
+    {
+        $locationProviders = $plugin->findMultipleComponents('LocationProvider', 'Piwik\\Plugins\\UserCountry\\LocationProvider');
+        $instances  = [];
+
+        foreach ($locationProviders as $locationProvider) {
+            $instances[] = new $locationProvider();
+        }
+
+        return $instances;
     }
 
     /**
@@ -272,7 +282,7 @@ abstract class LocationProvider
      *
      * This function should not be called by the Tracker.
      *
-     * @return \Piwik\Plugins\UserCountry\LocationProvider
+     * @return \Piwik\Plugins\UserCountry\LocationProvider|null
      */
     public static function getCurrentProvider()
     {
@@ -289,7 +299,7 @@ abstract class LocationProvider
     public static function setCurrentProvider($providerId)
     {
         $provider = self::getProviderById($providerId);
-        if ($provider === false) {
+        if (empty($provider)) {
             throw new Exception(
                 "Invalid provider ID '$providerId'. The provider either does not exist or is not available");
         }
@@ -302,7 +312,7 @@ abstract class LocationProvider
      * Returns a provider instance by ID or false if the ID is invalid or unavailable.
      *
      * @param string $providerId
-     * @return \Piwik\Plugins\UserCountry\LocationProvider|false
+     * @return \Piwik\Plugins\UserCountry\LocationProvider|null
      */
     public static function getProviderById($providerId)
     {
@@ -312,7 +322,7 @@ abstract class LocationProvider
             }
         }
 
-        return false;
+        return null;
     }
 
     public function getId()
@@ -347,7 +357,7 @@ abstract class LocationProvider
             && !empty($location[self::CONTINENT_CODE_KEY])
         ) {
             $continentCode = strtolower($location[self::CONTINENT_CODE_KEY]);
-            $location[self::CONTINENT_NAME_KEY] = Piwik::translate('UserCountry_continent_' . $continentCode);
+            $location[self::CONTINENT_NAME_KEY] = continentTranslate($continentCode);
         }
 
         // fill in country name if country code is present
@@ -355,7 +365,7 @@ abstract class LocationProvider
             && !empty($location[self::COUNTRY_CODE_KEY])
         ) {
             $countryCode = strtolower($location[self::COUNTRY_CODE_KEY]);
-            $location[self::COUNTRY_NAME_KEY] = Piwik::translate('UserCountry_country_' . $countryCode);
+            $location[self::COUNTRY_NAME_KEY] = countryTranslate($countryCode);
         }
 
         // deal w/ improper latitude/longitude & round proper values

@@ -1,5 +1,6 @@
 {
     "ImageGraph": {
-        "PluginDescription": "Prodhoni për çfarëdo raporti Piwik figura të mrekullueshme PNG statike Grafikësh."
+        "ColumnOrdinateMissing": "Në këtë raport s’u gjet shtylla '%1$s'. Provoni cilëndo nga %2$s",
+        "PluginDescription": "Prodhoni figura të hijshme Grafikësh statikë PNG për çfarëdo të dhënash të raportit tuaj."
     }
 }

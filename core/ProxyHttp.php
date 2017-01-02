@@ -60,9 +60,12 @@ class ProxyHttp
      *                             of the file will be served.
      * @param int|false $byteEnd The ending byte in the file to serve. If false, the data from $byteStart to the
      *                           end of the file will be served.
+     * @param string|false $filename By default the filename of $file is reused as Content-Disposition. If the
+     *                               file should be sent as a different filename to the client you can specify
+     *                               a custom filename here.
      */
     public static function serverStaticFile($file, $contentType, $expireFarFutureDays = 100, $byteStart = false,
-                                            $byteEnd = false)
+                                            $byteEnd = false, $filename = false)
     {
         // if the file cannot be found return HTTP status code '404'
         if (!file_exists($file)) {
@@ -78,7 +81,12 @@ class ProxyHttp
         // set some HTTP response headers
         self::overrideCacheControlHeaders('public');
         Common::sendHeader('Vary: Accept-Encoding');
-        Common::sendHeader('Content-Disposition: inline; filename=' . basename($file));
+
+        if (false === $filename) {
+            $filename = basename($file);
+        }
+
+        Common::sendHeader('Content-Disposition: inline; filename=' . $filename);
 
         if ($expireFarFutureDays) {
             // Required by proxy caches potentially in between the browser and server to cache the request indeed
@@ -234,7 +242,7 @@ class ProxyHttp
 
         if (preg_match(self::DEFLATE_ENCODING_REGEX, $acceptEncoding, $matches)) {
             return array('deflate', '.deflate');
-        } else if (preg_match(self::GZIP_ENCODING_REGEX, $acceptEncoding, $matches)) {
+        } elseif (preg_match(self::GZIP_ENCODING_REGEX, $acceptEncoding, $matches)) {
             return array('gzip', '.gz');
         } else {
             return array(false, false);
@@ -262,7 +270,7 @@ class ProxyHttp
 
         if ($compressionEncoding == 'deflate') {
             $data = gzdeflate($data, 9);
-        } else if ($compressionEncoding == 'gzip' || $compressionEncoding == 'x-gzip') {
+        } elseif ($compressionEncoding == 'gzip' || $compressionEncoding == 'x-gzip') {
             $data = gzencode($data, 9);
         }
 

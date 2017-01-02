@@ -10,6 +10,7 @@
 namespace Piwik\Plugins\CoreVisualizations\Visualizations\HtmlTable;
 
 use Piwik\DataTable;
+use Piwik\Metrics;
 use Piwik\Plugins\CoreVisualizations\Visualizations\HtmlTable;
 use Piwik\View;
 
@@ -19,20 +20,20 @@ use Piwik\View;
 class AllColumns extends HtmlTable
 {
     const ID = 'tableAllColumns';
-    const FOOTER_ICON       = 'plugins/Morpheus/images/table_more.png';
+    const FOOTER_ICON       = 'icon-table-more';
     const FOOTER_ICON_TITLE = 'General_DisplayTableWithMoreMetrics';
 
     public function beforeRender()
     {
         $this->config->show_extra_columns  = true;
-        $this->config->datatable_css_class = 'dataTableVizAllColumns';
-        $this->config->show_exclude_low_population = true;
 
         parent::beforeRender();
     }
 
     public function beforeGenericFiltersAreAppliedToLoadedDataTable()
     {
+        $this->config->datatable_css_class = 'dataTableVizAllColumns';
+        
         $this->dataTable->filter('AddColumnsProcessedMetrics');
 
         $properties = $this->config;
@@ -40,11 +41,13 @@ class AllColumns extends HtmlTable
         $this->dataTable->filter(function (DataTable $dataTable) use ($properties) {
             $columnsToDisplay = array('label', 'nb_visits');
 
-            if (in_array('nb_uniq_visitors', $dataTable->getColumns())) {
+            $columns = $dataTable->getColumns();
+
+            if (in_array('nb_uniq_visitors', $columns)) {
                 $columnsToDisplay[] = 'nb_uniq_visitors';
             }
 
-            if (in_array('nb_users', $dataTable->getColumns())) {
+            if (in_array('nb_users', $columns)) {
                 $columnsToDisplay[] = 'nb_users';
             }
 
@@ -60,5 +63,16 @@ class AllColumns extends HtmlTable
 
             $properties->columns_to_display = $columnsToDisplay;
         });
+    }
+
+    public function beforeLoadDataTable()
+    {
+        unset($this->requestConfig->request_parameters_to_modify['pivotBy']);
+        unset($this->requestConfig->request_parameters_to_modify['pivotByColumn']);
+    }
+
+    protected function isPivoted()
+    {
+        return false; // Pivot not supported
     }
 }

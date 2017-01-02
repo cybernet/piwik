@@ -2,7 +2,8 @@
     "MultiSites": {
         "Evolution": "Evolutie",
         "LoadingWebsites": "Websites laden",
-        "Pagination": "%s - %s van %s",
-        "TopLinkTooltip": "Vergelijk Website statistieken van al je websites."
+        "PluginDescription": "Bekijk en vergelijk al uw websites en apps in dit handige 'Alle Websites' paneel.",
+        "TopLinkTooltip": "Vergelijk Website statistieken van al je websites.",
+        "Pagination": "%1$s - %2$s van %3$s"
     }
 }

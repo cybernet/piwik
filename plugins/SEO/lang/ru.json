@@ -1,15 +1,13 @@
 {
     "SEO": {
+        "PluginDescription": "Этот плагин извлекает и отображает метрику SEO: веб-ранг Alexa, Google Pagerank, количество индексированных страниц и обратных ссылок на текущий выбранный веб-сайт.",
         "AlexaRank": "Рейтинг Alexa",
         "Bing_IndexedPages": "Страниц в индексе Bing",
         "Dmoz": "Записей в каталоге DMOZ",
         "DomainAge": "Возраст домена",
-        "ExternalBacklinks": "Внешние обратные ссылки (Majestic)",
         "Google_IndexedPages": "Страниц в индексе Google",
         "Rank": "Рейтинг",
-        "ReferrerDomains": "Ссылающиеся домены (Majestic)",
         "SeoRankings": "SEO-Рейтинги",
-        "SEORankingsFor": "SEO Рейтинги для %s",
-        "ViewBacklinksOnMajesticSEO": "Посмотреть Внешние обратные ссылки на сайте MajesticSEO.com"
+        "SEORankingsFor": "SEO Рейтинги для %s"
     }
 }

@@ -26,12 +26,17 @@ class UpdaterMock extends Updater
 
     public function getLatestVersion()
     {
-        return '4.0.0';
+        return '40.0.0';
     }
 
     public function isNewVersionAvailable()
     {
         return true;
+    }
+
+    public function getArchiveUrl($version, $https = true)
+    {
+        return 'http://builds.piwik.org/piwik.zip';
     }
 
     public function updatePiwik($https = true)

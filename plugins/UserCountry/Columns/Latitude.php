@@ -8,7 +8,6 @@
  */
 namespace Piwik\Plugins\UserCountry\Columns;
 
-use Piwik\Common;
 use Piwik\Piwik;
 use Piwik\Plugins\UserCountry\LocationProvider;
 use Piwik\Plugins\UserCountry\Segment;
@@ -19,7 +18,7 @@ use Piwik\Tracker\Action;
 class Latitude extends Base
 {
     protected $columnName = 'location_latitude';
-    protected $columnType = 'float(10, 6) DEFAULT NULL';
+    protected $columnType = 'decimal(9, 6) DEFAULT NULL';
 
     protected function configureSegments()
     {

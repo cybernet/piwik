@@ -9,23 +9,25 @@
 namespace Piwik\Plugins\CoreUpdater;
 
 use Exception;
+use Piwik\AssetManager;
 use Piwik\Common;
 use Piwik\Config;
 use Piwik\DbHelper;
 use Piwik\Filechecks;
+use Piwik\FileIntegrity;
 use Piwik\Filesystem;
 use Piwik\Http;
 use Piwik\Option;
 use Piwik\Piwik;
-use Piwik\Plugin\Manager as PluginManager;
 use Piwik\Plugin;
-use Piwik\Plugins\CorePluginsAdmin\Marketplace;
+use Piwik\Plugin\Manager as PluginManager;
 use Piwik\Plugins\LanguagesManager\LanguagesManager;
+use Piwik\Plugins\Marketplace\Plugins;
 use Piwik\SettingsServer;
 use Piwik\Updater as DbUpdater;
 use Piwik\Version;
-use Piwik\View\OneClickDone;
 use Piwik\View;
+use Piwik\View\OneClickDone;
 
 class Controller extends \Piwik\Plugin\Controller
 {
@@ -39,9 +41,77 @@ class Controller extends \Piwik\Plugin\Controller
      */
     private $updater;
 
-    public function __construct(Updater $updater)
+    /**
+     * @var Plugins
+     */
+    private $marketplacePlugins;
+
+    public function __construct(Updater $updater, Plugins $marketplacePlugins = null)
     {
         $this->updater = $updater;
+        $this->marketplacePlugins = $marketplacePlugins;
+
+        parent::__construct();
+    }
+
+    /**
+     * Return the base.less compiled to css
+     *
+     * @return string
+     */
+    public function getUpdaterCss()
+    {
+        Common::sendHeader('Content-Type: text/css');
+        Common::sendHeader('Cache-Control: max-age=' . (60 * 60));
+
+        $files = array(
+            'plugins/Morpheus/stylesheets/base/bootstrap.css',
+            'plugins/Morpheus/stylesheets/base/icons.css',
+            'libs/jquery/themes/base/jquery-ui.min.css',
+            'libs/bower_components/materialize/dist/css/materialize.min.css',
+            'plugins/Morpheus/stylesheets/base.less',
+            'plugins/Morpheus/stylesheets/general/_forms.less',
+            'plugins/Morpheus/stylesheets/simple_structure.css',
+            'plugins/CoreHome/stylesheets/jquery.ui.autocomplete.css',
+            'plugins/CoreUpdater/stylesheets/updateLayout.css'
+        );
+
+        return AssetManager::compileCustomStylesheets($files);
+    }
+
+    /**
+     * Return the base.less compiled to css
+     *
+     * @return string
+     */
+    public function getUpdaterJs()
+    {
+        Common::sendHeader('Content-Type: application/javascript; charset=UTF-8');
+        Common::sendHeader('Cache-Control: max-age=' . (60 * 60));
+    
+        $files = array(
+            'libs/bower_components/jquery/dist/jquery.min.js',
+            'libs/bower_components/jquery-ui/ui/minified/jquery-ui.min.js',
+            'libs/bower_components/materialize/dist/js/materialize.min.js',
+            'plugins/Morpheus/javascripts/piwikHelper.js',
+            'plugins/CoreHome/javascripts/donate.js',
+            'plugins/CoreUpdater/javascripts/updateLayout.js',
+            'libs/bower_components/angular/angular.min.js',
+            'libs/bower_components/angular-sanitize/angular-sanitize.js',
+            'libs/bower_components/angular-animate/angular-animate.js',
+            'libs/bower_components/angular-cookies/angular-cookies.js',
+            'libs/bower_components/ngDialog/js/ngDialog.min.js',
+            'plugins/CoreHome/angularjs/common/services/service.module.js',
+            'plugins/CoreHome/angularjs/common/filters/filter.module.js',
+            'plugins/CoreHome/angularjs/common/filters/translate.js',
+            'plugins/CoreHome/angularjs/common/directives/directive.module.js',
+            'plugins/CoreHome/angularjs/common/directives/focus-anywhere-but-here.js',
+            'plugins/CoreHome/angularjs/piwikApp.config.js',
+            'plugins/CoreHome/angularjs/piwikApp.js',
+            'plugins/Installation/javascripts/installation.js',
+        );
+
+        return AssetManager::compileCustomJs($files);
     }
 
     public function newVersionAvailable()
@@ -53,6 +123,7 @@ class Controller extends \Piwik\Plugin\Controller
 
         $view = new View('@CoreUpdater/newVersionAvailable');
         $this->addCustomLogoInfo($view);
+        $this->setBasicVariablesView($view);
 
         $view->piwik_version = Version::VERSION;
         $view->piwik_new_version = $newVersion;
@@ -61,9 +132,8 @@ class Controller extends \Piwik\Plugin\Controller
 
         $marketplacePlugins = array();
         try {
-            if (!empty($incompatiblePlugins)) {
-                $marketplace = new Marketplace();
-                $marketplacePlugins = $marketplace->getAllAvailablePluginNames();
+            if (!empty($incompatiblePlugins) && $this->marketplacePlugins) {
+                $marketplacePlugins = $this->marketplacePlugins->getAllAvailablePluginNames();
             }
         } catch (\Exception $e) {}
 
@@ -95,6 +165,8 @@ class Controller extends \Piwik\Plugin\Controller
             $messages = $e->getUpdateLogMessages();
         }
 
+        Filesystem::deleteAllCacheOnUpdate();
+
         $view->feedbackMessages = $messages;
         $this->addCustomLogoInfo($view);
         return $view->render();
@@ -102,15 +174,26 @@ class Controller extends \Piwik\Plugin\Controller
 
     public function oneClickResults()
     {
-        $view = new View('@CoreUpdater/oneClickResults');
-        $view->error = Common::getRequestVar('error', '', 'string', $_POST);
-        $view->feedbackMessages = safe_unserialize(Common::unsanitizeInputValue(Common::getRequestVar('messages', '', 'string', $_POST)));
-        $view->httpsFail = (bool) Common::getRequestVar('httpsFail', 0, 'int', $_POST);
+        $httpsFail = (bool) Common::getRequestVar('httpsFail', 0, 'int', $_POST);
+        $error = Common::getRequestVar('error', '', 'string', $_POST);
+
+        if ($httpsFail) {
+            $view = new View('@CoreUpdater/updateHttpsError');
+            $view->error = $error;
+        } elseif ($error) {
+            $view = new View('@CoreUpdater/updateHttpError');
+            $view->error = $error;
+            $view->feedbackMessages = safe_unserialize(Common::unsanitizeInputValue(Common::getRequestVar('messages', '', 'string', $_POST)));
+        } else {
+            $view = new View('@CoreUpdater/updateSuccess');
+        }
+
         $this->addCustomLogoInfo($view);
+        $this->setBasicVariablesView($view);
         return $view->render();
     }
 
-    protected function redirectToDashboardWhenNoError($updater)
+    protected function redirectToDashboardWhenNoError(DbUpdater $updater)
     {
         if (count($updater->getSqlQueriesToExecute()) == 1
             && !$this->coreError
@@ -146,22 +229,23 @@ class Controller extends \Piwik\Plugin\Controller
     public function runUpdaterAndExit($doDryRun = null)
     {
         $updater = new DbUpdater();
-        $componentsWithUpdateFile = CoreUpdater::getComponentUpdates($updater);
+        $componentsWithUpdateFile = $updater->getComponentUpdates();
         if (empty($componentsWithUpdateFile)) {
             throw new NoUpdatesFoundException("Everything is already up to date.");
         }
 
         SettingsServer::setMaxExecutionTime(0);
 
-        $cli = Common::isPhpCliMode() ? '_cli' : '';
-        $welcomeTemplate = '@CoreUpdater/runUpdaterAndExit_welcome' . $cli;
-        $doneTemplate = '@CoreUpdater/runUpdaterAndExit_done' . $cli;
+        $welcomeTemplate = '@CoreUpdater/runUpdaterAndExit_welcome';
+        $doneTemplate = '@CoreUpdater/runUpdaterAndExit_done';
 
         $viewWelcome = new View($welcomeTemplate);
         $this->addCustomLogoInfo($viewWelcome);
+        $this->setBasicVariablesView($viewWelcome);
 
         $viewDone = new View($doneTemplate);
         $this->addCustomLogoInfo($viewDone);
+        $this->setBasicVariablesView($viewDone);
 
         $doExecuteUpdates = Common::getRequestVar('updateCorePlugins', 0, 'integer') == 1;
 
@@ -174,21 +258,6 @@ class Controller extends \Piwik\Plugin\Controller
             $viewWelcome->isMajor = $updater->hasMajorDbUpdate();
             $this->doWelcomeUpdates($viewWelcome, $componentsWithUpdateFile);
             return $viewWelcome->render();
-        }
-
-        // CLI
-        if (Common::isPhpCliMode()) {
-            $this->doWelcomeUpdates($viewWelcome, $componentsWithUpdateFile);
-            $output = $viewWelcome->render();
-
-            // Proceed with upgrade in CLI only if user specifically asked for it, or if running console command
-            $isUpdateRequested = Common::isRunningConsoleCommand() || Piwik::getModule() == 'CoreUpdater';
-
-            if (!$this->coreError && $isUpdateRequested) {
-                $this->doExecuteUpdates($viewDone, $updater, $componentsWithUpdateFile);
-                $output .= $viewDone->render();
-            }
-            return $output;
         }
 
         // Web
@@ -207,7 +276,7 @@ class Controller extends \Piwik\Plugin\Controller
     private function doWelcomeUpdates($view, $componentsWithUpdateFile)
     {
         $view->new_piwik_version = Version::VERSION;
-        $view->commandUpgradePiwik = "<br /><code>php " . Filesystem::getPathToPiwikRoot() . "/console core:update </code>";
+        $view->commandUpgradePiwik = "php " . Filesystem::getPathToPiwikRoot() . "/console core:update";
         $pluginNamesToUpdate = array();
         $dimensionsToUpdate = array();
         $coreToUpdate = false;
@@ -237,14 +306,17 @@ class Controller extends \Piwik\Plugin\Controller
         }
 
         // check file integrity
-        $integrityInfo = Filechecks::getFileIntegrityInformation();
-        if (isset($integrityInfo[1])) {
-            if ($integrityInfo[0] == false) {
-                $this->warningMessages[] = Piwik::translate('General_FileIntegrityWarningExplanation');
-            }
-            $this->warningMessages = array_merge($this->warningMessages, array_slice($integrityInfo, 1));
+        list($success, $messages) = FileIntegrity::getFileIntegrityInformation();
+
+        if (!$success) {
+            $this->warningMessages[] = Piwik::translate('General_FileIntegrityWarning');
+        }
+        if (count($messages) > 0) {
+            $this->warningMessages = array_merge($this->warningMessages, $messages);
         }
         Filesystem::deleteAllCacheOnUpdate();
+
+        sort($dimensionsToUpdate);
 
         $view->coreError = $this->coreError;
         $view->warningMessages = $this->warningMessages;
@@ -255,9 +327,9 @@ class Controller extends \Piwik\Plugin\Controller
         $view->coreToUpdate = $coreToUpdate;
     }
 
-    private function doExecuteUpdates($view, $updater, $componentsWithUpdateFile)
+    private function doExecuteUpdates($view, DbUpdater $updater, $componentsWithUpdateFile)
     {
-        $result = CoreUpdater::updateComponents($updater, $componentsWithUpdateFile);
+        $result = $updater->updateComponents($componentsWithUpdateFile);
 
         $this->coreError       = $result['coreError'];
         $this->warningMessages = $result['warnings'];

@@ -11,7 +11,9 @@ namespace Piwik\Plugins\SitesManager;
 use Exception;
 use Piwik\API\ResponseBuilder;
 use Piwik\Common;
+use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Piwik;
+use Piwik\Settings\Measurable\MeasurableSettings;
 use Piwik\SettingsPiwik;
 use Piwik\Site;
 use Piwik\Tracker\TrackerCodeGenerator;
@@ -28,17 +30,25 @@ class Controller extends \Piwik\Plugin\ControllerAdmin
      */
     public function index()
     {
+        Piwik::checkUserHasSomeAdminAccess();
+
         return $this->renderTemplate('index');
     }
+    
+    public function globalSettings()
+    {
+        Piwik::checkUserHasSuperUserAccess();
 
-    public function getGlobalSettings() {
+        return $this->renderTemplate('globalSettings');
+    }
 
+    public function getGlobalSettings()
+    {
         Piwik::checkUserHasSomeViewAccess();
 
         $response = new ResponseBuilder(Common::getRequestVar('format'));
 
         $globalSettings = array();
-
         $globalSettings['keepURLFragmentsGlobal'] = API::getInstance()->getKeepURLFragmentsGlobal();
         $globalSettings['siteSpecificUserAgentExcludeEnabled'] = API::getInstance()->isSiteSpecificUserAgentExcludeEnabled();
         $globalSettings['defaultCurrency'] = API::getInstance()->getDefaultCurrency();
@@ -115,8 +125,8 @@ class Controller extends \Piwik\Plugin\ControllerAdmin
     {
         $path = PIWIK_INCLUDE_PATH . '/libs/PiwikTracker/';
         $filename = 'PiwikTracker.php';
-        header('Content-type: text/php');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        Common::sendHeader('Content-type: text/php');
+        Common::sendHeader('Content-Disposition: attachment; filename="' . $filename . '"');
         return file_get_contents($path . $filename);
     }
 
@@ -125,10 +135,15 @@ class Controller extends \Piwik\Plugin\ControllerAdmin
         $javascriptGenerator = new TrackerCodeGenerator();
         $piwikUrl = Url::getCurrentUrlWithoutFileName();
 
+        if (!$this->site) {
+            throw new UnexpectedWebsiteFoundException('Invalid site ' . $this->idSite);
+        }
+
         return $this->renderTemplate('siteWithoutData', array(
             'siteName'     => $this->site->getName(),
+            'idSite' => $this->site->getId(),
             'trackingHelp' => $this->renderTemplate('_displayJavascriptCode', array(
-                'displaySiteName' => $this->site->getName(),
+                'displaySiteName' => Common::unsanitizeInputValue($this->site->getName()),
                 'jsTag'           => $javascriptGenerator->generate($this->idSite, $piwikUrl),
                 'idSite'          => $this->idSite,
                 'piwikUrl'        => $piwikUrl,

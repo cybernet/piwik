@@ -1,4 +1,4 @@
-/*!
+    /*!
  * Piwik - free/libre analytics platform
  *
  * Overlay screenshot tests.
@@ -9,13 +9,26 @@
 
 // TODO: should be stored in Overlay plugin
 describe("Overlay", function () {
+    this.retries(3);
+
     this.timeout(0);
 
     var url = null;
+    var urlWithSegment;
+
+    function removeOptOutIframe(page) {
+        page.evaluate(function () {
+            $('iframe#optOutIframe', $('iframe').contents()).remove();
+        });
+    }
 
     before(function (done) {
-        url = "?module=Overlay&period=year&date=today&idSite=3#l=" + encodeURIComponent(testEnvironment.overlayUrl).replace(/[%]/g, "$");
-        
+        var baseUrl = '?module=Overlay&period=year&date=today&idSite=3';
+        var hash = '#?l=' + encodeURIComponent(testEnvironment.overlayUrl).replace(/[%]/g, "$");
+
+        url = baseUrl + hash;
+        urlWithSegment = baseUrl + '&segment=' + encodeURIComponent('visitIp==20.56.34.67') + hash;
+
         testEnvironment.callApi("SitesManager.addSiteAliasUrls", {idSite: 3, urls: [config.piwikUrl]}, done);
     });
 
@@ -26,6 +39,8 @@ describe("Overlay", function () {
     it("should load correctly", function (done) {
         expect.screenshot("loaded").to.be.capture(function (page) {
             page.load(url);
+
+            removeOptOutIframe(page);
         }, done);
     });
 
@@ -33,13 +48,23 @@ describe("Overlay", function () {
         expect.screenshot("page_link_clicks").to.be.capture(function (page) {
             var pos = page.webpage.evaluate(function () {
                 var iframe = $('iframe'),
-                    innerOffset = $('.btn.btn-lg', iframe.contents()).offset();
+                    innerOffset = $('.btn.btn-large', iframe.contents()).offset();
                 return {
                     x: iframe.offset().left + innerOffset.left,
                     y: iframe.offset().top + innerOffset.top
                 };
             });
             page.sendMouseEvent('mousemove', pos);
+
+            page.evaluate(function () {
+                $('div#PIS_StatusBar', $('iframe').contents()).each(function () {
+                    var html = $(this).html();
+                    html = html.replace(/localhost\:[0-9]+/g, 'localhost');
+                    $(this).html(html);
+                });
+            });
+
+            removeOptOutIframe(page);
         }, done);
     });
 
@@ -54,6 +79,8 @@ describe("Overlay", function () {
                 };
             });
             page.sendMouseEvent('click', pos, 2000);
+
+            removeOptOutIframe(page);
         }, done);
     });
 
@@ -68,30 +95,46 @@ describe("Overlay", function () {
                 };
             });
             page.sendMouseEvent('click', pos);
+
+            removeOptOutIframe(page);
         }, done);
     });
 
     it("should change date range when period changed", function (done) {
         expect.screenshot("period_change").to.be.capture(function (page) {
             page.evaluate(function () {
-                $('#Overlay_DateRangeSelect').val('day;yesterday').trigger('change');
+                $('#overlayDateRangeSelect').val('day;yesterday').trigger('change');
             });
+
+            removeOptOutIframe(page);
         }, done);
     });
 
     it("should open row evolution popup when row evolution link clicked", function (done) {
         expect.screenshot("row_evolution").to.be.capture(function (page) {
-            page.click('#Overlay_RowEvolution');
+            page.click('#overlayRowEvolution');
             page.evaluate(function () {
                 $('.jqplot-xaxis').hide(); // xaxis will change every day so hide it
             });
+
+            removeOptOutIframe(page);
         }, done);
     });
 
     it("should open transitions popup when transitions link clicked", function (done) {
         expect.screenshot("transitions").to.be.capture(function (page) {
             page.click('button.ui-dialog-titlebar-close');
-            page.click('#Overlay_Transitions');
+            page.click('#overlayTransitions');
+
+            removeOptOutIframe(page);
+        }, done);
+    });
+
+    it("should load an overlay with segment", function (done) {
+        expect.screenshot("loaded_with_segment").to.be.capture(function (page) {
+            page.load(urlWithSegment);
+
+            removeOptOutIframe(page);
         }, done);
     });
 });

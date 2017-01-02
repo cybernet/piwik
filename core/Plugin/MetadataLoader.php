@@ -9,7 +9,6 @@
 namespace Piwik\Plugin;
 
 use Exception;
-use Piwik\Common;
 use Piwik\Piwik;
 use Piwik\Version;
 
@@ -50,9 +49,23 @@ class MetadataLoader
      */
     public function load()
     {
+        $defaults = $this->getDefaultPluginInformation();
+        $plugin   = $this->loadPluginInfoJson();
+
+        // use translated plugin description if available
+        if ($defaults['description'] != Piwik::translate($defaults['description'])) {
+            unset($plugin['description']);
+        }
+
+        // look for a license file
+        $licenseFile = $this->getPathToLicenseFile();
+        if(!empty($licenseFile)) {
+            $plugin['license_file'] = $licenseFile;
+        }
+
         return array_merge(
-            $this->getDefaultPluginInformation(),
-            $this->loadPluginInfoJson()
+            $defaults,
+            $plugin
         );
     }
 
@@ -67,11 +80,10 @@ class MetadataLoader
     {
         $descriptionKey = $this->pluginName . '_PluginDescription';
         return array(
-            'description'      => Piwik::translate($descriptionKey),
+            'description'      => $descriptionKey,
             'homepage'         => 'http://piwik.org/',
             'authors'          => array(array('name' => 'Piwik', 'homepage'  => 'http://piwik.org/')),
             'license'          => 'GPL v3+',
-            'license_homepage' => 'http://www.gnu.org/licenses/gpl.html',
             'version'          => Version::VERSION,
             'theme'            => false,
             'require'          => array()
@@ -80,7 +92,7 @@ class MetadataLoader
 
     private function loadPluginInfoJson()
     {
-        $path = \Piwik\Plugin\Manager::getPluginsDirectory() . $this->pluginName . '/' . self::PLUGIN_JSON_FILENAME;
+        $path = $this->getPathToPluginFolder() . '/' . self::PLUGIN_JSON_FILENAME;
         return $this->loadJsonMetadata($path);
     }
 
@@ -103,5 +115,33 @@ class MetadataLoader
         }
 
         return $info;
+    }
+
+    /**
+     * @return string
+     */
+    private function getPathToPluginFolder()
+    {
+        return \Piwik\Plugin\Manager::getPluginsDirectory() . $this->pluginName;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getPathToLicenseFile()
+    {
+        $prefixPath = $this->getPathToPluginFolder() . '/';
+        $licenseFiles = array(
+            'LICENSE',
+            'LICENSE.md',
+            'LICENSE.txt'
+        );
+        foreach ($licenseFiles as $licenseFile) {
+            $pathToLicense = $prefixPath . $licenseFile;
+            if (is_file($pathToLicense) && is_readable($pathToLicense)) {
+                return $pathToLicense;
+            }
+        }
+        return null;
     }
 }

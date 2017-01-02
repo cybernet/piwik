@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <result>
-	<date>Sat 6 Mar</date>
+	<date>Sat, Mar 6</date>
 	<previousPages>
 		<row>
 			<label>example.org/the/third_page.html?foo=bar</label>
@@ -22,10 +22,10 @@
 		</row>
 	</previousSiteSearches>
 	<pageMetrics>
-		<loops>2</loops>
+		<loops>5</loops>
 		<pageviews>18</pageviews>
 		<entries>4</entries>
-		<exits>2</exits>
+		<exits>4</exits>
 	</pageMetrics>
 	<followingPages>
 		<row>
@@ -42,10 +42,6 @@
 		</row>
 		<row>
 			<label>example.org/page3.html</label>
-			<referrals>1</referrals>
-		</row>
-		<row>
-			<label>example.org/page/search.html</label>
 			<referrals>1</referrals>
 		</row>
 	</followingPages>

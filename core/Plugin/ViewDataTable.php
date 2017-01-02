@@ -13,6 +13,7 @@ use Piwik\Common;
 use Piwik\DataTable;
 use Piwik\Period;
 use Piwik\Piwik;
+use Piwik\Plugin\ReportsProvider;
 use Piwik\View;
 use Piwik\View\ViewInterface;
 use Piwik\ViewDataTable\Config as VizConfig;
@@ -177,7 +178,12 @@ abstract class ViewDataTable implements ViewInterface
      */
     public function __construct($controllerAction, $apiMethodToRequestDataTable, $overrideParams = array())
     {
-        list($controllerName, $controllerAction) = explode('.', $controllerAction);
+        if (strpos($controllerAction, '.') === false) {
+            $controllerName = '';
+            $controllerAction = '';
+        } else {
+            list($controllerName, $controllerAction) = explode('.', $controllerAction);
+        }
 
         $this->requestConfig = static::getDefaultRequestConfig();
         $this->config        = static::getDefaultConfig();
@@ -191,7 +197,7 @@ abstract class ViewDataTable implements ViewInterface
 
         $this->requestConfig->apiMethodToRequestDataTable = $apiMethodToRequestDataTable;
 
-        $report = Report::factory($this->requestConfig->getApiModuleToRequest(), $this->requestConfig->getApiMethodToRequest());
+        $report = ReportsProvider::factory($this->requestConfig->getApiModuleToRequest(), $this->requestConfig->getApiMethodToRequest());
 
         if (!empty($report)) {
             /** @var Report $report */
@@ -205,13 +211,7 @@ abstract class ViewDataTable implements ViewInterface
             $relatedReports = $report->getRelatedReports();
             if (!empty($relatedReports)) {
                 foreach ($relatedReports as $relatedReport) {
-                    $widgetTitle = $relatedReport->getWidgetTitle();
-
-                    if ($widgetTitle && Common::getRequestVar('widget', 0, 'int')) {
-                        $relatedReportName = $widgetTitle;
-                    } else {
-                        $relatedReportName = $relatedReport->getName();
-                    }
+                    $relatedReportName = $relatedReport->getName();
 
                     $this->config->addRelatedReport($relatedReport->getModule() . '.' . $relatedReport->getAction(),
                                                     $relatedReportName);
@@ -227,6 +227,8 @@ abstract class ViewDataTable implements ViewInterface
             if (!empty($processedMetrics)) {
                 $this->config->addTranslations($processedMetrics);
             }
+
+            $this->config->title = $report->getName();
 
             $report->configureView($this);
         }
@@ -260,7 +262,7 @@ abstract class ViewDataTable implements ViewInterface
         $this->config->show_footer_icons = (false == $this->requestConfig->idSubtable);
 
         // the exclude low population threshold value is sometimes obtained by requesting data.
-        // to avoid issuing unecessary requests when display properties are determined by metadata,
+        // to avoid issuing unnecessary requests when display properties are determined by metadata,
         // we allow it to be a closure.
         if (isset($this->requestConfig->filter_excludelowpop_value)
             && $this->requestConfig->filter_excludelowpop_value instanceof \Closure
@@ -273,7 +275,7 @@ abstract class ViewDataTable implements ViewInterface
         $this->overrideViewPropertiesWithQueryParams();
     }
 
-    protected function assignRelatedReportsTitle()
+    private function assignRelatedReportsTitle()
     {
         if (!empty($this->config->related_reports_title)) {
             // title already assigned by a plugin
@@ -347,7 +349,7 @@ abstract class ViewDataTable implements ViewInterface
             throw new \Exception($message);
         }
 
-       return $id;
+        return $id;
     }
 
     /**
@@ -411,11 +413,8 @@ abstract class ViewDataTable implements ViewInterface
      */
     public function render()
     {
-        $view = $this->buildView();
-        return $view->render();
+        return '';
     }
-
-    abstract protected function buildView();
 
     protected function getDefaultDataTableCssClass()
     {
@@ -513,6 +512,47 @@ abstract class ViewDataTable implements ViewInterface
                 $this->config->custom_parameters[$key] = $value;
             }
         }
+    }
+
+    /**
+     * Display a meaningful error message when any invalid parameter is being set.
+     *
+     * @param $overrideParams
+     * @throws
+     */
+    public function throwWhenSettingNonOverridableParameter($overrideParams)
+    {
+        $nonOverridableParams = $this->getNonOverridableParams($overrideParams);
+        if(count($nonOverridableParams) > 0) {
+            throw new \Exception(sprintf(
+                "Setting parameters %s is not allowed. Please report this bug to the Piwik team.",
+                implode(" and ", $nonOverridableParams)
+            ));
+        }
+    }
+
+    /**
+     * @param $overrideParams
+     * @return array
+     */
+    public function getNonOverridableParams($overrideParams)
+    {
+        $paramsCannotBeOverridden = array();
+        foreach ($overrideParams as $paramName => $paramValue) {
+            if (property_exists($this->requestConfig, $paramName)) {
+                $allowedParams = $this->requestConfig->overridableProperties;
+            } elseif (property_exists($this->config, $paramName)) {
+                $allowedParams = $this->config->overridableProperties;
+            } else {
+                // setting Config.custom_parameters is always allowed
+                continue;
+            }
+
+            if (!in_array($paramName, $allowedParams)) {
+                $paramsCannotBeOverridden[] = $paramName;
+            }
+        }
+        return $paramsCannotBeOverridden;
     }
 
 }

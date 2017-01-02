@@ -2,6 +2,8 @@
     "MultiSites": {
         "Evolution": "Evolução",
         "LoadingWebsites": "Carregando sites",
-        "TopLinkTooltip": "Comparar estatísticas de todos os websites."
+        "PluginDescription": "Veja e compare todos os seus sites e aplicativos neste útil painel 'Todos Websites'.",
+        "TopLinkTooltip": "Comparar estatísticas de todos os websites.",
+        "Pagination": "%1$s - %2$s de %3$s"
     }
 }

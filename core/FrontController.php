@@ -11,13 +11,14 @@ namespace Piwik;
 
 use Exception;
 use Piwik\API\Request;
-use Piwik\API\ResponseBuilder;
 use Piwik\Container\StaticContainer;
 use Piwik\Exception\AuthenticationFailedException;
+use Piwik\Exception\DatabaseSchemaIsNewerThanCodebaseException;
+use Piwik\Exception\PluginDeactivatedException;
+use Piwik\Exception\StylesheetLessCompileException;
 use Piwik\Http\ControllerResolver;
 use Piwik\Http\Router;
-use Piwik\Plugin\Report;
-use Piwik\Session;
+use Piwik\Plugins\CoreAdminHome\CustomLogo;
 
 /**
  * This singleton dispatches requests to the appropriate plugin Controller.
@@ -44,14 +45,14 @@ use Piwik\Session;
  *         $_GET['changeVisitAlpha'] = false;
  *         $_GET['removeOldVisits'] = false;
  *         $_GET['showFooterMessage'] = false;
- *         $realtimeMap = FrontController::getInstance()->fetchDispatch('UserCountryMap', 'realtimeMap');
+ *         $realtimeMap = FrontController::getInstance()->dispatch('UserCountryMap', 'realtimeMap');
  *
  *         $view = new View('@MyPlugin/myPopupWithRealtimeMap.twig');
  *         $view->realtimeMap = $realtimeMap;
  *         return $realtimeMap->render();
  *     }
  *
- * For a detailed explanation, see the documentation [here](http://piwik.org/docs/plugins/framework-overview).
+ * For a detailed explanation, see the documentation [here](https://developer.piwik.org/guides/how-piwik-works).
  *
  * @method static \Piwik\FrontController getInstance()
  */
@@ -67,9 +68,50 @@ class FrontController extends Singleton
     public static $enableDispatch = true;
 
     /**
+     * @var bool
+     */
+    private $initialized = false;
+
+    /**
+     * @param $lastError
+     * @return string
+     * @throws AuthenticationFailedException
+     * @throws Exception
+     */
+    private static function generateSafeModeOutputFromError($lastError)
+    {
+        Common::sendResponseCode(500);
+
+        $controller = FrontController::getInstance();
+        try {
+            $controller->init();
+            $message = $controller->dispatch('CorePluginsAdmin', 'safemode', array($lastError));
+        } catch(Exception $e) {
+            // may fail in safe mode (eg. global.ini.php not found)
+            $message = sprintf("Piwik encoutered an error: %s (which lead to: %s)", $lastError['message'], $e->getMessage());
+        }
+
+        return $message;
+    }
+
+    /**
+     * @param Exception $e
+     * @return string
+     */
+    private static function generateSafeModeOutputFromException($e)
+    {
+        $error = array(
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        );
+        return self::generateSafeModeOutputFromError($error);
+    }
+
+    /**
      * Executes the requested plugin controller method.
      *
-     * @throws Exception|\Piwik\PluginDeactivatedException in case the plugin doesn't exist, the action doesn't exist,
+     * @throws Exception|\Piwik\Exception\PluginDeactivatedException in case the plugin doesn't exist, the action doesn't exist,
      *                                                     there is not enough permission, etc.
      *
      * @param string $module The name of the plugin whose controller to execute, eg, `'UserCountryMap'`.
@@ -106,6 +148,15 @@ class FrontController extends Singleton
              * @param \Piwik\NoAccessException $exception The exception that was caught.
              */
             Piwik::postEvent('User.isNotAuthorized', array($exception), $pending = true);
+        } catch (\Twig_Error_Runtime $e) {
+            echo $this->generateSafeModeOutputFromException($e);
+            exit;
+        } catch(StylesheetLessCompileException $e) {
+            echo $this->generateSafeModeOutputFromException($e);
+            exit;
+        } catch(\Error $e) {
+            echo $this->generateSafeModeOutputFromException($e);
+            exit;
         }
     }
 
@@ -168,49 +219,16 @@ class FrontController extends Singleton
 
     public static function setUpSafeMode()
     {
-        register_shutdown_function(array('\\Piwik\\FrontController','triggerSafeModeWhenError'));
+        register_shutdown_function(array('\\Piwik\\FrontController', 'triggerSafeModeWhenError'));
     }
 
     public static function triggerSafeModeWhenError()
     {
         $lastError = error_get_last();
         if (!empty($lastError) && $lastError['type'] == E_ERROR) {
-            Common::sendResponseCode(500);
-
-            $controller = FrontController::getInstance();
-            $controller->init();
-            $message = $controller->dispatch('CorePluginsAdmin', 'safemode', array($lastError));
-
+            $message = self::generateSafeModeOutputFromError($lastError);
             echo $message;
         }
-    }
-
-    /**
-     * Loads the config file
-     * This is overridden in tests to ensure test config file is used
-     *
-     * @return Exception
-     */
-    public static function createConfigObject()
-    {
-        $exceptionToThrow = false;
-        try {
-            Config::getInstance()->database; // access property to check if the local file exists
-        } catch (Exception $exception) {
-            Log::debug($exception);
-
-            /**
-             * Triggered when the configuration file cannot be found or read, which usually
-             * means Piwik is not installed yet.
-             *
-             * This event can be used to start the installation process or to display a custom error message.
-             *
-             * @param Exception $exception The exception that was thrown by `Config::getInstance()`.
-             */
-            Piwik::postEvent('Config.NoConfigurationFile', array($exception), $pending = true);
-            $exceptionToThrow = $exception;
-        }
-        return $exceptionToThrow;
     }
 
     /**
@@ -226,13 +244,11 @@ class FrontController extends Singleton
      */
     public function init()
     {
-        static $initialized = false;
-        if ($initialized) {
+        if ($this->initialized) {
             return;
         }
-        $initialized = true;
 
-        $exceptionToThrow = self::createConfigObject();
+        $this->initialized = true;
 
         $tmpPath = StaticContainer::get('path.tmp');
 
@@ -253,10 +269,6 @@ class FrontController extends Singleton
 
         Plugin\Manager::getInstance()->loadPluginTranslations();
         Plugin\Manager::getInstance()->loadActivatedPlugins();
-
-        if ($exceptionToThrow) {
-            throw $exceptionToThrow;
-        }
 
         // try to connect to the database
         try {
@@ -318,9 +330,14 @@ class FrontController extends Singleton
          */
         Piwik::postEvent('Request.dispatchCoreAndPluginUpdatesScreen');
 
-        Updater::throwIfPiwikVersionIsOlderThanDBSchema();
+        $this->throwIfPiwikVersionIsOlderThanDBSchema();
 
-        \Piwik\Plugin\Manager::getInstance()->installLoadedPlugins();
+        if (empty($_GET['module'])
+            || empty($_GET['action'])
+            || $_GET['module'] !== 'Installation'
+            || !in_array($_GET['action'], array('getInstallationCss', 'getInstallationJs'))) {
+            \Piwik\Plugin\Manager::getInstance()->installLoadedPlugins();
+        }
 
         // ensure the current Piwik URL is known for later use
         if (method_exists('Piwik\SettingsPiwik', 'getPiwikUrl')) {
@@ -411,28 +428,28 @@ class FrontController extends Singleton
 
     protected function handleMaintenanceMode()
     {
-        if (Config::getInstance()->General['maintenance_mode'] == 1
-            && !Common::isPhpCliMode()
-        ) {
-            $format = Common::getRequestVar('format', '');
-
-            $message = "Piwik is in scheduled maintenance. Please come back later."
-                . " The administrator can disable maintenance by editing the file piwik/config/config.ini.php and removing the following: "
-                . " maintenance_mode=1 ";
-            if (Config::getInstance()->Tracker['record_statistics'] == 0) {
-                $message .= ' and record_statistics=0';
-            }
-
-            $exception = new Exception($message);
-            // extend explain how to re-enable
-            // show error message when record stats = 0
-            if (empty($format)) {
-                throw $exception;
-            }
-            $response = new ResponseBuilder($format);
-            echo $response->getResponseException($exception);
-            exit;
+        if ((Config::getInstance()->General['maintenance_mode'] != 1) || Common::isPhpCliMode()) {
+            return;
         }
+        Common::sendResponseCode(503);
+
+        $logoUrl = null;
+        $faviconUrl = null;
+        try {
+            $logo = new CustomLogo();
+            $logoUrl = $logo->getHeaderLogoUrl();
+            $faviconUrl = $logo->getPathUserFavicon();
+        } catch (Exception $ex) {
+        }
+        $logoUrl = $logoUrl ?: 'plugins/Morpheus/images/logo-header.png';
+        $faviconUrl = $faviconUrl ?: 'plugins/CoreHome/images/favicon.png';
+
+        $page = file_get_contents(PIWIK_INCLUDE_PATH . '/plugins/Morpheus/templates/maintenance.tpl');
+        $page = str_replace('%logoUrl%', $logoUrl, $page);
+        $page = str_replace('%faviconUrl%', $faviconUrl, $page);
+        $page = str_replace('%piwikTitle%', Piwik::getRandomTitle(), $page);
+        echo $page;
+        exit;
     }
 
     protected function handleSSLRedirection()
@@ -446,10 +463,6 @@ class FrontController extends Singleton
             return;
         }
         if (Common::isPhpCliMode()) {
-            return;
-        }
-        // Only enable this feature after Piwik is already installed
-        if (!SettingsPiwik::isPiwikInstalled()) {
             return;
         }
         // proceed only when force_ssl = 1
@@ -556,4 +569,28 @@ class FrontController extends Singleton
         return $result;
     }
 
+    /**
+     * This method ensures that Piwik Platform cannot be running when using a NEWER database.
+     */
+    private function throwIfPiwikVersionIsOlderThanDBSchema()
+    {
+        // When developing this situation happens often when switching branches
+        if (Development::isEnabled()) {
+            return;
+        }
+
+        $updater = new Updater();
+
+        $dbSchemaVersion = $updater->getCurrentComponentVersion('core');
+        $current = Version::VERSION;
+        if (-1 === version_compare($current, $dbSchemaVersion)) {
+            $messages = array(
+                Piwik::translate('General_ExceptionDatabaseVersionNewerThanCodebase', array($current, $dbSchemaVersion)),
+                Piwik::translate('General_ExceptionDatabaseVersionNewerThanCodebaseWait'),
+                // we cannot fill in the Super User emails as we are failing before Authentication was ready
+                Piwik::translate('General_ExceptionContactSupportGeneric', array('', ''))
+            );
+            throw new DatabaseSchemaIsNewerThanCodebaseException(implode(" ", $messages));
+        }
+    }
 }

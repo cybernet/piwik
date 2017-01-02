@@ -26,7 +26,7 @@ class Cloud extends Visualization
 {
     const ID = 'cloud';
     const TEMPLATE_FILE     = "@CoreVisualizations/_dataTableViz_tagCloud.twig";
-    const FOOTER_ICON       = 'plugins/Morpheus/images/tagcloud.png';
+    const FOOTER_ICON       = 'icon-tag-cloud';
     const FOOTER_ICON_TITLE = 'General_TagCloud';
 
     /** Used by system tests to make sure output is consistent. */
@@ -174,6 +174,8 @@ class Cloud extends Visualization
      */
     private function truncateWordIfNeeded($word)
     {
+        $word = Common::unsanitizeInputValue($word);
+
         if (Common::mb_strlen($word) > $this->truncatingLimit) {
             return Common::mb_substr($word, 0, $this->truncatingLimit - 3) . '...';
         }

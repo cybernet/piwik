@@ -196,7 +196,7 @@ THIRD-PARTY COMPONENTS AND LIBRARIES
 	Link:  http://www.zendframework.com/
 	License:  New BSD
 
-	Name: pChart 2.1.3
+	Name: pChart 2.1.4
 	Link: http://www.pchart.net
 	License: GPL v3
 
@@ -267,6 +267,14 @@ THIRD-PARTY CONTENT
     Link: https://www.iconfinder.com/icons/6074/brainstorm_bulb_idea_jabber_light_icon
     License: GPL
     By: Alessandro Rei - http://www.kde-look.org/usermanager/search.php?username=mentalrey
+
+    Name: Material icons ("icon-info2" "icon_outline" "icon_settings") in plugins/Morpheus/fonts
+    Link: https://design.google.com/icons/
+    License: Apache License Version 2.0
+
+    Name: IcoMoon - Free icons ("icon-funnel") in plugins/Morpheus/fonts
+    Link: https://icomoon.io/#icons-icomoon
+    License: GPL
 
 Notes:
 - the "New BSD" license refers to either the "Modified BSD" and "Simplified BSD"

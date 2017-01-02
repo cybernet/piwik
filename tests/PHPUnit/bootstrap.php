@@ -1,10 +1,13 @@
 <?php
 
+use Piwik\Application\Environment;
 use Piwik\Container\StaticContainer;
 use Piwik\Http;
 use Piwik\Intl\Locale;
 use Piwik\Config;
 use Piwik\SettingsPiwik;
+use Piwik\Tests\Framework\TestingEnvironmentManipulator;
+use Piwik\Tests\Framework\TestingEnvironmentVariables;
 
 define('PIWIK_TEST_MODE', true);
 define('PIWIK_PRINT_ERROR_BACKTRACE', false);
@@ -36,28 +39,26 @@ if (!defined('PIWIK_INCLUDE_SEARCH_PATH')) {
 require_once PIWIK_INCLUDE_PATH . '/core/bootstrap.php';
 
 require_once PIWIK_INCLUDE_PATH . '/libs/PiwikTracker/PiwikTracker.php';
-require_once PIWIK_INCLUDE_PATH . '/tests/PHPUnit/TestingEnvironment.php';
 
 if (getenv('PIWIK_USE_XHPROF') == 1) {
     \Piwik\Profiler::setupProfilerXHProf();
 }
 
 // setup container for tests
-StaticContainer::setEnvironment('test');
+function setupRootContainer() {
+    // before running tests, delete the TestingEnvironmentVariables file, since it can indirectly mess w/
+    // phpunit's class loading (if a test class is loaded in bootstrap.php, phpunit can't load it from a file,
+    // so executing the tests in a file will fail)
+    $vars = new TestingEnvironmentVariables();
+    $vars->delete();
 
-\Piwik\Config::getInstance()->setTestEnvironment();
+    Environment::setGlobalEnvironmentManipulator(new TestingEnvironmentManipulator($vars));
 
-// require test fixtures
-$fixturesToLoad = array(
-    '/tests/UI/Fixtures/*.php',
-    '/plugins/*/tests/Fixtures/*.php',
-    '/plugins/*/Test/Fixtures/*.php',
-);
-foreach($fixturesToLoad as $fixturePath) {
-    foreach (glob(PIWIK_INCLUDE_PATH . $fixturePath) as $file) {
-        require_once $file;
-    }
+    $rootTestEnvironment = new \Piwik\Application\Environment(null);
+    $rootTestEnvironment->init();
 }
+
+setupRootContainer(); // do it in a function so it doesn't appear in $_GLOBALS and so PHPUnit won't try to serialize it.
 
 Locale::setDefaultLocale();
 
@@ -81,6 +82,7 @@ function prepareServerVariables(Config $config)
     $_SERVER['HTTP_HOST']   = $testConfig['http_host'];
     $_SERVER['REQUEST_URI'] = $testConfig['request_uri'];
     $_SERVER['REMOTE_ADDR'] = $testConfig['remote_addr'];
+    $_SERVER['SERVER_PORT'] = $testConfig['port'];
 }
 
 function prepareTestDatabaseConfig(Config $config)
@@ -113,7 +115,7 @@ if (!SettingsPiwik::isPiwikInstalled()) {
 }
 
 $config = Config::getInstance();
-$config->init();
+
 prepareServerVariables($config);
 prepareTestDatabaseConfig($config);
 checkPiwikSetupForTests();

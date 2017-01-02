@@ -9,6 +9,8 @@
 
 namespace Piwik\View;
 
+use Piwik\Common;
+
 /**
  * Post-update view
  *
@@ -57,11 +59,11 @@ class OneClickDone
     public function render()
     {
         // set response headers
-        @header('Content-Type: text/html; charset=UTF-8');
-        @header('Pragma: ');
-        @header('Expires: ');
-        @header('Cache-Control: must-revalidate');
-        @header('X-Frame-Options: deny');
+        @Common::sendHeader('Content-Type: text/html; charset=UTF-8');
+        @Common::sendHeader('Pragma: ');
+        @Common::sendHeader('Expires: ');
+        @Common::sendHeader('Cache-Control: must-revalidate');
+        @Common::sendHeader('X-Frame-Options: deny');
 
         $error = htmlspecialchars($this->error, ENT_QUOTES, 'UTF-8');
         $messages = htmlspecialchars(serialize($this->feedbackMessages), ENT_QUOTES, 'UTF-8');
@@ -73,6 +75,7 @@ class OneClickDone
 <!DOCTYPE html>
 <html>
  <head>
+  <meta name="robots" content="noindex,nofollow">
   <meta charset="utf-8">
   <title></title>
  </head>

@@ -1,12 +1,10 @@
 {
     "Contents": {
+        "Impressions": "Ogledi",
+        "InteractionRate": "Stopnja interakcij",
         "ContentName": "Ime vsebine",
         "ContentPiece": "Del vsebine",
-        "Contents": "Vsebine",
         "ContentTarget": "Cilj vsebine",
-        "Impressions": "Ogledi",
-        "Interaction": "Interakcija",
-        "InteractionRate": "Stopnja interakcij",
-        "Interactions": "Interakcije"
+        "Contents": "Vsebine"
     }
 }

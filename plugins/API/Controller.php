@@ -14,6 +14,7 @@ use Piwik\API\Request;
 use Piwik\Common;
 use Piwik\Config;
 use Piwik\Piwik;
+use Piwik\Plugin\Report;
 use Piwik\Url;
 use Piwik\View;
 
@@ -24,12 +25,18 @@ class Controller extends \Piwik\Plugin\Controller
 {
     function index()
     {
+        $token = 'token_auth=' . Common::getRequestVar('token_auth', 'anonymous', 'string');
+
         // when calling the API through http, we limit the number of returned results
         if (!isset($_GET['filter_limit'])) {
-            $_GET['filter_limit'] = Config::getInstance()->General['API_datatable_default_limit'];
+            if (isset($_POST['filter_limit'])) {
+                $_GET['filter_limit'] = $_POST['filter_limit'];
+            } else {
+                $_GET['filter_limit'] = Config::getInstance()->General['API_datatable_default_limit'];
+            }
         }
 
-        $request = new Request('token_auth=' . Common::getRequestVar('token_auth', 'anonymous', 'string'));
+        $request  = new Request($token);
         $response = $request->process();
 
         if (is_array($response)) {
@@ -42,7 +49,8 @@ class Controller extends \Piwik\Plugin\Controller
     public function listAllMethods()
     {
         $ApiDocumentation = new DocumentationGenerator();
-        return $ApiDocumentation->getAllInterfaceString($outputExampleUrls = true, $prefixUrls = Common::getRequestVar('prefixUrl', ''));
+        $prefixUrls = Common::getRequestVar('prefixUrl', 'http://demo.piwik.org/', 'string');
+        return $ApiDocumentation->getApiDocumentationAsStringForDeveloperReference($outputExampleUrls = true, $prefixUrls);
     }
 
     public function listAllAPI()
@@ -52,7 +60,7 @@ class Controller extends \Piwik\Plugin\Controller
 
         $ApiDocumentation = new DocumentationGenerator();
         $view->countLoadedAPI = Proxy::getInstance()->getCountRegisteredClasses();
-        $view->list_api_methods_with_links = $ApiDocumentation->getAllInterfaceString();
+        $view->list_api_methods_with_links = $ApiDocumentation->getApiDocumentationAsString();
         return $view->render();
     }
 
@@ -132,5 +140,15 @@ class Controller extends \Piwik\Plugin\Controller
 		$tableMetrics
 		</table>
 		";
+    }
+
+    public function glossary()
+    {
+        Piwik::checkUserHasSomeViewAccess();
+
+        return $this->renderTemplate('glossary', array(
+            'reports' => Request::processRequest('API', array('method' => 'API.getGlossaryReports')),
+            'metrics' => Request::processRequest('API', array('method' => 'API.getGlossaryMetrics')),
+        ));
     }
 }

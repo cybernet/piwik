@@ -12,7 +12,6 @@ use PDOStatement;
 use Piwik\Config;
 use Piwik\DataTable\Row\DataTableSummaryRow;
 use Piwik\DataTable;
-use Piwik\DataTable\Manager;
 use Piwik\DataTable\Row;
 use Piwik\Metrics as PiwikMetrics;
 use Piwik\Piwik;
@@ -54,7 +53,7 @@ class ArchivingHelper
                 unset($row[PiwikMetrics::INDEX_SITE_SEARCH_HAS_NO_RESULT]);
             }
 
-            if ($row['type'] == Action::TYPE_CONTENT) {
+            if (in_array($row['type'], array(Action::TYPE_CONTENT, Action::TYPE_EVENT))) {
                 continue;
             }
 
@@ -604,7 +603,12 @@ class ArchivingHelper
         $urlFragment = $matches[3];
 
         if (in_array($type, array(Action::TYPE_DOWNLOAD, Action::TYPE_OUTLINK))) {
-            return array(trim($urlHost), '/' . trim($urlPath));
+            $path = '/' . trim($urlPath);
+            if (!empty($urlFragment)) {
+                $path .= '#' . $urlFragment;
+            }
+
+            return array(trim($urlHost), $path);
         }
 
         $name = $urlPath;

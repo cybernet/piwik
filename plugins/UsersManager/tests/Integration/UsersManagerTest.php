@@ -9,21 +9,17 @@
 namespace Piwik\Plugins\UsersManager\tests\Integration;
 
 use Piwik\Access;
+use Piwik\Auth\Password;
 use Piwik\Plugins\SitesManager\API as APISitesManager;
 use Piwik\Plugins\UsersManager\API;
 use Piwik\Plugins\UsersManager\Model;
+use Piwik\Plugins\UsersManager\UsersManager;
 use Piwik\Tests\Framework\Mock\FakeAccess;
-use Piwik\Translate;
 use Piwik\Tests\Framework\TestCase\IntegrationTestCase;
 use Exception;
 
 
 /**
- * Piwik - free/libre analytics platform
- *
- * @link http://piwik.org
- * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
- *
  * @group UsersManagerTest
  * @group UsersManager
  * @group Plugins
@@ -48,14 +44,12 @@ class UsersManagerTest extends IntegrationTestCase
         \Piwik\Plugin\Manager::getInstance()->installLoadedPlugins();
 
         // setup the access layer
-        $pseudoMockAccess = new FakeAccess;
         FakeAccess::setIdSitesView(array(1, 2));
         FakeAccess::setIdSitesAdmin(array(3, 4));
 
         //finally we set the user as a Super User by default
         FakeAccess::$superUser = true;
         FakeAccess::$superUserLogin = 'superusertest';
-        Access::setSingletonInstance($pseudoMockAccess);
 
         $this->api   = API::getInstance();
         $this->model = new Model();
@@ -82,14 +76,20 @@ class UsersManagerTest extends IntegrationTestCase
         }
         $userAfter = $this->api->getUser($user["login"]);
         unset($userAfter['date_registered']);
+        unset($userAfter['password']);
 
-        // we now compute what the token auth should be, it should always be a hash of the login and the current password
-        // if the password has changed then the token_auth has changed!
+        // implicitly checks password!
+        $userModel = $this->model->getUser($user['login']);
+        $userAfter['token_auth'] = $userModel['token_auth'];
+
         $user['token_auth'] = $this->api->getTokenAuth($user["login"], md5($newPassword));
-        $user['password']   = md5($newPassword);
-        $user['email']      = $newEmail;
-        $user['alias']      = $newAlias;
+
+        $user['email']            = $newEmail;
+        $user['alias']            = $newAlias;
         $user['superuser_access'] = 0;
+
+        unset($user['password']);
+
         $this->assertEquals($user, $userAfter);
     }
 
@@ -150,13 +150,23 @@ class UsersManagerTest extends IntegrationTestCase
     }
 
     /**
+     * @see https://github.com/piwik/piwik/issues/8548
+     * @expectedException \Exception
+     * @expectedExceptionMessage UsersManager_ExceptionLoginExists
+     */
+    public function testAddUserExistingLoginCaseInsensitive()
+    {
+        $this->api->addUser("test", "password", "email@email.com", "alias");
+        $this->api->addUser("TeSt", "password2", "em2ail@email.com", "al2ias");
+    }
+
+    /**
      * Dataprovider for wrong password tests
      */
     public function getWrongPasswordTestData()
     {
         return array(
             array("geggeqgeqag", "pas", "email@email.com", "alias"), // too short -> exception
-            array("ghqgeggg", "gegageqqqqqqqgeqgqeg84897897897897g122gerrgageqqqqqqqgeqgqeg84897897897897g12234k3", "email@email.com", "alias"), // too long -> exception
             array("geggeqgeqag", "", "email@email.com", "alias"), // empty -> exception
         );
     }
@@ -172,27 +182,12 @@ class UsersManagerTest extends IntegrationTestCase
     }
 
     /**
-     * Dataprovider for wrong email tests
-     */
-    public function getWrongEmailTestData()
-    {
-        return array(
-            array("geggeqgeqag", "geqgeagae", "ema'il@email.com", "alias"),
-            array("geggeqgeqag", "geqgeagae", "@email.com", "alias"),
-            array("geggeqgeqag", "geqgeagae", "email@.com", "alias"),
-            array("geggeqgeqag", "geqgeagae", "email@4.", "alias"),
-            array("geggeqgeqag", "geqgeagae", "", "alias"),
-        );
-    }
-
-    /**
-     * @dataProvider getWrongEmailTestData
      * @expectedException \Exception
      * @expectedExceptionMessage mail
      */
-    public function testAddUserWrongEmail($userLogin, $password, $email, $alias)
+    public function testAddUserWrongEmail()
     {
-        $this->api->addUser($userLogin, $password, $email, $alias);
+        $this->api->addUser('geggeqgeqag', 'geqgeagae', "ema il@email.com", 'alias');
     }
 
     /**
@@ -202,6 +197,19 @@ class UsersManagerTest extends IntegrationTestCase
     {
         $login = "geggeqgeqag";
         $this->api->addUser($login, "geqgeagae", "mgeagi@geq.com", "");
+        $user = $this->api->getUser($login);
+        $this->assertEquals($login, $user['alias']);
+        $this->assertEquals($login, $user['login']);
+    }
+
+    /**
+     * long password => should work
+     * empty alias => use login
+     */
+    public function testAddUserLongPassword()
+    {
+        $login = "geggeqgeqag";
+        $this->api->addUser($login, "geqgeagaegeqgeagaegeqgeagaegeqgeagaegeqgeagaegeqgeagaegeqgeagaegeqgeagaegeqgeagaegeqgeagaegeqgeagaeg", "mgeagi@geq.com", "");
         $user = $this->api->getUser($login);
         $this->assertEquals($login, $user['alias']);
         $this->assertEquals($login, $user['login']);
@@ -238,17 +246,23 @@ class UsersManagerTest extends IntegrationTestCase
             "the date_registered " . strtotime($user['date_registered']) . " is different from the time() " . time());
         $this->assertTrue($user['date_registered'] <= time());
 
-        // check that token is 32 chars
-        $this->assertEquals(32, strlen($user['password']));
+        // check that password and token are properly set
+        $this->assertEquals(60, strlen($user['password']));
 
-        // that the password has been md5
-        $this->assertEquals(md5($login . md5($password)), $user['token_auth']);
+        $userModel = $this->model->getUser($login);
+        $this->assertEquals(32, strlen($userModel['token_auth']));
+
+        $userModel = $this->model->getUser($login);
+        $this->assertEquals($userModel['token_auth'], $this->api->getTokenAuth($login, UsersManager::getPasswordHash($password)));
 
         // check that all fields are the same
         $this->assertEquals($login, $user['login']);
-        $this->assertEquals(md5($password), $user['password']);
         $this->assertEquals($email, $user['email']);
         $this->assertEquals($alias, $user['alias']);
+
+        $passwordHelper = new Password();
+
+        $this->assertTrue($passwordHelper->verify(UsersManager::getPasswordHash($password), $user['password']));
     }
 
     /**
@@ -357,7 +371,7 @@ class UsersManagerTest extends IntegrationTestCase
         $this->assertInternalType('string', $user['date_registered']);
         $this->assertEquals($email, $user['email']);
 
-        //alias shouldnt be empty even if no alias specified
+        //alias shouldn't be empty even if no alias specified
         $this->assertGreaterThan(0, strlen($user['alias']));
     }
 
@@ -381,18 +395,34 @@ class UsersManagerTest extends IntegrationTestCase
 
         $users = $this->api->getUsers();
         $users = $this->_removeNonTestableFieldsFromUsers($users);
-        $user1 = array('login' => "gegg4564eqgeqag", 'password' => md5("geqgegagae"), 'alias' => "alias", 'email' => "tegst@tesgt.com", 'superuser_access' => 0);
-        $user2 = array('login' => "geggeqge632ge56a4qag", 'password' => md5("geqgegeagae"), 'alias' => "alias", 'email' => "tesggt@tesgt.com", 'superuser_access' => 0);
-        $user3 = array('login' => "geggeqgeqagqegg", 'password' => md5("geqgeaggggae"), 'alias' => 'geggeqgeqagqegg', 'email' => "tesgggt@tesgt.com", 'superuser_access' => 0);
+        $user1 = array('login' => "gegg4564eqgeqag", 'alias' => "alias", 'email' => "tegst@tesgt.com", 'superuser_access' => 0);
+        $user2 = array('login' => "geggeqge632ge56a4qag", 'alias' => "alias", 'email' => "tesggt@tesgt.com", 'superuser_access' => 0);
+        $user3 = array('login' => "geggeqgeqagqegg", 'alias' => 'geggeqgeqagqegg', 'email' => "tesgggt@tesgt.com", 'superuser_access' => 0);
         $expectedUsers = array($user1, $user2, $user3);
         $this->assertEquals($expectedUsers, $users);
         $this->assertEquals(array($user1), $this->_removeNonTestableFieldsFromUsers($this->api->getUsers('gegg4564eqgeqag')));
         $this->assertEquals(array($user1, $user2), $this->_removeNonTestableFieldsFromUsers($this->api->getUsers('gegg4564eqgeqag,geggeqge632ge56a4qag')));
     }
 
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage checkUserHasSomeAdminAccess Fake exception
+     */
+    public function testGetUsers_withViewAccess_shouldThrowAnException()
+    {
+        $this->api->addUser("gegg4564eqgeqag", "geqgegagae", "tegst@tesgt.com", "alias");
+        $this->api->addUser("geggeqge632ge56a4qag", "geqgegeagae", "tesggt@tesgt.com", "alias");
+        $this->api->addUser("geggeqgeqagqegg", "geqgeaggggae", "tesgggt@tesgt.com");
+
+        FakeAccess::clearAccess($superUser = false, $admin = array(), $view = array(1), 'gegg4564eqgeqag');
+
+        $this->api->getUsers();
+    }
+
     protected function _removeNonTestableFieldsFromUsers($users)
     {
         foreach ($users as &$user) {
+            unset($user['password']);
             unset($user['token_auth']);
             unset($user['date_registered']);
         }
@@ -411,6 +441,37 @@ class UsersManagerTest extends IntegrationTestCase
         $logins = $this->api->getUsersLogin();
 
         $this->assertEquals(array("gegg4564eqgeqag", "geggeqge632ge56a4qag", "geggeqgeqagqegg"), $logins);
+    }
+
+    public function testGetUserLoginFromUserEmail()
+    {
+        $this->api->addUser('gegg4564eqgeqag', 'geqgegagae', 'tegst@tesgt.com', 'alias');
+        $this->api->addUser("geggeqge632ge56a4qag", "geqgegeagae", "tesggt@tesgt.com", "alias");
+        $this->api->addUser("geggeqgeqagqegg", "geqgeaggggae", "tesgggt@tesgt.com");
+
+        $this->assertSame('gegg4564eqgeqag', $this->api->getUserLoginFromUserEmail('tegst@tesgt.com'));
+        $this->assertSame('geggeqge632ge56a4qag', $this->api->getUserLoginFromUserEmail('tesggt@tesgt.com'));
+        // test camel case should still find user
+        $this->assertSame('geggeqge632ge56a4qag', $this->api->getUserLoginFromUserEmail('teSGgT@tesgt.com'));
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage UsersManager_ExceptionUserDoesNotExist
+     */
+    public function testGetUserLoginFromUserEmail_shouldThrowException_IfUserDoesNotExist()
+    {
+        $this->api->getUserLoginFromUserEmail('unknownUser@teSsgt.com');
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage checkUserHasSomeAdminAccess Fake exception
+     */
+    public function testGetUserLoginFromUserEmail_shouldThrowException_IfUserDoesNotHaveAtLeastAdminPermission()
+    {
+        FakeAccess::clearAccess($superUser = false, $admin =array(), $view = array(1));
+        $this->api->getUserLoginFromUserEmail('tegst@tesgt.com');
     }
 
     /**
@@ -478,8 +539,11 @@ class UsersManagerTest extends IntegrationTestCase
         $access = $this->api->getSitesAccessFromUser("gegg4564eqgeqag");
         $access = $this->_flatten($access);
 
+        /** @var Access $accessInstance */
+        $accessInstance = self::$fixture->piwikEnvironment->getContainer()->get('Piwik\Access');
+
         FakeAccess::$superUser = false;
-        $this->assertEquals(array_keys($access), FakeAccess::getSitesIdWithAdminAccess());
+        $this->assertEquals(array_keys($access), $accessInstance->getSitesIdWithAdminAccess());
 
         // we want to test the case for which we have actually set some rights
         // if this is not OK then change the setUp method and add some admin rights for some websites
@@ -656,7 +720,7 @@ class UsersManagerTest extends IntegrationTestCase
      */
     public function testSetSuperUserAccess_ShouldFail_IfUserHasNotSuperUserPermission()
     {
-        FakeAccess::setSuperUserAccess(false);
+        FakeAccess::$superUser= false;
         $this->api->setSuperUserAccess('nologin', false);
     }
 
@@ -915,5 +979,12 @@ class UsersManagerTest extends IntegrationTestCase
         }
 
         return $idSites;
+    }
+
+    public function provideContainerConfig()
+    {
+        return array(
+            'Piwik\Access' => new FakeAccess()
+        );
     }
 }

@@ -54,7 +54,7 @@ class Cache
      * @param int $idSite
      * @return array
      */
-    static function getCacheWebsiteAttributes($idSite)
+    public static function getCacheWebsiteAttributes($idSite)
     {
         if ('all' == $idSite) {
             return array();
@@ -104,6 +104,8 @@ class Cache
         if (!empty($content)) {
             $cache->save($cacheId, $content, self::getTtl());
         }
+
+        Tracker::restoreTrackerPlugins();
 
         return $content;
     }
@@ -160,6 +162,9 @@ class Cache
         Piwik::postEvent('Tracker.setTrackerCacheGeneral', array(&$cacheContent));
         self::setCacheGeneral($cacheContent);
         Common::printDebug("General tracker cache was re-created.");
+
+        Tracker::restoreTrackerPlugins();
+
         return $cacheContent;
     }
 

@@ -10,45 +10,21 @@ namespace Piwik\Plugins\CoreHome;
 
 use Piwik\Db;
 use Piwik\Menu\MenuTop;
-use Piwik\Menu\MenuUser;
 use Piwik\Piwik;
 use Piwik\Plugin;
-use Piwik\Plugins\UsersManager\API as APIUsersManager;
 
 class Menu extends \Piwik\Plugin\Menu
 {
     public function configureTopMenu(MenuTop $menu)
     {
-        $login = Piwik::getCurrentUserLogin();
-        $user  = APIUsersManager::getInstance()->getUser($login);
-
-        if (!empty($user['alias'])) {
-            $login = $user['alias'];
-        }
-
-        if (Piwik::isUserIsAnonymous()) {
-            if (Plugin\Manager::getInstance()->isPluginActivated('Feedback')) {
-                $menu->addItem($login, null, array('module' => 'Feedback', 'action' => 'index'), 998);
-            } else {
-                $menu->addItem($login, null, array('module' => 'API', 'action' => 'listAllAPI'), 998);
-            }
-        } else {
-            $menu->addItem($login, null, array('module' => 'UsersManager', 'action' => 'userSettings'), 998);
-        }
-
         $module = $this->getLoginModule();
         if (Piwik::isUserIsAnonymous()) {
-            $menu->addItem('Login_LogIn', null, array('module' => $module, 'action' => false), 999);
+            $menu->registerMenuIcon('Login_LogIn', 'icon-sign-in');
+            $menu->addItem('Login_LogIn', null, array('module' => $module, 'action' => false), 1000, Piwik::translate('Login_LogIn'));
         } else {
-            $menu->addItem('General_Logout', null, array('module' => $module, 'action' => 'logout', 'idSite' => null), 999);
+            $menu->registerMenuIcon('General_Logout', 'icon-sign-out');
+            $menu->addItem('General_Logout', null, array('module' => $module, 'action' => 'logout', 'idSite' => null), 1000, Piwik::translate('General_Logout'));
         }
-    }
-
-    public function configureUserMenu(MenuUser $menu)
-    {
-        $menu->addPersonalItem(null, array(), 1, false);
-        $menu->addManageItem(null, array(), 2, false);
-        $menu->addPlatformItem(null, array(), 3, false);
     }
 
     private function getLoginModule()

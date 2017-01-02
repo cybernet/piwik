@@ -10,12 +10,16 @@ namespace Piwik\Plugins\CoreUpdater;
 
 use Exception;
 use Piwik\ArchiveProcessor\Rules;
-use Piwik\Config;
+use Piwik\Container\StaticContainer;
 use Piwik\Filechecks;
 use Piwik\Filesystem;
 use Piwik\Http;
 use Piwik\Option;
 use Piwik\Plugin\Manager as PluginManager;
+use Piwik\Plugin\ReleaseChannels;
+use Piwik\Plugins\CorePluginsAdmin\PluginInstaller;
+use Piwik\Plugins\Marketplace\Api as MarketplaceApi;
+use Piwik\Plugins\Marketplace\Marketplace;
 use Piwik\SettingsServer;
 use Piwik\Translation\Translator;
 use Piwik\Unzip;
@@ -25,9 +29,7 @@ class Updater
 {
     const OPTION_LATEST_VERSION = 'UpdateCheck_LatestVersion';
     const PATH_TO_EXTRACT_LATEST_VERSION = '/latest/';
-    const LATEST_VERSION_URL = '://builds.piwik.org/piwik.zip';
-    const LATEST_BETA_VERSION_URL = '://builds.piwik.org/piwik-%s.zip';
-    const DOWNLOAD_TIMEOUT = 120;
+    const DOWNLOAD_TIMEOUT = 720;
 
     /**
      * @var Translator
@@ -35,13 +37,19 @@ class Updater
     private $translator;
 
     /**
+     * @var ReleaseChannels
+     */
+    private $releaseChannels;
+
+    /**
      * @var string
      */
     private $tmpPath;
 
-    public function __construct(Translator $translator, $tmpPath)
+    public function __construct(Translator $translator, ReleaseChannels $releaseChannels, $tmpPath)
     {
         $this->translator = $translator;
+        $this->releaseChannels = $releaseChannels;
         $this->tmpPath = $tmpPath;
     }
 
@@ -106,13 +114,60 @@ class Updater
             $this->verifyDecompressedArchive($extractedArchiveDirectory);
             $messages[] = $this->translator->translate('CoreUpdater_VerifyingUnpackedFiles');
 
-            $disabledPluginNames = $this->disableIncompatiblePlugins($newVersion);
-            if (!empty($disabledPluginNames)) {
-                $messages[] = $this->translator->translate('CoreUpdater_DisablingIncompatiblePlugins', implode(', ', $disabledPluginNames));
+            if (Marketplace::isMarketplaceEnabled()) {
+                // we need to load the marketplace already here, otherwise it will use the new, updated file in Piwik 3
+
+                // we also need to make sure to create a new instance here as otherwise we would change the "global"
+                // environment, but we only want to change piwik version temporarily for this task here
+                $environment = StaticContainer::getContainer()->make('Piwik\Plugins\Marketplace\Environment');
+                $environment->setPiwikVersion($newVersion);
+                /** @var \Piwik\Plugins\Marketplace\Api\Client $marketplaceClient */
+                $marketplaceClient = StaticContainer::getContainer()->make('Piwik\Plugins\Marketplace\Api\Client', array(
+                    'environment' => $environment
+                ));
+                require_once PIWIK_DOCUMENT_ROOT . '/plugins/CorePluginsAdmin/PluginInstaller.php';
+                require_once PIWIK_DOCUMENT_ROOT . '/plugins/Marketplace/Api/Exception.php';
             }
 
             $this->installNewFiles($extractedArchiveDirectory);
             $messages[] = $this->translator->translate('CoreUpdater_InstallingTheLatestVersion');
+
+        } catch (ArchiveDownloadException $e) {
+            throw $e;
+        } catch (Exception $e) {
+            throw new UpdaterException($e, $messages);
+        }
+
+        try {
+
+            if (Marketplace::isMarketplaceEnabled() && !empty($marketplaceClient)) {
+                $messages[] = $this->translator->translate('CoreUpdater_CheckingForPluginUpdates');
+                $pluginManager = PluginManager::getInstance();
+                $pluginManager->loadAllPluginsAndGetTheirInfo();
+                $loadedPlugins = $pluginManager->getLoadedPlugins();
+
+                $marketplaceClient->clearAllCacheEntries();
+                $pluginsWithUpdate = $marketplaceClient->checkUpdates($loadedPlugins);
+
+                foreach ($pluginsWithUpdate as $pluginWithUpdate) {
+                    $pluginName = $pluginWithUpdate['name'];
+                    $messages[] = $this->translator->translate('CoreUpdater_UpdatingPluginXToVersionY',
+                                                               array($pluginName, $pluginWithUpdate['version']));
+                    $pluginInstaller = new PluginInstaller($marketplaceClient);
+                    $pluginInstaller->installOrUpdatePluginFromMarketplace($pluginName);
+                }
+            }
+        } catch (MarketplaceApi\Exception $e) {
+            // there is a problem with the connection to the server, ignore for now
+        } catch (Exception $e) {
+            throw new UpdaterException($e, $messages);
+        }
+
+        try {
+            $disabledPluginNames = $this->disableIncompatiblePlugins($newVersion);
+            if (!empty($disabledPluginNames)) {
+                $messages[] = $this->translator->translate('CoreUpdater_DisablingIncompatiblePlugins', implode(', ', $disabledPluginNames));
+            }
         } catch (Exception $e) {
             throw new UpdaterException($e, $messages);
         }
@@ -250,11 +305,8 @@ class Updater
      */
     public function getArchiveUrl($version, $https = true)
     {
-        if (@Config::getInstance()->Debug['allow_upgrades_to_beta']) {
-            $url = sprintf(self::LATEST_BETA_VERSION_URL, $version);
-        } else {
-            $url = self::LATEST_VERSION_URL;
-        }
+        $channel = $this->releaseChannels->getActiveReleaseChannel();
+        $url = $channel->getDownloadUrlWithoutScheme($version);
 
         if ($this->isUpdatingOverHttps() && $https) {
             $url = 'https' . $url;

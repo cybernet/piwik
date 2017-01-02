@@ -44,11 +44,8 @@ class TestsRun extends ConsoleCommand
 
         $groups = $this->getGroupsFromString($groups);
 
-        $command = '../../vendor/phpunit/phpunit/phpunit';
-
-        if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-            $command = 'php -dzend.enable_gc=0 ' . $command;
-        }
+        // bin is the composer executeable directory, where all vendors (should) place their executables
+        $command = PIWIK_VENDOR_PATH . '/bin/phpunit';
 
         if (!$this->isCoverageEnabled($options) && $this->isXdebugLoaded()) {
             $message = 'Did you know? You can run tests faster by disabling xdebug';
@@ -193,7 +190,7 @@ class TestsRun extends ConsoleCommand
 
     private function getTestsSuites()
     {
-        return array('unit', 'integration', 'system');
+        return array('unit', 'integration', 'system', 'plugin');
     }
 
     /**

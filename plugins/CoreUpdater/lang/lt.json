@@ -1,8 +1,10 @@
 {
     "CoreUpdater": {
+        "CheckingForPluginUpdates": "Tikrinama ar yra naujų atnaujinimų papildiniams",
         "ClickHereToViewSqlQueries": "Spauskite čia SQL užklausų, kurias reikia įvykdyti, sąrašui gauti.",
         "CriticalErrorDuringTheUpgradeProcess": "Kritinė klaida atnaujinimo metu:",
         "DatabaseUpgradeRequired": "Reikalingas duombazės atnaujinimas",
+        "DisablingIncompatiblePlugins": "Išjungiami nesuderinami papildiniai: %s",
         "DownloadingUpdateFromX": "Atsisiunčiamas atnaujinimas iš %s",
         "DownloadX": "Atsisiųsti %s",
         "EmptyDatabaseError": "Duombazė %s yra tuščia. Privalote paredaguoti arba pašalinti savo Piwik konfigūracijos failą.",
@@ -21,8 +23,11 @@
         "HelpMessageIntroductionWhenError": "Aukščiau nurodytas klaidos aprašymas. Jei reikia daugiau pagalbos:",
         "HelpMessageIntroductionWhenWarning": "Piwik atnaujinta, tačiau su išlygomis. Prašome perskaityti aukščiau pateikiamą aprašymą. Jei reikia daugiau pagalbos:",
         "InstallingTheLatestVersion": "Įdiegiama naujausia versija",
+        "MajorUpdateWarning1": "Tai yra didesnis atnaujinimas! Jis užtruks ilgiau nei įprasta.",
         "NoteForLargePiwikInstances": "Svarbi pastaba apie didelius Piwik diegimus",
-        "NoteItIsExpectedThatQueriesFail": "Pastaba: jei rankiniu būdu įvykdysite šias užklausas, gali būti, jog kai kurios iš jų praneš apie klaidas ir nebus įvykdytos. Paprasčiausias ignoruokite klaidas ir vykdykite sekančias užklausas esančias sąraše.",
+        "NotificationClickToUpdatePlugins": "Spustelėkite čia, kad atnaujintumėte savo papildinius dabar:",
+        "NotificationClickToUpdateThemes": "Spustelėkite čia, kad atnaujintumėte savo temas dabar:",
+        "NotificationSubjectAvailablePluginUpdate": "Jūsų Piwik papildiniams yra atnaujinimų",
         "PiwikHasBeenSuccessfullyUpgraded": "Piwik sėkmingai atnaujinta!",
         "PiwikUpdatedSuccessfully": "Piwik sėkmingai atnaujinta!",
         "PiwikWillBeUpgradedFromVersionXToVersionY": "Piwik duombazė bus atnaujinta iš %1$s į %2$s versiją.",
@@ -35,14 +40,17 @@
         "UpdateAutomatically": "Naujinti automatiškai",
         "UpdateHasBeenCancelledExplanation": "Piwik automatinis atnaujinimas atšauktas. Jei negalite ištaisyti nurodytos klaidos, rekomenduojame atnaujinti Piwik rankiniu būdu. %1$s Peržiūrėkite %2$sNaujinimo dokumentaciją%3$s prieš pradedant!",
         "UpdateTitle": "Naujinimas",
+        "UpdatingPluginXToVersionY": "Atnaujinamas papildinys %1$s į versiją %2$s",
+        "UpdateSuccessTitle": "Piwik sėkmingai atnaujinta!",
+        "UpdateErrorTitle": "Atnaujinimo klaida",
         "UpgradeComplete": "Naujinimas baigtas!",
         "UpgradePiwik": "Naujinti Piwik",
         "VerifyingUnpackedFiles": "Tikrinami išskleisti failai",
         "WarningMessages": "Įspėjamieji pranešimai:",
         "WeAutomaticallyDeactivatedTheFollowingPlugins": "Automatiškai pasyvinome šiuos papildinius: %s",
         "YouCanUpgradeAutomaticallyOrDownloadPackage": "Galite atnaujinti iki %s versijos automatiškai arba atsisiųsti paketą ir atnaujinti Piwik rankiniu būdu:",
-        "YouCouldManuallyExecuteSqlQueries": "Jei negalite pasinaudoti komandine eilute Piwik atnaujinti ar Piwik tiesiog neatsinaujina (dėl nutrūkusios sesijos, prarasto ryšio su duombaze ar kurios nors kitos priežasties), galite rankiniu būdu įvykdyti SQL užklausas Piwik atnaujinimui.",
         "YouMustDownloadPackageOrFixPermissions": "Piwik negali perrašyti Jūsų dabartinio diegimo. Galite arba pataisyti katalogo\/failo teises, arba atsisiųsti paketą ir įdiegti šią versiją %s rankiniu būdu:",
-        "YourDatabaseIsOutOfDate": "Norint tęsti, reikia atnaujinti Piwik duombazę"
+        "YourDatabaseIsOutOfDate": "Norint tęsti, reikia atnaujinti Piwik duombazę",
+        "ViewVersionChangelog": "Rodyti šios versijos keitinių žurnalą:"
     }
 }

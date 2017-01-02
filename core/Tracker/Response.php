@@ -74,8 +74,11 @@ class Response
             $this->outputApiResponse($tracker);
             Common::printDebug("Logging disabled, display transparent logo");
         } elseif (!$tracker->hasLoggedRequests()) {
+            if (!$this->isHttpGetRequest() || !empty($_GET) || !empty($_POST)) {
+                Common::sendResponseCode(400);
+            }
             Common::printDebug("Empty request => Piwik page");
-            echo "<a href='/'>Piwik</a> is a free/libre web <a href='http://piwik.org'>analytics</a> that lets you keep control of your data.";
+            echo "This resource is part of Piwik. Keep full control of your data with the leading free and open source <a href='https://piwik.org' target='_blank'>digital analytics platform</a> for web and mobile.";
         } else {
             $this->outputApiResponse($tracker);
             Common::printDebug("Nothing to notice => default behaviour");
@@ -99,13 +102,18 @@ class Response
 
     private function outputAccessControlHeaders()
     {
-        $requestMethod = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
-
-        if ($requestMethod !== 'GET') {
+        if (!$this->isHttpGetRequest()) {
             $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*';
             Common::sendHeader('Access-Control-Allow-Origin: ' . $origin);
             Common::sendHeader('Access-Control-Allow-Credentials: true');
         }
+    }
+
+    private function isHttpGetRequest()
+    {
+        $requestMethod = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
+
+        return strtoupper($requestMethod) === 'GET';
     }
 
     private function getOutputBuffer()
@@ -138,7 +146,7 @@ class Response
         $this->outputTransparentGif();
     }
 
-    private function outputTransparentGif ()
+    private function outputTransparentGif()
     {
         $transGifBase64 = "R0lGODlhAQABAIAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
         Common::sendHeader('Content-Type: image/gif');
@@ -167,9 +175,8 @@ class Response
         return $e->getMessage();
     }
 
-    protected function logExceptionToErrorLog(Exception $e)
+    protected function logExceptionToErrorLog($e)
     {
         error_log(sprintf("Error in Piwik (tracker): %s", str_replace("\n", " ", $this->getMessageFromException($e))));
     }
-
 }

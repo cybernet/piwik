@@ -28,17 +28,13 @@ class PageUrl
         'https://'     => 2
     );
 
-    protected static $queryParametersToExclude = array('gclid', 'fb_xd_fragment', 'fb_comment_id',
-                                                       'phpsessid', 'jsessionid', 'sessionid', 'aspsessionid',
-                                                       'doing_wp_cron');
-
     /**
      * Given the Input URL, will exclude all query parameters set for this site
      *
      * @static
      * @param $originalUrl
      * @param $idSite
-     * @return bool|string
+     * @return bool|string Returned URL is HTML entities decoded
      */
     public static function excludeQueryParametersFromUrl($originalUrl, $idSite)
     {
@@ -50,7 +46,6 @@ class PageUrl
 
         if (empty($parsedUrl['query'])) {
             if (empty($parsedUrl['fragment'])) {
-
                 return UrlHelper::getParseUrlReverse($parsedUrl);
             }
 
@@ -88,7 +83,7 @@ class PageUrl
         $excludedParameters = self::getExcludedParametersFromWebsite($website);
 
         $parametersToExclude = array_merge($excludedParameters,
-                                           self::$queryParametersToExclude,
+                                           self::getUrlParameterNamesToExcludeFromUrl(),
                                            $campaignTrackingParameters);
 
         /**
@@ -97,14 +92,27 @@ class PageUrl
          *
          * @param array &$parametersToExclude An array of parameters to exclude from the tracking url.
          */
-		Piwik::postEvent('Tracker.PageUrl.getQueryParametersToExclude', array(&$parametersToExclude));
+        Piwik::postEvent('Tracker.PageUrl.getQueryParametersToExclude', array(&$parametersToExclude));
 
-		if (!empty($parametersToExclude)) {
-			Common::printDebug('Excluding parameters "' . implode(',', $parametersToExclude) . '" from URL');
-		}
+        if (!empty($parametersToExclude)) {
+            Common::printDebug('Excluding parameters "' . implode(',', $parametersToExclude) . '" from URL');
+        }
 
         $parametersToExclude = array_map('strtolower', $parametersToExclude);
         return $parametersToExclude;
+    }
+
+    /**
+     * Returns the list of URL query parameters that should be removed from the tracked URL query string.
+     *
+     * @return array
+     */
+    protected static function getUrlParameterNamesToExcludeFromUrl()
+    {
+        $paramsToExclude = Config::getInstance()->Tracker['url_query_parameter_to_exclude_from_url'];
+        $paramsToExclude = explode(",", $paramsToExclude);
+        $paramsToExclude = array_map('trim', $paramsToExclude);
+        return $paramsToExclude;
     }
 
     /**
@@ -332,7 +340,6 @@ class PageUrl
     {
         foreach (self::$urlPrefixMap as $prefix => $id) {
             if (strtolower(substr($url, 0, strlen($prefix))) == $prefix) {
-
                 return array(
                     'url'      => substr($url, strlen($prefix)),
                     'prefixId' => $id

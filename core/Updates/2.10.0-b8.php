@@ -10,17 +10,17 @@
 namespace Piwik\Updates;
 
 use Piwik\Updates;
+use Piwik\Updater;
 
 class Updates_2_10_0_b8 extends Updates
 {
-    static function update()
+    public function doUpdate(Updater $updater)
     {
         $pluginManager = \Piwik\Plugin\Manager::getInstance();
 
         try {
             $pluginManager->activatePlugin('Resolution');
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
         }
     }
-
 }

@@ -9,17 +9,21 @@
 namespace Piwik\Container;
 
 use DI\Definition\Exception\DefinitionException;
-use DI\Definition\Source\ChainableDefinitionSource;
+use DI\Definition\Source\DefinitionSource;
 use DI\Definition\ValueDefinition;
-use Piwik\Config;
+use Piwik\Application\Kernel\GlobalSettingsProvider;
 
 /**
- * Import the old INI config into PHP-DI.
+ * Expose the INI config into PHP-DI.
+ *
+ * The INI config can be used by prefixing `ini.` before the setting we want to get:
+ *
+ *     $maintenanceMode = $container->get('ini.General.maintenance_mode');
  */
-class IniConfigDefinitionSource extends ChainableDefinitionSource
+class IniConfigDefinitionSource implements DefinitionSource
 {
     /**
-     * @var Config
+     * @var GlobalSettingsProvider
      */
     private $config;
 
@@ -29,16 +33,19 @@ class IniConfigDefinitionSource extends ChainableDefinitionSource
     private $prefix;
 
     /**
-     * @param Config $config
+     * @param GlobalSettingsProvider $config
      * @param string $prefix Prefix for the container entries.
      */
-    public function __construct(Config $config, $prefix = 'ini.')
+    public function __construct(GlobalSettingsProvider $config, $prefix = 'ini.')
     {
         $this->config = $config;
         $this->prefix = $prefix;
     }
 
-    protected function findDefinition($name)
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefinition($name)
     {
         if (strpos($name, $this->prefix) !== 0) {
             return null;
@@ -74,11 +81,11 @@ class IniConfigDefinitionSource extends ChainableDefinitionSource
 
     private function getSection($sectionName)
     {
-        $section = $this->config->$sectionName;
+        $section = $this->config->getSection($sectionName);
 
         if (!is_array($section)) {
             throw new DefinitionException(sprintf(
-                'Piwik\Config did not return an array for the config section %s',
+                'IniFileChain did not return an array for the config section %s',
                 $section
             ));
         }

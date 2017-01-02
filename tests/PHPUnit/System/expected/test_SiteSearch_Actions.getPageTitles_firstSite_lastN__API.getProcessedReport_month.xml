@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <result>
 	<website>Site 1 - Site search</website>
-	<prettyDate>1 Jan 10 - 31 Jul 10</prettyDate>
+	<prettyDate>January 1 – July 31, 2010</prettyDate>
 	<metadata>
 		<category>Actions</category>
+		<subcategory>Page titles</subcategory>
 		<name>Page titles</name>
 		<module>Actions</module>
 		<action>getPageTitles</action>
@@ -27,6 +28,18 @@
 			<avg_time_generation>Avg. generation time</avg_time_generation>
 		</processedMetrics>
 		<actionToLoadSubTables>getPageTitles</actionToLoadSubTables>
+		<relatedReports>
+			<row>
+				<name>Entry page titles</name>
+				<module>Actions</module>
+				<action>getEntryPageTitles</action>
+			</row>
+			<row>
+				<name>Exit page titles</name>
+				<module>Actions</module>
+				<action>getExitPageTitles</action>
+			</row>
+		</relatedReports>
 		<imageGraphUrl>index.php?module=API&amp;method=ImageGraph.get&amp;idSite=1&amp;apiModule=Actions&amp;apiAction=getPageTitles&amp;period=range&amp;date=2010-01-03,2010-07-03</imageGraphUrl>
 		<imageGraphEvolutionUrl>index.php?module=API&amp;method=ImageGraph.get&amp;idSite=1&amp;apiModule=Actions&amp;apiAction=getPageTitles&amp;period=month&amp;date=2010-01-03,2010-07-03</imageGraphEvolutionUrl>
 		<uniqueId>Actions_getPageTitles</uniqueId>
@@ -40,7 +53,7 @@
 		<exit_rate>Exit rate</exit_rate>
 	</columns>
 	<reportData>
-		<result prettyDate="2010, January">
+		<result prettyDate="January 2010">
 			<row>
 				<label> Im just a page</label>
 				<nb_visits>1</nb_visits>
@@ -62,28 +75,29 @@
 				<nb_visits>1</nb_visits>
 				<nb_hits>2</nb_hits>
 				<bounce_rate>0%</bounce_rate>
-				<avg_time_on_page>00:03:36</avg_time_on_page>
+				<avg_time_on_page>00:01:48</avg_time_on_page>
 				<exit_rate>0%</exit_rate>
 			</row>
 		</result>
-		<result prettyDate="2010, February" />
-		<result prettyDate="2010, March" />
-		<result prettyDate="2010, April" />
-		<result prettyDate="2010, May" />
-		<result prettyDate="2010, June" />
-		<result prettyDate="2010, July" />
+		<result prettyDate="February 2010" />
+		<result prettyDate="March 2010" />
+		<result prettyDate="April 2010" />
+		<result prettyDate="May 2010" />
+		<result prettyDate="June 2010" />
+		<result prettyDate="July 2010" />
 	</reportData>
 	<reportMetadata>
-		<result prettyDate="2010, January" />
-		<result prettyDate="2010, February" />
-		<result prettyDate="2010, March" />
-		<result prettyDate="2010, April" />
-		<result prettyDate="2010, May" />
-		<result prettyDate="2010, June" />
-		<result prettyDate="2010, July" />
+		<result prettyDate="January 2010" />
+		<result prettyDate="February 2010" />
+		<result prettyDate="March 2010" />
+		<result prettyDate="April 2010" />
+		<result prettyDate="May 2010" />
+		<result prettyDate="June 2010" />
+		<result prettyDate="July 2010" />
 	</reportMetadata>
 	<reportTotal>
 		<nb_visits>3</nb_visits>
 		<nb_hits>4</nb_hits>
+		<exit_nb_visits>1</exit_nb_visits>
 	</reportTotal>
 </result>

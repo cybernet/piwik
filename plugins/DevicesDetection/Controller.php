@@ -13,30 +13,12 @@ use Piwik\Common;
 use Piwik\Db;
 use Piwik\Piwik;
 use Piwik\Plugin\ControllerAdmin;
-use Piwik\Plugins\DevicesDetection\Reports\GetBrand;
-use Piwik\Plugins\DevicesDetection\Reports\GetBrowserEngines;
-use Piwik\Plugins\DevicesDetection\Reports\GetBrowsers;
-use Piwik\Plugins\DevicesDetection\Reports\GetModel;
-use Piwik\Plugins\DevicesDetection\Reports\GetOsVersions;
-use Piwik\Plugins\DevicesDetection\Reports\GetType;
+use Piwik\Plugin\Report;
 use Piwik\View;
 
 class Controller extends \Piwik\Plugin\Controller
 {
-    public function index()
-    {
-        $view = new View('@DevicesDetection/index');
-        $view->deviceTypes = $view->deviceModels = $view->deviceBrands = $view->osReport = $view->browserReport = "blank";
-        $view->deviceTypes = $this->renderReport(new GetType());
-        $view->deviceBrands = $this->renderReport(new GetBrand());
-        $view->deviceModels = $this->renderReport(new GetModel());
-        $view->osReport = $this->renderReport(new GetOsVersions());
-        $view->browserReport = $this->renderReport(new GetBrowsers());
-        $view->browserEngineReport = $this->renderReport(new GetBrowserEngines());
-        return $view->render();
-    }
-
-    public function deviceDetection()
+    public function detection()
     {
         Piwik::checkUserHasSomeAdminAccess();
 

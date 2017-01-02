@@ -38,7 +38,7 @@
      * @param    {object}  [options.style]            Optional style/css dictionary. For instance {'display': 'inline-block'}
      * @param    {string}  [options.placeat]          By default, the notification will be displayed in the "stats bar".
      *                                                You can specify any other CSS selector to place the notifications
-     *                                                whereever you want.
+     *                                                wherever you want.
      */
     Notification.prototype.show = function (message, options) {
         if (!message) {
@@ -52,6 +52,16 @@
 
         var template = generateNotificationHtmlMarkup(options, message);
         this.$node   = placeNotification(template, options);
+    };
+
+    /**
+     * Removes a previously shown notification having the given notification id.
+     *
+     *
+     * @param {string}  notificationId   The id of a notification that was previously registered.
+     */
+    Notification.prototype.remove = function (notificationId) {
+        $('[piwik-notification][notification-id=' + notificationId + ']').remove();
     };
 
     Notification.prototype.scrollToNotification = function () {

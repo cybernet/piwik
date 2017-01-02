@@ -2,6 +2,7 @@
     "CorePluginsAdmin": {
         "Activate": "Activar",
         "Activated": "Activado",
-        "Deactivate": "Desactivar"
+        "Deactivate": "Desactivar",
+        "Websites": "Sitios"
     }
 }

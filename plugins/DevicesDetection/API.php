@@ -34,7 +34,6 @@ class API extends \Piwik\Plugin\API
         Piwik::checkUserHasViewAccess($idSite);
         $archive = Archive::build($idSite, $period, $date, $segment);
         $dataTable = $archive->getDataTable($name);
-        $dataTable->filter('Sort', array(Metrics::INDEX_NB_VISITS));
         $dataTable->queueFilter('ReplaceColumnNames');
         $dataTable->queueFilter('ReplaceSummaryRowLabel');
         return $dataTable;
@@ -57,7 +56,7 @@ class API extends \Piwik\Plugin\API
         $mapping = DeviceParserAbstract::getAvailableDeviceTypeNames();
         $dataTable->filter('AddSegmentByLabelMapping', array('deviceType', $mapping));
         $dataTable->filter('ColumnCallbackAddMetadata', array('label', 'logo', __NAMESPACE__ . '\getDeviceTypeLogo'));
-        $dataTable->filter('ColumnCallbackReplace', array('label', __NAMESPACE__ . '\getDeviceTypeLabel'));
+        $dataTable->filter('GroupBy', array('label', __NAMESPACE__ . '\getDeviceTypeLabel'));
         return $dataTable;
     }
 
@@ -95,8 +94,9 @@ class API extends \Piwik\Plugin\API
     public function getBrand($idSite, $period, $date, $segment = false)
     {
         $dataTable = $this->getDataTable('DevicesDetection_brands', $idSite, $period, $date, $segment);
-        $dataTable->filter('ColumnCallbackReplace', array('label', __NAMESPACE__ . '\getDeviceBrandLabel'));
+        $dataTable->filter('GroupBy', array('label', __NAMESPACE__ . '\getDeviceBrandLabel'));
         $dataTable->filter('ColumnCallbackAddMetadata', array('label', 'logo', __NAMESPACE__ . '\getBrandLogo'));
+        $dataTable->filter('AddSegmentByLabel', array('deviceBrand'));
         return $dataTable;
     }
 
@@ -111,7 +111,7 @@ class API extends \Piwik\Plugin\API
     public function getModel($idSite, $period, $date, $segment = false)
     {
         $dataTable = $this->getDataTable('DevicesDetection_models', $idSite, $period, $date, $segment);
-        $dataTable->filter('ColumnCallbackReplace', array('label', __NAMESPACE__ . '\getModelName'));
+        $dataTable->filter('GroupBy', array('label', __NAMESPACE__ . '\getModelName'));
         return $dataTable;
     }
 
@@ -217,7 +217,11 @@ class API extends \Piwik\Plugin\API
      */
     public function getBrowserFamilies($idSite, $period, $date, $segment = false)
     {
-        return $this->getBrowsers($idSite, $period, $date, $segment);
+        $table = $this->getBrowsers($idSite, $period, $date, $segment);
+        // this one will not be sorted automatically by nb_visits since there is no Report class for it.
+        $table->filter('Sort', array(Metrics::INDEX_NB_VISITS, 'desc'));
+
+        return $table;
     }
 
     /**

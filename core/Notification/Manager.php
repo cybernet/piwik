@@ -24,6 +24,11 @@ class Manager
     private static $session = null;
 
     /**
+     * @var Notification[]
+     */
+    private static $notifications = array();
+
+    /**
      * Posts a notification that will be shown in Piwik's status bar. If a notification with the same ID
      * has been posted and has not been closed/removed, it will be replaced with `$notification`.
      *
@@ -37,13 +42,14 @@ class Manager
     {
         self::checkId($id);
 
+        self::removeOldestNotificationsIfThereAreTooMany();
         self::addNotification($id, $notification);
     }
 
     /**
      * Removes a posted notification by ID.
      *
-     * @param $id The notification ID, see {@link notify()}.
+     * @param string $id The notification ID, see {@link notify()}.
      */
     public static function cancel($id)
     {
@@ -104,38 +110,77 @@ class Manager
 
     private static function addNotification($id, Notification $notification)
     {
-        if (!self::isEnabled()) {
+        self::saveNotificationAcrossUiRequestsIfNeeded($id, $notification);
+
+        // we store all kinda notifications here so in case the session is not enabled or disabled later there is still
+        // a chance it gets delivered to the UI during the same request.
+        self::$notifications[$id] = $notification;
+    }
+
+    private static function saveNotificationAcrossUiRequestsIfNeeded($id, Notification $notification)
+    {
+        if (self::isSessionEnabled()) {
+            // we need to save even non persistent notifications if possible. Otherwise if there's a redirect
+            // a notification is not shown on the next page view
+            $session = static::getSession();
+            $session->notifications[$id] = $notification;
+        }
+    }
+
+    private static function removeOldestNotificationsIfThereAreTooMany()
+    {
+        if (!self::isSessionEnabled()) {
             return;
         }
 
+        $maxNotificationsInSession = 30;
+
         $session = static::getSession();
-        $session->notifications[$id] = $notification;
+
+        while (count($session->notifications) >= $maxNotificationsInSession) {
+            array_shift($session->notifications);
+        }
     }
 
     private static function getAllNotifications()
     {
-        if (!self::isEnabled()) {
+        if (!self::isSessionEnabled()) {
             return array();
         }
 
-        $session = static::getSession();
+        $notifications = self::$notifications;
 
-        return $session->notifications;
+        foreach ($notifications as $id => $notification) {
+            // we copy them over to the session if possible and persist it in case the session was not yet
+            // writable / enabled at the time the notification was added.
+            self::saveNotificationAcrossUiRequestsIfNeeded($id, $notification);
+        }
+
+        if (self::isSessionEnabled()) {
+            $session = static::getSession();
+            foreach ($session->notifications as $id => $notification) {
+                $notifications[$id] = $notification;
+            }
+        }
+
+        return $notifications;
     }
 
     private static function removeNotification($id)
     {
-        if (!self::isEnabled()) {
-            return;
+        if (array_key_exists($id, self::$notifications)) {
+            unset(self::$notifications[$id]);
         }
 
-        $session = static::getSession();
-        if (array_key_exists($id, $session->notifications)) {
-            unset($session->notifications[$id]);
+        if (self::isSessionEnabled()) {
+            $session = static::getSession();
+            if (array_key_exists($id, $session->notifications)) {
+                unset($session->notifications[$id]);
+            }
         }
     }
 
-    private static function isEnabled()
+    private static function isSessionEnabled()
     {
         return Session::isWritable() && Session::isReadable();
     }
@@ -149,7 +194,7 @@ class Manager
             static::$session = new SessionNamespace('notification');
         }
 
-        if (empty(static::$session->notifications) && self::isEnabled()) {
+        if (empty(static::$session->notifications) && self::isSessionEnabled()) {
             static::$session->notifications = array();
         }
 

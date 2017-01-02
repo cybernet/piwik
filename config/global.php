@@ -1,6 +1,7 @@
 <?php
 
 use Interop\Container\ContainerInterface;
+use Interop\Container\Exception\NotFoundException;
 use Piwik\Cache\Eager;
 use Piwik\SettingsServer;
 
@@ -44,7 +45,20 @@ return array(
         return $cache;
     },
     'Piwik\Cache\Backend' => function (ContainerInterface $c) {
-        return \Piwik\Cache::buildBackend($c->get('ini.Cache.backend'));
+        // If Piwik is not installed yet, it's possible the tmp/ folder is not writable
+        // we prevent failing with an unclear message eg. coming from doctrine-cache
+        // by forcing to use a cache backend which always works ie. array
+        if(!\Piwik\SettingsPiwik::isPiwikInstalled()) {
+            $backend = 'array';
+        } else {
+            try {
+                $backend = $c->get('ini.Cache.backend');
+            } catch (NotFoundException $ex) {
+                $backend = 'chained'; // happens if global.ini.php is not available
+            }
+        }
+
+        return \Piwik\Cache::buildBackend($backend);
     },
     'cache.eager.cache_id' => function () {
         return 'eagercache-' . str_replace(array('.', '-'), '', \Piwik\Version::VERSION) . '-';
@@ -53,6 +67,26 @@ return array(
     'Psr\Log\LoggerInterface' => DI\object('Psr\Log\NullLogger'),
 
     'Piwik\Translation\Loader\LoaderInterface' => DI\object('Piwik\Translation\Loader\LoaderCache')
-        ->constructor(DI\link('Piwik\Translation\Loader\JsonFileLoader')),
+        ->constructor(DI\get('Piwik\Translation\Loader\JsonFileLoader')),
+
+    'observers.global' => array(),
+
+    'Piwik\EventDispatcher' => DI\object()->constructorParameter('observers', DI\get('observers.global')),
+
+    'Zend_Validate_EmailAddress' => function () {
+        return new \Zend_Validate_EmailAddress(array(
+            'hostname' => new \Zend_Validate_Hostname(array(
+                'tld' => false,
+            ))));
+    },
+
+    'Piwik\Tracker\VisitorRecognizer' => DI\object()
+        ->constructorParameter('trustCookiesOnly', DI\get('ini.Tracker.trust_visitors_cookies'))
+        ->constructorParameter('visitStandardLength', DI\get('ini.Tracker.visit_standard_length'))
+        ->constructorParameter('lookbackNSecondsCustom', DI\get('ini.Tracker.window_look_back_for_visitor'))
+        ->constructorParameter('trackerAlwaysNewVisitor', DI\get('ini.Debug.tracker_always_new_visitor')),
+
+    'Piwik\Tracker\Settings' => DI\object()
+        ->constructorParameter('isSameFingerprintsAcrossWebsites', DI\get('ini.Tracker.enable_fingerprinting_across_websites')),
 
 );

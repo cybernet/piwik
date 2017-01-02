@@ -14,7 +14,6 @@ use Piwik\DataTable;
 use Piwik\Date;
 use Piwik\Metrics;
 use Piwik\Period;
-use Piwik\Period\Range;
 use Piwik\Piwik;
 use Piwik\Site;
 
@@ -33,7 +32,7 @@ class API extends \Piwik\Plugin\API
         $archive = Archive::build($idSite, $period, $date, $segment);
         $dataTable = $archive->getDataTable($name);
 
-        $dataTable->filter('Sort', array('label', 'asc', true));
+        $dataTable->filter('Sort', array('label', 'asc', true, false));
         $dataTable->queueFilter('ColumnCallbackReplace', array('label', __NAMESPACE__ . '\getTimeLabel'));
         $dataTable->queueFilter('ReplaceColumnNames');
         return $dataTable;

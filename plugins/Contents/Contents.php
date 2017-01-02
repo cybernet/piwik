@@ -8,24 +8,26 @@
  */
 namespace Piwik\Plugins\Contents;
 
+use Piwik\Piwik;
+
 class Contents extends \Piwik\Plugin
 {
     /**
-     * @see Piwik\Plugin::getListHooksRegistered
+     * @see Piwik\Plugin::registerEvents
      */
-    public function getListHooksRegistered()
+    public function registerEvents()
     {
         return array(
             'Metrics.getDefaultMetricTranslations' => 'addMetricTranslations',
+            'Metrics.getDefaultMetricDocumentationTranslations' => 'addMetricDocumentationTranslations',
             'AssetManager.getJavaScriptFiles' => 'getJsFiles',
-            'AssetManager.getStylesheetFiles' => 'getStylesheetFiles',
         );
     }
 
     public function addMetricTranslations(&$translations)
     {
         $translations['nb_impressions']   = 'Contents_Impressions';
-        $translations['nb_interactions']  = 'Contents_Interactions';
+        $translations['nb_interactions']  = 'Contents_ContentInteractions';
         $translations['interaction_rate'] = 'Contents_InteractionRate';
     }
 
@@ -34,9 +36,9 @@ class Contents extends \Piwik\Plugin
         $jsFiles[] = "plugins/Contents/javascripts/contentsDataTable.js";
     }
 
-    public function getStylesheetFiles(&$stylesheets)
+    public function addMetricDocumentationTranslations(&$translations)
     {
-        $stylesheets[] = "plugins/Contents/stylesheets/datatable.less";
+        $translations['nb_impressions'] = Piwik::translate('Contents_ImpressionsMetricDocumentation');
+        $translations['nb_interactions'] = Piwik::translate('Contents_InteractionsMetricDocumentation');
     }
-
 }

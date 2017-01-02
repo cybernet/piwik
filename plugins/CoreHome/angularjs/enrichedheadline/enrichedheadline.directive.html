@@ -1,22 +1,22 @@
 <div class="enrichedHeadline"
     ng-mouseenter="view.showIcons=true" ng-mouseleave="view.showIcons=false">
-    <span ng-show="!editUrl" class="title" ng-transclude></span>
+    <div ng-show="!editUrl" class="title" ng-transclude tabindex="6"></div>
     <a ng-show="editUrl" class="title" href="{{ editUrl }}"
        title="{{ 'CoreHome_ClickToEditX'|translate:featureName }}"
-       ng-transclude></a>
+       ng-transclude ></a>
 
-    <span ng-show="view.showIcons">
+    <span ng-show="view.showIcons" class="iconsBar">
         <a ng-if="helpUrl && !inlineHelp"
            rel="noreferrer"
            target="_blank"
            href="{{ helpUrl }}"
            title="{{ 'CoreHome_ExternalHelp'|translate }}"
-           class="helpIcon"></a>
+           class="helpIcon"><span class="icon-help"></span></a>
 
         <a ng-if="inlineHelp"
            title="{{ 'General_Help'|translate }}"
            ng-click="view.showInlineHelp=!view.showInlineHelp"
-           class="helpIcon"></a>
+           class="helpIcon"><span class="icon-help"></span></a>
 
         <div class="ratingIcons"
              piwik-rate-feature

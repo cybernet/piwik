@@ -1,13 +1,11 @@
 {
     "Feedback": {
-        "ContactThePiwikTeam": "დაუკავშირდით Piwik გუნდს!",
         "DoYouHaveBugReportOrFeatureRequest": "არ გაქვთ შეცდომის რეპორტი ან მახასიათებლების მოთხოვნა?",
         "IWantTo": "მე მინდა:",
-        "LearnWaysToParticipate": "გაეცანით ინფორმაციას %s მონაწილეობის%s მიღების ყველა გზის შესახებ",
+        "LearnWaysToParticipate": "გაეცანით ინფორმაციას %1$s მონაწილეობის%2$s მიღების ყველა გზის შესახებ",
         "ManuallySendEmailTo": "გთხოვთ, ხელით გამოაგზავნეთ წერილი მისამართზე",
         "SendFeedback": "გამოხმაურების გაგზავნა",
-        "SpecialRequest": "გაქვთ სპეციალური მოთხოვნა Piwik გუნდთან?",
         "ThankYou": "გმადლობთ, რომ გვეხმარებით Piwik გახდეს უკეთესი!",
-        "VisitTheForums": "იხილეთ %s ფორუმები%s"
+        "VisitTheForums": "იხილეთ %1$s ფორუმები%2$s"
     }
 }

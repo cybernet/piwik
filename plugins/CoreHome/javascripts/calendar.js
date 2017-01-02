@@ -20,8 +20,88 @@
 
     var currentYear, currentMonth, currentDay, currentDate, currentWeek;
 
+    function formatDateString(date) {
+        var month = date.getMonth() + 1;
+        var day = date.getDate();
+        if (month < 10) {
+            month = '0' + month;
+        }
+        if (day < 10) {
+            day = '0' + day;
+        }
+
+        return date.getFullYear() + '-' + month + '-' + day;
+    }
+
+    function updateDisplayDate(selectedPeriod, dateText)
+    {
+        piwik.period = selectedPeriod;
+
+        if (dateText && dateText.indexOf(',') > -1) {
+            var dateParts = dateText.split(',');
+            if (dateParts[1]) {
+                piwik.currentDateString = dateParts[1];
+            } else if (dateParts[0]) {
+                piwik.currentDateString = dateParts[0];
+            }
+        } else {
+            piwik.currentDateString = dateText;
+        }
+
+        if (selectedPeriod === 'week') {
+            var millisecondsPerDay = 24 * 60 * 60 * 1000;
+            var currentTimeSelected = currentDate.getTime();
+            // we fix currentDayOfWeek as our week starts on Monday.
+            var currentDayOfWeek = currentDate.getDay();
+            if (currentDayOfWeek === 0) {
+                // Usually Sunday === 0, we set Sunday to the end of the week.
+                currentDayOfWeek = 6;
+            } else {
+                // we move every day one day forward, so Monday which is usually 1 becomes 0
+                currentDayOfWeek = currentDayOfWeek - 1;
+            }
+
+            var firstDayOfWeek = new Date();
+            var lastDayOfWeek = new Date();
+            firstDayOfWeek.setTime(currentTimeSelected - (millisecondsPerDay * currentDayOfWeek));
+            lastDayOfWeek.setTime(firstDayOfWeek.getTime() + (millisecondsPerDay * 6));
+
+            piwik.startDateString = formatDateString(firstDayOfWeek);
+            piwik.endDateString   = formatDateString(lastDayOfWeek);
+        } else if (dateText.indexOf(',') !== -1) {
+            var dateParts = dateText.split(',');
+            piwik.startDateString = dateParts[0];
+            piwik.endDateString = dateParts[1];
+        } else {
+            piwik.startDateString = dateText;
+            piwik.endDateString = dateText;
+        }
+
+        var displayDate = dateText;
+        if (selectedPeriod === 'month') {
+            displayDate = _pk_translate('Intl_Month_Long_StandAlone_' + (currentMonth+1)) + ' ' + currentYear;
+        } else if (selectedPeriod === 'year') {
+            displayDate = currentYear;
+        } else if (selectedPeriod === 'range' || selectedPeriod === 'week') {
+            displayDate = _pk_translate('General_DateRangeFromTo', [piwik.startDateString, piwik.endDateString]);
+        }
+
+        var $title = $('#date.title');
+        $title.text(displayDate);
+        $title.attr('title', _pk_translate('General_ChooseDate', [piwikHelper.escape(displayDate)]));
+
+        if (typeof initTopControls !== 'undefined' && initTopControls) {
+            initTopControls();
+        }
+    }
+
     function setCurrentDate(dateStr) {
-        var splitDate = dateStr.split("-");
+        if (dateStr && dateStr.indexOf(',') !== -1) {
+            var parts = dateStr.split(',');
+            dateStr = parts[0];
+        }
+        
+        var splitDate = dateStr.split('-');
         currentYear = splitDate[0];
         currentMonth = splitDate[1] - 1;
         currentDay = splitDate[2];
@@ -33,6 +113,7 @@
         // eg. Login form
         return;
     }
+
     setCurrentDate(piwik.currentDateString);
 
     var todayDate = new Date;
@@ -40,11 +121,11 @@
     var todayYear = todayDate.getFullYear();
     var todayDay = todayDate.getDate();
 
-// min/max date for picker
+    // min/max date for picker
     var piwikMinDate = new Date(piwik.minDateYear, piwik.minDateMonth - 1, piwik.minDateDay),
         piwikMaxDate = new Date(piwik.maxDateYear, piwik.maxDateMonth - 1, piwik.maxDateDay);
 
-// we start w/ the current period
+    // we start w/ the current period
     var selectedPeriod = piwik.period;
 
     function isDateInCurrentPeriod(date) {
@@ -115,6 +196,32 @@
         return [true, ''];
     }
 
+    function propagateNewUrlParams(date, period)
+    {
+        if (piwikHelper.isAngularRenderingThePage()) {
+
+            $('#periodString').removeClass('expanded');
+            piwikHelper.hideAjaxLoading('ajaxLoadingCalendar');
+
+            angular.element(document).injector().invoke(function ($location) {
+                var $search = $location.search();
+
+                if (date !== $search.date || period !== $search.period) {
+                    // eg when using back button the date might be actually already changed in the URL and we do not
+                    // want to change the URL again
+                    $search.date = date;
+                    $search.period = period;
+                    $location.search($search);
+                }
+
+            });
+        } else {
+            // Let broadcast do its job:
+            // It will replace date value to both search query and hash and load the new page.
+            broadcast.propagateNewPage('date=' + date + '&period=' + period);
+        }
+    }
+
     piwik.getBaseDatePickerOptions = function (defaultDate) {
         return {
             showOtherMonths: false,
@@ -131,55 +238,55 @@
             stepMonths: 1,
             // jquery-ui-i18n 1.7.2 lacks some translations, so we use our own
             dayNamesMin: [
-                _pk_translate('General_DaySu'),
-                _pk_translate('General_DayMo'),
-                _pk_translate('General_DayTu'),
-                _pk_translate('General_DayWe'),
-                _pk_translate('General_DayTh'),
-                _pk_translate('General_DayFr'),
-                _pk_translate('General_DaySa')],
+                _pk_translate('Intl_Day_Min_StandAlone_7'),
+                _pk_translate('Intl_Day_Min_StandAlone_1'),
+                _pk_translate('Intl_Day_Min_StandAlone_2'),
+                _pk_translate('Intl_Day_Min_StandAlone_3'),
+                _pk_translate('Intl_Day_Min_StandAlone_4'),
+                _pk_translate('Intl_Day_Min_StandAlone_5'),
+                _pk_translate('Intl_Day_Min_StandAlone_6')],
             dayNamesShort: [
-                _pk_translate('General_ShortDay_7'), // start with sunday
-                _pk_translate('General_ShortDay_1'),
-                _pk_translate('General_ShortDay_2'),
-                _pk_translate('General_ShortDay_3'),
-                _pk_translate('General_ShortDay_4'),
-                _pk_translate('General_ShortDay_5'),
-                _pk_translate('General_ShortDay_6')],
+                _pk_translate('Intl_Day_Short_StandAlone_7'), // start with sunday
+                _pk_translate('Intl_Day_Short_StandAlone_1'),
+                _pk_translate('Intl_Day_Short_StandAlone_2'),
+                _pk_translate('Intl_Day_Short_StandAlone_3'),
+                _pk_translate('Intl_Day_Short_StandAlone_4'),
+                _pk_translate('Intl_Day_Short_StandAlone_5'),
+                _pk_translate('Intl_Day_Short_StandAlone_6')],
             dayNames: [
-                _pk_translate('General_LongDay_7'), // start with sunday
-                _pk_translate('General_LongDay_1'),
-                _pk_translate('General_LongDay_2'),
-                _pk_translate('General_LongDay_3'),
-                _pk_translate('General_LongDay_4'),
-                _pk_translate('General_LongDay_5'),
-                _pk_translate('General_LongDay_6')],
+                _pk_translate('Intl_Day_Long_StandAlone_7'), // start with sunday
+                _pk_translate('Intl_Day_Long_StandAlone_1'),
+                _pk_translate('Intl_Day_Long_StandAlone_2'),
+                _pk_translate('Intl_Day_Long_StandAlone_3'),
+                _pk_translate('Intl_Day_Long_StandAlone_4'),
+                _pk_translate('Intl_Day_Long_StandAlone_5'),
+                _pk_translate('Intl_Day_Long_StandAlone_6')],
             monthNamesShort: [
-                _pk_translate('General_ShortMonth_1'),
-                _pk_translate('General_ShortMonth_2'),
-                _pk_translate('General_ShortMonth_3'),
-                _pk_translate('General_ShortMonth_4'),
-                _pk_translate('General_ShortMonth_5'),
-                _pk_translate('General_ShortMonth_6'),
-                _pk_translate('General_ShortMonth_7'),
-                _pk_translate('General_ShortMonth_8'),
-                _pk_translate('General_ShortMonth_9'),
-                _pk_translate('General_ShortMonth_10'),
-                _pk_translate('General_ShortMonth_11'),
-                _pk_translate('General_ShortMonth_12')],
+                _pk_translate('Intl_Month_Short_StandAlone_1'),
+                _pk_translate('Intl_Month_Short_StandAlone_2'),
+                _pk_translate('Intl_Month_Short_StandAlone_3'),
+                _pk_translate('Intl_Month_Short_StandAlone_4'),
+                _pk_translate('Intl_Month_Short_StandAlone_5'),
+                _pk_translate('Intl_Month_Short_StandAlone_6'),
+                _pk_translate('Intl_Month_Short_StandAlone_7'),
+                _pk_translate('Intl_Month_Short_StandAlone_8'),
+                _pk_translate('Intl_Month_Short_StandAlone_9'),
+                _pk_translate('Intl_Month_Short_StandAlone_10'),
+                _pk_translate('Intl_Month_Short_StandAlone_11'),
+                _pk_translate('Intl_Month_Short_StandAlone_12')],
             monthNames: [
-                _pk_translate('General_LongMonth_1'),
-                _pk_translate('General_LongMonth_2'),
-                _pk_translate('General_LongMonth_3'),
-                _pk_translate('General_LongMonth_4'),
-                _pk_translate('General_LongMonth_5'),
-                _pk_translate('General_LongMonth_6'),
-                _pk_translate('General_LongMonth_7'),
-                _pk_translate('General_LongMonth_8'),
-                _pk_translate('General_LongMonth_9'),
-                _pk_translate('General_LongMonth_10'),
-                _pk_translate('General_LongMonth_11'),
-                _pk_translate('General_LongMonth_12')]
+                _pk_translate('Intl_Month_Long_StandAlone_1'),
+                _pk_translate('Intl_Month_Long_StandAlone_2'),
+                _pk_translate('Intl_Month_Long_StandAlone_3'),
+                _pk_translate('Intl_Month_Long_StandAlone_4'),
+                _pk_translate('Intl_Month_Long_StandAlone_5'),
+                _pk_translate('Intl_Month_Long_StandAlone_6'),
+                _pk_translate('Intl_Month_Long_StandAlone_7'),
+                _pk_translate('Intl_Month_Long_StandAlone_8'),
+                _pk_translate('Intl_Month_Long_StandAlone_9'),
+                _pk_translate('Intl_Month_Long_StandAlone_10'),
+                _pk_translate('Intl_Month_Long_StandAlone_11'),
+                _pk_translate('Intl_Month_Long_StandAlone_12')]
         };
     };
 
@@ -194,6 +301,8 @@
     }
 
     $(function () {
+
+        var reloading = false;
 
         var datepickerElem = $('#datepicker').datepicker(getDatePickerOptions()),
             periodLabels = $('#periodString').find('.period-type label'),
@@ -250,6 +359,7 @@
         var unhighlightAllDates = function () {
             // make sure nothing is highlighted
             $('.ui-state-active,.ui-state-hover', datepickerElem).removeClass('ui-state-active ui-state-hover');
+            $('.ui-datepicker-current-day', datepickerElem).removeClass('ui-datepicker-current-day');
 
             // color whitespace
             if (piwik.period == 'year') {
@@ -269,7 +379,7 @@
 
             // select new dates in calendar
             setCurrentDate(dateText);
-            piwik.period = selectedPeriod;
+            updateDisplayDate(selectedPeriod, dateText);
 
             // make sure it's called after jquery-ui is done, otherwise everything we do will
             // be undone.
@@ -277,9 +387,9 @@
 
             datepickerElem.datepicker('refresh');
 
-            // Let broadcast do its job:
-            // It will replace date value to both search query and hash and load the new page.
-            broadcast.propagateNewPage('date=' + dateText + '&period=' + selectedPeriod);
+            propagateNewUrlParams(dateText, selectedPeriod);
+            initTopControls();
+            reloading = false;
         };
 
         var toggleMonthDropdown = function (disable) {
@@ -294,7 +404,6 @@
         var togglePeriodPickers = function (showSingle) {
             $('#periodString').find('.period-date').toggle(showSingle);
             $('#periodString').find('.period-range').toggle(!showSingle);
-            $('#calendarRangeApply').toggle(!showSingle);
         };
 
         //
@@ -354,8 +463,24 @@
             }
         });
 
-        var reloading = false;
-        var changePeriodOnClick = function (periodInput) {
+        var changePeriodWithPageReload = function (periodInput) {
+
+            var url = periodInput.val(),
+                period = broadcast.getValueFromUrl('period', url);
+
+            // if clicking on the selected period, change the period but not the date
+            if (period != 'range' && !reloading) {
+                // only reload if current period is different from selected
+                reloading = true;
+                selectedPeriod = period;
+                updateDate(piwik.currentDateString);
+                return true;
+            }
+
+            return false;
+        };
+
+        var changePeriodOnClickIfPeriodChanged = function (periodInput) {
             if (reloading) // if a click event resulted in reloading, don't reload again
             {
                 return;
@@ -367,11 +492,10 @@
             // if clicking on the selected period, change the period but not the date
             if (selectedPeriod == period && selectedPeriod != 'range') {
                 // only reload if current period is different from selected
-                if (piwik.period != selectedPeriod && !reloading) {
-                    reloading = true;
-                    selectedPeriod = period;
-                    updateDate(piwik.currentDateString);
+                if (piwik.period != selectedPeriod) {
+                    return changePeriodWithPageReload(periodInput);
                 }
+
                 return true;
             }
 
@@ -380,8 +504,42 @@
 
         $("#otherPeriods").find("label,input").on('dblclick', function (e) {
             var id = $(e.target).attr('for');
-            changePeriodOnClick($('#' + id));
+            changePeriodOnClickIfPeriodChanged($('#' + id));
         });
+
+        $("#otherPeriods").find("label,input").on('dblclick', function (e) {
+            var id = $(e.target).attr('for');
+            changePeriodOnClickIfPeriodChanged($('#' + id));
+        });
+
+        // Apply date range button will reload the page with the selected range
+        $('#calendarApply')
+            .on('click', function () {
+                var $selectedPeriod = $('#periodMore [name=period]:checked');
+
+                if (!$selectedPeriod.is('#period_id_range')) {
+                    changePeriodWithPageReload($selectedPeriod);
+                    return true;
+                }
+
+                var dateFrom = $('#inputCalendarFrom').val(),
+                    dateTo = $('#inputCalendarTo').val(),
+                    oDateFrom = $.datepicker.parseDate('yy-mm-dd', dateFrom),
+                    oDateTo = $.datepicker.parseDate('yy-mm-dd', dateTo);
+
+                if (!isValidDate(oDateFrom)
+                    || !isValidDate(oDateTo)
+                    || oDateFrom > oDateTo) {
+                    $('#alert').find('h2').text(_pk_translate('General_InvalidDateRange'));
+                    piwikHelper.modalConfirm('#alert', {});
+                    return false;
+                }
+                piwikHelper.showAjaxLoading('ajaxLoadingCalendar');
+                propagateNewUrlParams(dateFrom + ',' + dateTo, 'range');
+            })
+            .show();
+
+
 
         // when non-range period is clicked, change the period & refresh the date picker
         $("#otherPeriods").find("input").on('click', function (e) {
@@ -389,7 +547,7 @@
                 period = broadcast.getValueFromUrl('period', request_URL),
                 lastPeriod = selectedPeriod;
 
-            if (changePeriodOnClick($(e.target))) {
+            if (changePeriodOnClickIfPeriodChanged($(e.target))) {
                 return true;
             }
 
@@ -440,21 +598,6 @@
             toggleMonthDropdown(selectedPeriod == 'year');
         });
 
-        // reset date/period when opening calendar
-        $("#periodString").on('click', "#date,.calendar-icon", function () {
-            var periodMore = $("#periodMore").toggle();
-            if (periodMore.is(":visible")) {
-                periodMore.find(".ui-state-highlight").removeClass('ui-state-highlight');
-            }
-        });
-
-        $('body').on('click', function(e) {
-            var target = $(e.target);
-            if (target.closest('html').length && !target.closest('#periodString').length && !target.is('option') && $("#periodMore").is(":visible")) {
-                $("#periodMore").hide();
-            }
-        });
-
         function onDateRangeSelect(dateText, inst) {
             var toOrFrom = inst.id == 'calendarFrom' ? 'From' : 'To';
             $('#inputCalendar' + toOrFrom).val(dateText);
@@ -487,27 +630,6 @@
             // If not called, the first date appears light brown instead of dark brown
             $('.ui-state-hover').removeClass('ui-state-hover');
 
-            // Apply date range button will reload the page with the selected range
-            $('#calendarRangeApply')
-                .on('click', function () {
-                    var request_URL = $(e.target).val();
-                    var dateFrom = $('#inputCalendarFrom').val(),
-                        dateTo = $('#inputCalendarTo').val(),
-                        oDateFrom = $.datepicker.parseDate('yy-mm-dd', dateFrom),
-                        oDateTo = $.datepicker.parseDate('yy-mm-dd', dateTo);
-
-                    if (!isValidDate(oDateFrom)
-                        || !isValidDate(oDateTo)
-                        || oDateFrom > oDateTo) {
-                        $('#alert').find('h2').text(_pk_translate('General_InvalidDateRange'));
-                        piwikHelper.modalConfirm('#alert', {});
-                        return false;
-                    }
-                    piwikHelper.showAjaxLoading('ajaxLoadingCalendar');
-                    broadcast.propagateNewPage('period=range&date=' + dateFrom + ',' + dateTo);
-                })
-                .show();
-
             // Bind the input fields to update the calendar's date when date is manually changed
             $('#inputCalendarFrom, #inputCalendarTo')
                 .keyup(function (e) {
@@ -520,7 +642,7 @@
                     }
                     $("#calendar" + fromOrTo).datepicker("setDate", newDate);
                     if (e.keyCode == 13) {
-                        $('#calendarRangeApply').click();
+                        $('#calendarApply').click();
                     }
                 });
             return true;
@@ -534,6 +656,45 @@
         if (piwik.period == 'range') {
             $("#period_id_range").click();
         }
+
+        function updatePeriodPickerFromHash()
+        {
+            var dateHash = broadcast.getValueFromHash('date');
+            var periodHash = broadcast.getValueFromHash('period');
+
+            if (!dateHash || dateHash.length > 30 || !periodHash || periodHash.length > 7) {
+                // invalid data in URL
+                return;
+            }
+
+            if (!/^(\d){4}/.test(dateHash)) {
+                // it's not an actual date, it is 'yesterday' or so meaning date was not changed in calendar
+                return;
+            }
+
+            if (piwik.period === periodHash && piwik.currentDateString === dateHash) {
+                // this period / date is already loaded
+                return;
+            }
+
+            $('input[id=period_id_' + periodHash + ']').click();
+
+            updateDate(dateHash);
+
+            $('input[id=period_id_' + periodHash + ']').click();
+        }
+
+        if (piwikHelper.isAngularRenderingThePage()) {
+            // when using back button etc we need to update the date under circumstances
+            angular.element(document).injector().invoke(function ($rootScope) {
+                $rootScope.$on('$locationChangeSuccess', updatePeriodPickerFromHash);
+            });
+
+            // on initial page load the date/period in hash might be different to the one in the URL
+            updatePeriodPickerFromHash();
+        }
+
+        initTopControls();
     });
 
 }(jQuery));

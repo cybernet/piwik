@@ -38,14 +38,15 @@ use Piwik\Network\IPUtils;
 class IP
 {
     /**
-     * Returns the most accurate IP address availble for the current user, in
+     * Returns the most accurate IP address available for the current user, in
      * IPv4 format. This could be the proxy client's IP address.
      *
      * @return string IP address in presentation format.
      */
     public static function getIpFromHeader()
     {
-        $clientHeaders = @Config::getInstance()->General['proxy_client_headers'];
+        $general = Config::getInstance()->General;
+        $clientHeaders = @$general['proxy_client_headers'];
         if (!is_array($clientHeaders)) {
             $clientHeaders = array();
         }
@@ -82,7 +83,10 @@ class IP
         // examine proxy headers
         foreach ($proxyHeaders as $proxyHeader) {
             if (!empty($_SERVER[$proxyHeader])) {
-                $proxyIp = self::getLastIpFromList($_SERVER[$proxyHeader], $proxyIps);
+                // this may be buggy if someone has proxy IPs and proxy host headers configured as
+                // `$_SERVER[$proxyHeader]` could be eg $_SERVER['HTTP_X_FORWARDED_HOST'] and
+                // include an actual host name, not an IP
+                $proxyIp = self::getFirstIpFromList($_SERVER[$proxyHeader], $proxyIps);
                 if (strlen($proxyIp) && stripos($proxyIp, 'unknown') === false) {
                     return $proxyIp;
                 }
@@ -97,20 +101,25 @@ class IP
      *
      * @param string $csv Comma separated list of elements.
      * @param array $excludedIps Optional list of excluded IP addresses (or IP address ranges).
-     * @return string Last (non-excluded) IP address in the list.
+     * @return string Last (non-excluded) IP address in the list or an empty string if all given IPs are excluded.
      */
-    public static function getLastIpFromList($csv, $excludedIps = null)
+    public static function getFirstIpFromList($csv, $excludedIps = null)
     {
         $p = strrpos($csv, ',');
         if ($p !== false) {
             $elements = explode(',', $csv);
-            for ($i = count($elements); $i--;) {
-                $element = trim(Common::sanitizeInputValue($elements[$i]));
+            foreach ($elements as $ipString) {
+                $element = trim(Common::sanitizeInputValue($ipString));
+                if(empty($element)) {
+                    continue;
+                }
                 $ip = \Piwik\Network\IP::fromStringIP(IPUtils::sanitizeIp($element));
                 if (empty($excludedIps) || (!in_array($element, $excludedIps) && !$ip->isInRanges($excludedIps))) {
                     return $element;
                 }
             }
+
+            return '';
         }
         return trim(Common::sanitizeInputValue($csv));
     }

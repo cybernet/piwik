@@ -8,15 +8,16 @@
  */
 namespace Piwik\Plugins\Actions\Reports;
 
-use Piwik\Common;
 use Piwik\Piwik;
 use Piwik\Plugin\ViewDataTable;
-use Piwik\API\Request;
 use Piwik\Plugins\Actions\Columns\EntryPageUrl;
 use Piwik\Plugins\Actions\Columns\Metrics\AveragePageGenerationTime;
 use Piwik\Plugins\Actions\Columns\Metrics\AverageTimeOnPage;
 use Piwik\Plugins\Actions\Columns\Metrics\BounceRate;
 use Piwik\Plugins\Actions\Columns\Metrics\ExitRate;
+use Piwik\Plugin\ReportsProvider;
+use Piwik\Report\ReportWidgetFactory;
+use Piwik\Widget\WidgetsList;
 
 class GetEntryPageUrls extends Base
 {
@@ -40,8 +41,7 @@ class GetEntryPageUrls extends Base
 
         $this->actionToLoadSubTables = $this->action;
 
-        $this->menuTitle   = 'Actions_SubmenuPagesEntry';
-        $this->widgetTitle = 'Actions_WidgetPagesEntry';
+        $this->subcategoryId = 'Actions_SubmenuPagesEntry';
     }
 
     public function getProcessedMetrics()
@@ -59,7 +59,7 @@ class GetEntryPageUrls extends Base
     protected function getMetricsDocumentation()
     {
         $metrics = parent::getMetricsDocumentation();
-        $metrics['bounce_rate'] = Piwik::translate('General_ColumnBounceRateForPageDocumentation');
+        $metrics['bounce_rate'] = Piwik::translate('General_ColumnPageBounceRateDocumentation');
 
         unset($metrics['bounce_rate']);
         unset($metrics['exit_rate']);
@@ -83,7 +83,7 @@ class GetEntryPageUrls extends Base
     public function getRelatedReports()
     {
         return array(
-            new GetEntryPageTitles()
+            ReportsProvider::factory('Actions', 'getEntryPageTitles'),
         );
     }
 }

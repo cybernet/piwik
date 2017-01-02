@@ -23,6 +23,7 @@ use Piwik\Period;
 use Piwik\Piwik;
 use Piwik\Plugins\API\API as ApiApi;
 use Piwik\Plugins\PrivacyManager\PrivacyManager;
+use Piwik\Plugin\ReportsProvider;
 use Piwik\View;
 use Piwik\ViewDataTable\Manager as ViewDataTableManager;
 use Piwik\Plugin\Manager as PluginManager;
@@ -168,10 +169,10 @@ class Visualization extends ViewDataTable
 
         parent::__construct($controllerAction, $apiMethodToRequestDataTable, $params);
 
-        $this->report = Report::factory($this->requestConfig->getApiModuleToRequest(), $this->requestConfig->getApiMethodToRequest());
+        $this->report = ReportsProvider::factory($this->requestConfig->getApiModuleToRequest(), $this->requestConfig->getApiMethodToRequest());
     }
 
-    protected function buildView()
+    public function render()
     {
         $this->overrideSomeConfigPropertiesIfNeeded();
 
@@ -226,14 +227,18 @@ class Visualization extends ViewDataTable
         }
 
         $view->idSubtable  = $this->requestConfig->idSubtable;
-        $view->clientSideParameters = $this->getClientSideParametersToSet();
+        $clientSideParameters = $this->getClientSideParametersToSet();
+        if (isset($clientSideParameters['showtitle'])) {
+            unset($clientSideParameters['showtitle']);
+        }
+        $view->clientSideParameters = $clientSideParameters;
         $view->clientSideProperties = $this->getClientSidePropertiesToSet();
         $view->properties  = array_merge($this->requestConfig->getProperties(), $this->config->getProperties());
         $view->reportLastUpdatedMessage = $this->reportLastUpdatedMessage;
         $view->footerIcons = $this->config->footer_icons;
         $view->isWidget    = Common::getRequestVar('widget', 0, 'int');
 
-        return $view;
+        return $view->render();
     }
 
     /**
@@ -272,7 +277,18 @@ class Visualization extends ViewDataTable
         $idSite  = Common::getRequestVar('idSite', null, 'string', $request);
         $module  = $this->requestConfig->getApiModuleToRequest();
         $action  = $this->requestConfig->getApiMethodToRequest();
-        $metadata = ApiApi::getInstance()->getMetadata($idSite, $module, $action);
+
+        $apiParameters = array();
+        $idDimension = Common::getRequestVar('idDimension', 0, 'int');
+        $idGoal = Common::getRequestVar('idGoal', 0, 'int');
+        if ($idDimension > 0) {
+            $apiParameters['idDimension'] = $idDimension;
+        }
+        if ($idGoal > 0) {
+            $apiParameters['idGoal'] = $idGoal;
+        }
+
+        $metadata = ApiApi::getInstance()->getMetadata($idSite, $module, $action, $apiParameters);
 
         if (!empty($metadata)) {
             return array_shift($metadata);
@@ -359,7 +375,7 @@ class Visualization extends ViewDataTable
             $this->metadata = $this->dataTable->getAllTableMetadata();
 
             if (isset($this->metadata[DataTable::ARCHIVED_DATE_METADATA_NAME])) {
-                $this->config->report_last_updated_message = $this->makePrettyArchivedOnText();
+                $this->reportLastUpdatedMessage = $this->makePrettyArchivedOnText();
             }
         }
 
@@ -399,6 +415,8 @@ class Visualization extends ViewDataTable
 
         $postProcessor->setCallbackBeforeGenericFilters(function (DataTable\DataTableInterface $dataTable) use ($self, $postProcessor) {
 
+            $self->setDataTable($dataTable);
+
             // First, filters that delete rows
             foreach ($self->config->getPriorityFilters() as $filter) {
                 $dataTable->filter($filter[0], $filter[1]);
@@ -416,6 +434,8 @@ class Visualization extends ViewDataTable
         });
 
         $postProcessor->setCallbackAfterGenericFilters(function (DataTable\DataTableInterface $dataTable) use ($self) {
+
+            $self->setDataTable($dataTable);
 
             $self->afterGenericFiltersAreAppliedToLoadedDataTable();
 
@@ -467,9 +487,10 @@ class Visualization extends ViewDataTable
             return Piwik::translate('CoreHome_ReportGeneratedXAgo', $timeAgo);
         }
 
-        $prettyDate = $date->getLocalized("%longYear%, %longMonth% %day%") . $date->toString('S');
+        $prettyDate = $date->getLocalized(Date::DATE_FORMAT_SHORT);
 
-        return Piwik::translate('CoreHome_ReportGeneratedOn', $prettyDate);
+        $timezoneAppend = ' (UTC)';
+        return Piwik::translate('CoreHome_ReportGeneratedOn', $prettyDate) . $timezoneAppend;
     }
 
     /**
@@ -504,7 +525,7 @@ class Visualization extends ViewDataTable
         foreach ($this->config->clientSideProperties as $name) {
             if (property_exists($this->requestConfig, $name)) {
                 $result[$name] = $this->getIntIfValueIsBool($this->requestConfig->$name);
-            } else if (property_exists($this->config, $name)) {
+            } elseif (property_exists($this->config, $name)) {
                 $result[$name] = $this->getIntIfValueIsBool($this->config->$name);
             }
         }
@@ -558,7 +579,7 @@ class Visualization extends ViewDataTable
 
             if (property_exists($this->requestConfig, $name)) {
                 $valueToConvert = $this->requestConfig->$name;
-            } else if (property_exists($this->config, $name)) {
+            } elseif (property_exists($this->config, $name)) {
                 $valueToConvert = $this->config->$name;
             }
 
@@ -715,7 +736,7 @@ class Visualization extends ViewDataTable
 
     /**
      * @internal
-     * 
+     *
      * @return array
      */
     public function buildApiRequestArray()

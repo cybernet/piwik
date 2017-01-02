@@ -10,15 +10,13 @@ namespace Piwik;
 
 use Exception;
 use Piwik\Container\StaticContainer;
-use Piwik\Db\Adapter;
-use Piwik\Db\Schema;
-use Piwik\Db;
-use Piwik\Plugin;
+use Piwik\Period\Day;
+use Piwik\Period\Month;
+use Piwik\Period\Range;
+use Piwik\Period\Week;
+use Piwik\Period\Year;
 use Piwik\Plugins\UsersManager\API as APIUsersManager;
-use Piwik\Session;
-use Piwik\Tracker;
 use Piwik\Translation\Translator;
-use Piwik\View;
 
 /**
  * @see core/Translate.php
@@ -38,11 +36,11 @@ class Piwik
      * @var array
      */
     public static $idPeriods = array(
-        'day'   => 1,
-        'week'  => 2,
-        'month' => 3,
-        'year'  => 4,
-        'range' => 5,
+        'day'   => Day::PERIOD_ID,
+        'week'  => Week::PERIOD_ID,
+        'month' => Month::PERIOD_ID,
+        'year'  => Year::PERIOD_ID,
+        'range' => Range::PERIOD_ID,
     );
 
     /**
@@ -79,11 +77,18 @@ class Piwik
     {
         Common::sendHeader('Content-Type: text/html; charset=utf-8');
 
-        $output = "<style>a{color:red;}</style>\n" .
-            "<div style='color:red;font-family:Georgia;font-size:120%'>" .
-            "<p><img src='plugins/Morpheus/images/error_medium.png' style='vertical-align:middle; float:left;padding:20 20 20 20' />" .
+        $message = str_replace("\n", "<br/>", $message);
+
+        $output = "<html><body>".
+            "<style>a{color:red;}</style>\n" .
+            "<div style='color:red;font-size:120%; width:100%;margin: 30px;'>" .
+            " <div style='width: 50px; float: left;'><img src='plugins/Morpheus/images/error_medium.png' /></div>" .
+            "  <div style='margin-left: 70px; min-width: 950px;'>" .
             $message .
-            "</p></div>";
+            "  </div>" .
+            " </div>" .
+            "</div>".
+            "</body></html>";
         print($output);
         exit;
     }
@@ -147,9 +152,6 @@ class Piwik
             'Analytics',
             'Real Time Analytics',
             'Analytics in Real time',
-            'Free/Libre Web Analytics',
-            'Free Website Analytics',
-            'Free Web Analytics',
             'Analytics Platform',
             'Data Platform',
         );
@@ -206,7 +208,7 @@ class Piwik
     {
         $login = Access::getInstance()->getLogin();
 
-        if(empty($login)) {
+        if (empty($login)) {
             return 'anonymous';
         }
         return $login;
@@ -304,7 +306,6 @@ class Piwik
             $hasAccess = Access::getInstance()->hasSuperUserAccess();
 
             return $hasAccess;
-
         } catch (Exception $e) {
             return false;
         }
@@ -400,12 +401,7 @@ class Piwik
      */
     public static function isUserHasSomeAdminAccess()
     {
-        try {
-            self::checkUserHasSomeAdminAccess();
-            return true;
-        } catch (Exception $e) {
-            return false;
-        }
+        return Access::getInstance()->isUserHasSomeAdminAccess();
     }
 
     /**
@@ -574,7 +570,9 @@ class Piwik
      */
     public static function isValidEmailString($emailAddress)
     {
-        return (preg_match('/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,}$/D', $emailAddress) > 0);
+        /** @var \Zend_Validate_EmailAddress $zendEmailValidator */
+        $zendEmailValidator = StaticContainer::get('Zend_Validate_EmailAddress');
+        return $zendEmailValidator->isValid($emailAddress);
     }
 
     /**
@@ -598,7 +596,7 @@ class Piwik
         $l = strlen($userLogin);
         if (!($l >= $loginMinimumLength
             && $l <= $loginMaximumLength
-            && (preg_match('/^[A-Za-z0-9_.@+-]*$/D', $userLogin) > 0))
+            && (preg_match('/^[A-Za-zÄäÖöÜüß0-9_.@+-]*$/D', $userLogin) > 0))
         ) {
             throw new Exception(Piwik::translate('UsersManager_ExceptionInvalidLoginFormat', array($loginMinimumLength, $loginMaximumLength)));
         }
@@ -638,8 +636,9 @@ class Piwik
         reset($array);
         if (!is_numeric(key($array))
             || key($array) != 0
-        ) // first key must be 0
-        {
+        ) {
+            // first key must be 0
+
             return true;
         }
 
@@ -652,7 +651,7 @@ class Piwik
 
             if ($next === null) {
                 break;
-            } else if ($current + 1 != $next) {
+            } elseif ($current + 1 != $next) {
                 return true;
             }
         }
@@ -730,7 +729,7 @@ class Piwik
 
     /**
      * Returns an internationalized string using a translation token. If a translation
-     * cannot be found for the toke, the token is returned.
+     * cannot be found for the token, the token is returned.
      *
      * @param string $translationId Translation ID, eg, `'General_Date'`.
      * @param array|string|int $args `sprintf` arguments to be applied to the internationalized

@@ -7,28 +7,11 @@
 
 function _pk_translate(translationStringId, values) {
 
-    function sprintf (translation, values) {
-        var index = 0;
-        return (translation+'').replace(/(%(.\$)?s+)/g, function(match, number) {
-
-            var replaced = match;
-            if (match != '%s') {
-                index = parseInt(match.substr(1, 1)) - 1;
-            }
-
-            if (typeof values[index] != 'undefined') {
-                replaced = values[index];
-            }
-
-            index++;
-            return replaced;
-        });
-    }
-
     if( typeof(piwik_translations[translationStringId]) != 'undefined' ){
         var translation = piwik_translations[translationStringId];
         if (typeof values != 'undefined' && values && values.length) {
-            return sprintf(translation, values);
+            values.unshift(translation);
+            return sprintf.apply(null, values);
         }
 
         return translation;
@@ -116,6 +99,10 @@ var piwikHelper = {
 		return url;
 	},
 
+    getAngularDependency: function (dependency) {
+        return angular.element(document).injector().get(dependency);
+    },
+
     /**
      * As we still have a lot of old jQuery code and copy html from node to node we sometimes have to trigger the
      * compiling of angular components manually.
@@ -125,10 +112,70 @@ var piwikHelper = {
     compileAngularComponents: function (selector) {
         var $element = $(selector);
 
+        if (!$element.length) {
+
+            return;
+        }
+
         angular.element(document).injector().invoke(function($compile) {
             var scope = angular.element($element).scope();
             $compile($element)(scope);
         });
+    },
+
+    /**
+     * Detection works currently only for directives defining an isolated scope. Functionality might need to be
+     * extended if needed. Under circumstances you might call this method before calling compileAngularComponents()
+     * to avoid compiling the same element twice.
+     * @param selector
+     */
+    isAlreadyCompiledAngularComponent: function (selector) {
+        var $element = $(selector);
+
+        return ($element.length && $element.hasClass('ng-isolate-scope'));
+    },
+
+    /**
+     * Detects whether angular is rendering the page. If so, the page will be reloaded automatically
+     * via angular as soon as it detects a $locationChange
+     *
+     * @returns {number|jQuery}
+     */
+    isAngularRenderingThePage: function ()
+    {
+        return $('[piwik-reporting-page]').length;
+    },
+
+    /**
+     * Moves an element further to the left by changing the left margin to make sure as much as possible of an element
+     * is visible in the current viewport. The top position keeps unchanged.
+     * @param elementToPosition
+     */
+    setMarginLeftToBeInViewport: function (elementToPosition) {
+        var availableWidth = $(window).width();
+        $(elementToPosition).css('marginLeft', '0px');
+        var offset = $(elementToPosition).offset();
+        if (!offset) {
+            return;
+        }
+        var leftPos = offset.left;
+        if (leftPos < 0) {
+            leftPos = 0;
+        }
+        var widthSegmentForm = $(elementToPosition).outerWidth();
+        if (leftPos + widthSegmentForm > availableWidth) {
+            var extraSpaceForMoreBeauty = 16;
+            var newLeft = availableWidth - widthSegmentForm - extraSpaceForMoreBeauty;
+            if (newLeft < extraSpaceForMoreBeauty) {
+                newLeft = extraSpaceForMoreBeauty;
+            }
+            var marginLeft = Math.abs(leftPos - newLeft);
+            if (marginLeft > extraSpaceForMoreBeauty) {
+                // we only move it further to the left if it is actually more than 16px to the left.
+                // otherwise it is not really worth it and doesn't look as good.
+                $(elementToPosition).css('marginLeft', (parseInt(marginLeft, 10) * -1) + 'px');
+            }
+        }
     },
 
     /**
@@ -142,38 +189,53 @@ var piwikHelper = {
      * @param {object} handles       callback functions for available roles
      * @return {void}
      */
-    modalConfirm: function( domSelector, handles )
+    modalConfirm: function(domSelector, handles, options)
     {
+        if (!options) {
+            options = {};
+        }
+
         var domElem = $(domSelector);
         var buttons = [];
 
-        $('[role]', domElem).each(function(){
-            var role  = $(this).attr('role');
-            var title = $(this).attr('title');
-            var text  = $(this).val();
+        var content = '<div class="modal"><div class="modal-content"></div>';
+        content += '<div class="modal-footer"></div></div>';
 
-            var button = {text: text};
+        var $content = $(content).hide();
+        var $footer = $content.find('.modal-footer');
+
+        $('[role]', domElem).each(function(){
+            var $button = $(this);
+            var role  = $button.attr('role');
+            var title = $button.attr('title');
+            var text  = $button.val();
+            $button.hide();
+
+            var button = $('<a href="javascript:;" class="modal-action modal-close waves-effect waves-light btn-flat "></a>');
+            button.text(text);
+            if (title) {
+                button.attr('title', title);
+            }
 
             if(typeof handles[role] == 'function') {
-                button.click = function(){$(this).dialog("close"); handles[role].apply()};
-            } else {
-                button.click = function(){$(this).dialog("close");};
+                button.on('click', function(){
+                    handles[role].apply()
+                });
             }
 
-            if (title) {
-                button.title = title;
-            }
-            buttons.push(button);
-            $(this).hide();
+            $footer.append(button);
         });
 
-        domElem.dialog({
-            resizable: false,
-            modal: true,
-            buttons: buttons,
-            width: 650,
-            position: ['center', 90]
-        });
+        $('body').append($content);
+        $content.find('.modal-content').append(domElem);
+
+        if (options && options.fixedFooter) {
+            $content.addClass('modal-fixed-footer');
+            delete options.fixedFooter;
+        }
+
+        domElem.show();
+        $content.openModal(options);
     },
 
     getQueryStringWithParametersModified: function (queryString, newParameters) {
@@ -353,6 +415,10 @@ var piwikHelper = {
         window.location = url;
     },
 
+    lazyScrollToContent: function () {
+        this.lazyScrollTo('#content', 250);
+    },
+
     /**
      * Scrolls the window to the jquery element 'elem'
      * if the top of the element is not currently visible on screen
@@ -363,7 +429,12 @@ var piwikHelper = {
      */
     lazyScrollTo: function(elem, time, forceScroll)
     {
-        var elemTop = $(elem).offset().top;
+        var $elem = $(elem);
+        if (!$elem.size()) {
+            return;
+        }
+
+        var elemTop = $elem.offset().top;
         // only scroll the page if the graph is not visible
         if (elemTop < $(window).scrollTop()
             || elemTop > $(window).scrollTop()+$(window).height()
@@ -403,6 +474,16 @@ function isEnterKey(e)
     return (window.event?window.event.keyCode:e.which)==13;
 }
 
+/**
+ * Returns true if the event keypress passed in parameter is the ESCAPE key
+ * @param {Event} e   current window event
+ * @return {boolean}
+ */
+function isEscapeKey(e)
+{
+    return (window.event?window.event.keyCode:e.which)==27;
+}
+
 // workarounds
 (function($){
 try {
@@ -422,48 +503,15 @@ try {
         oldArc.call(this, x, y, r, sAngle, eAngle, clockwise);
     };
 
-    //--------------------------------------
-    //
-    // Array.reduce is not available in IE8 but used in Jqplot
-    //
-    //--------------------------------------
-    if ('function' !== typeof Array.prototype.reduce) {
-        Array.prototype.reduce = function(callback, opt_initialValue){
-            'use strict';
-            if (null === this || 'undefined' === typeof this) {
-                // At the moment all modern browsers, that support strict mode, have
-                // native implementation of Array.prototype.reduce. For instance, IE8
-                // does not support strict mode, so this check is actually useless.
-                throw new TypeError(
-                    'Array.prototype.reduce called on null or undefined');
-            }
-            if ('function' !== typeof callback) {
-                throw new TypeError(callback + ' is not a function');
-            }
-            var index, value,
-                length = this.length >>> 0,
-                isValueSet = false;
-            if (1 < arguments.length) {
-                value = opt_initialValue;
-                isValueSet = true;
-            }
-            for (index = 0; length > index; ++index) {
-                if (this.hasOwnProperty(index)) {
-                    if (isValueSet) {
-                        value = callback(value, this[index], index, this);
-                    }
-                    else {
-                        value = this[index];
-                        isValueSet = true;
-                    }
-                }
-            }
-            if (!isValueSet) {
-                throw new TypeError('Reduce of empty array with no initial value');
-            }
-            return value;
-        };
-    }
+    // Fix jQuery UI dialogs scrolling when click on links with tooltips
+    jQuery.ui.dialog.prototype._focusTabbable = $.noop;
+
+    // Fix jQuery UI tooltip displaying when dialog is closed by Esc key
+    jQuery(document).keyup(function(e) {
+      if (e.keyCode == 27) {
+          $('.ui-tooltip').hide();
+      }
+    });
+
 } catch (e) {}
 }(jQuery));
-

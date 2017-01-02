@@ -66,6 +66,7 @@
 		<visitDurationPretty>6 min 3s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>0</actions>
+		<interactions>0</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -74,7 +75,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode>pl</languageCode>
+		<language>Polish</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -102,9 +108,6 @@
 		<visitLocalTime>12:34:06</visitLocalTime>
 		<visitLocalHour>12</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName3>VisitorName</customVariableName3>
@@ -168,6 +171,7 @@
 						<customVariablePageValue5 />
 					</row>
 				</customVariables>
+				<interactionPosition>1</interactionPosition>
 				<timeSpent>180</timeSpent>
 				<timeSpentPretty>3 min 0s</timeSpentPretty>
 				<icon />
@@ -198,6 +202,7 @@
 						<customVariablePageValue5 />
 					</row>
 				</customVariables>
+				<interactionPosition>2</interactionPosition>
 				<timeSpent>180</timeSpent>
 				<timeSpentPretty>3 min 0s</timeSpentPretty>
 				<icon />
@@ -224,6 +229,9 @@
 						<customVariablePageValue5>Category TWO LEFT in cart</customVariablePageValue5>
 					</row>
 				</customVariables>
+				<interactionPosition>3</interactionPosition>
+				<timeSpent>361</timeSpent>
+				<timeSpentPretty>6 min 1s</timeSpentPretty>
 				<icon />
 				
 			</row>
@@ -281,6 +289,7 @@
 		<visitDurationPretty>18 min 1s</visitDurationPretty>
 		<searches>0</searches>
 		<actions>3</actions>
+		<interactions>3</interactions>
 		<referrerType>direct</referrerType>
 		<referrerTypeName>Direct Entry</referrerTypeName>
 		<referrerName />
@@ -289,7 +298,12 @@
 		<referrerUrl />
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
+		<languageCode>pl</languageCode>
+		<language>Polish</language>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -317,9 +331,6 @@
 		<visitLocalTime>12:34:06</visitLocalTime>
 		<visitLocalHour>12</visitLocalHour>
 		<daysSinceLastVisit>0</daysSinceLastVisit>
-		<provider>Unknown</provider>
-		<providerName>Unknown</providerName>
-		<providerUrl />
 		<customVariables>
 			<row>
 				<customVariableName3>VisitorName</customVariableName3>

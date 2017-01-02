@@ -16,35 +16,6 @@ use Piwik\Tests\Framework\TestCase\UnitTestCase;
 use Piwik\Tracker\Request;
 use Piwik\Tracker\TrackerConfig;
 
-class TestRequest extends  Request {
-
-    public function getCookieName()
-    {
-        return parent::getCookieName();
-    }
-
-    public function getCookieExpire()
-    {
-        return parent::getCookieExpire();
-    }
-
-    public function getCookiePath()
-    {
-        return parent::getCookiePath();
-    }
-
-    public function makeThirdPartyCookie()
-    {
-        return parent::makeThirdPartyCookie();
-    }
-
-    public function setIsAuthenticated()
-    {
-        $this->isAuthenticated = true;
-    }
-
-}
-
 /**
  * @group RequestSetTest
  * @group RequestSet
@@ -78,9 +49,13 @@ class RequestTest extends UnitTestCase
         $this->assertSame($this->time, $request->getCurrentTimestamp());
     }
 
-    public function test_cdt_ShouldReturnTheCurrentTimestamp_IfNotAuthenticatedAndTimestampIsNotRecent()
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage Custom timestamp is 86500 seconds old
+     */
+    public function test_cdt_ShouldNotTrackTheRequest_IfNotAuthenticatedAndTimestampIsNotRecent()
     {
-        $request = $this->buildRequest(array('cdt' => '' . $this->time - 28800));
+        $request = $this->buildRequest(array('cdt' => '' . $this->time - 86500));
         $this->assertSame($this->time, $request->getCurrentTimestamp());
     }
 
@@ -93,9 +68,9 @@ class RequestTest extends UnitTestCase
 
     public function test_cdt_ShouldReturnTheCustomTimestamp_IfAuthenticatedAndValid()
     {
-        $request = $this->buildRequest(array('cdt' => '' . ($this->time - 28800)));
+        $request = $this->buildRequest(array('cdt' => '' . ($this->time - 86500)));
         $request->setIsAuthenticated();
-        $this->assertSame('' . ($this->time - 28800), $request->getCurrentTimestamp());
+        $this->assertSame('' . ($this->time - 86500), $request->getCurrentTimestamp());
     }
 
     public function test_cdt_ShouldReturnTheCustomTimestamp_IfTimestampIsInFuture()
@@ -480,14 +455,14 @@ class RequestTest extends UnitTestCase
 
     public function test_makeThirdPartyCookie_ShouldReturnAnInstanceOfCookie()
     {
-        $cookie = $this->request->makeThirdPartyCookie();
+        $cookie = $this->request->makeThirdPartyCookieUID();
 
         $this->assertTrue($cookie instanceof Cookie);
     }
 
     public function test_makeThirdPartyCookie_ShouldPreconfigureTheCookieInstance()
     {
-        $cookie = $this->request->makeThirdPartyCookie();
+        $cookie = $this->request->makeThirdPartyCookieUID();
 
         $this->assertCookieContains('COOKIE _pk_uid', $cookie);
         $this->assertCookieContains('expire: 1450750817', $cookie);
@@ -499,23 +474,29 @@ class RequestTest extends UnitTestCase
         $this->assertContains($needle, $cookie . '');
     }
 
+    public function test_getLocalTime()
+    {
+        $request = $this->buildRequest(array('h' => '12', 'm' => '34', 's' => '3'));
+        $this->assertSame('12:34:03', $request->getLocalTime());
+
+
+        $request = $this->buildRequest(array('h' => '23', 'm' => '59', 's' => '59'));
+        $this->assertSame('23:59:59', $request->getLocalTime());
+    }
+
+    public function test_getLocalTime_shouldReturnValidTime_whenTimeWasInvalid()
+    {
+        $request = $this->buildRequest(array('h' => '26', 'm' => '60', 's' => '333'));
+        $this->assertSame('00:00:00', $request->getLocalTime());
+
+        $request = $this->buildRequest(array('h' => '-26', 'm' => '-60', 's' => '-333'));
+        $this->assertSame('00:00:00', $request->getLocalTime());
+    }
+
     public function test_getIdSite()
     {
         $request = $this->buildRequest(array('idsite' => '14'));
         $this->assertSame(14, $request->getIdSite());
-    }
-
-    public function test_getIdSite_shouldTriggerEventAndReturnThatIdSite()
-    {
-        $self = $this;
-        Piwik::addAction('Tracker.Request.getIdSite', function (&$idSite, $params) use ($self) {
-            $self->assertSame(14, $idSite);
-            $self->assertEquals(array('idsite' => '14'), $params);
-            $idSite = 12;
-        });
-
-        $request = $this->buildRequest(array('idsite' => '14'));
-        $this->assertSame(12, $request->getIdSite());
     }
 
     /**
@@ -599,6 +580,32 @@ class RequestTest extends UnitTestCase
     {
         return new TestRequest($params, $token);
     }
+}
 
+class TestRequest extends Request
+{
+    public function getCookieName()
+    {
+        return parent::getCookieName();
+    }
 
+    public function getCookieExpire()
+    {
+        return parent::getCookieExpire();
+    }
+
+    public function getCookiePath()
+    {
+        return parent::getCookiePath();
+    }
+
+    public function makeThirdPartyCookieUID()
+    {
+        return parent::makeThirdPartyCookieUID();
+    }
+
+    public function setIsAuthenticated()
+    {
+        $this->isAuthenticated = true;
+    }
 }

@@ -8,11 +8,10 @@
  */
 namespace Piwik\Plugin;
 
+use Piwik\Common;
 use Piwik\Development;
 use Piwik\Menu\MenuAdmin;
-use Piwik\Menu\MenuReporting;
 use Piwik\Menu\MenuTop;
-use Piwik\Menu\MenuUser;
 use Piwik\Plugin\Manager as PluginManager;
 use Piwik\Plugins\UsersManager\UserPreferences;
 
@@ -30,6 +29,11 @@ use Piwik\Plugins\UsersManager\UserPreferences;
  */
 class Menu
 {
+    public function __construct()
+    {
+        // Constructor kept for BC (because called in implementations)
+    }
+
     private function getModule()
     {
         $className = get_class($this);
@@ -133,12 +137,9 @@ class Menu
      */
     protected function urlForActionWithDefaultUserParams($controllerAction, $additionalParams = array())
     {
-        $urlModuleAction = $this->urlForAction($controllerAction);
-        return array_merge(
-            $urlModuleAction,
-            $this->urlForDefaultUserParams(),
-            $additionalParams
-        );
+        $module = $this->getModule();
+
+        return $this->urlForModuleActionWithDefaultUserParams($module, $controllerAction, $additionalParams);
     }
 
     /**
@@ -156,9 +157,20 @@ class Menu
     protected function urlForModuleActionWithDefaultUserParams($module, $controllerAction, $additionalParams = array())
     {
         $urlModuleAction = $this->urlForModuleAction($module, $controllerAction);
+
+        $date = Common::getRequestVar('date', false);
+        if ($date) {
+            $urlModuleAction['date'] = $date;
+        }
+        $period = Common::getRequestVar('period', false);
+        if ($period) {
+            $urlModuleAction['period'] = $period;
+        }
+
+        // We want the current query parameters to override the user's defaults
         return array_merge(
-            $urlModuleAction,
             $this->urlForDefaultUserParams(),
+            $urlModuleAction,
             $additionalParams
         );
     }
@@ -196,14 +208,6 @@ class Menu
     }
 
     /**
-     * Configures the reporting menu which should only contain links to reports of a specific site such as
-     * "Search Engines", "Page Titles" or "Locations & Provider".
-     */
-    public function configureReportingMenu(MenuReporting $menu)
-    {
-    }
-
-    /**
      * Configures the top menu which is supposed to contain analytics related items such as the
      * "All Websites Dashboard".
      */
@@ -212,16 +216,8 @@ class Menu
     }
 
     /**
-     * Configures the user menu which is supposed to contain user and help related items such as
-     * "User settings", "Alerts" or "Email Reports".
-     */
-    public function configureUserMenu(MenuUser $menu)
-    {
-    }
-
-    /**
      * Configures the admin menu which is supposed to contain only administration related items such as
-     * "Websites", "Users" or "Plugin settings".
+     * "Websites", "Users" or "Settings".
      */
     public function configureAdminMenu(MenuAdmin $menu)
     {
@@ -240,7 +236,7 @@ class Menu
         }
 
         $reportAction = lcfirst(substr($action, 4));
-        if (Report::factory($module, $reportAction)) {
+        if (ReportsProvider::factory($module, $reportAction)) {
             return;
         }
 
@@ -254,5 +250,4 @@ class Menu
             Development::error($prefix . 'The defined action "' . $action . '" is not callable on "' . $controllerClass . '". Make sure the method is public.');
         }
     }
-
 }

@@ -1,6 +1,6 @@
 {
     "MobileMessaging": {
-        "Exception_UnknownProvider": "服务商名字 '%s' 未知，请试试下面的: %s。",
+        "Exception_UnknownProvider": "服务商名字 '%1$s' 未知，请试试下面的: %2$s。",
         "MobileReport_AdditionalPhoneNumbers": "通过访问，您可以添加多个电话号码",
         "MobileReport_MobileMessagingSettingsLink": "手机短信设置页",
         "MobileReport_NoPhoneNumbers": "激活至少一个电话号码，请访问",
@@ -21,7 +21,6 @@
         "Settings_PhoneActivated": "电话号码已验证! 您可以收到统计短信了。",
         "Settings_PhoneNumber": "电话号码",
         "Settings_PhoneNumbers_Add": "增加新的电话号码",
-        "Settings_PhoneNumbers_CountryCode_Help": "如果您不知道国家区号，请在这里查询",
         "Settings_PhoneNumbers_Help": "在手机上接收短信报表前，需要在下面输入电话号码。",
         "Settings_PhoneNumbers_HelpAdd": "点击\"增加\"后，一条包含代码的短信将发到手机上，收到短信的用户需要登录 Piwik，点管理设置，然后点手机短信。输入代码后，用户就能在手机上收到文字报表了。",
         "Settings_PleaseSignUp": "要创建短信报表并在手机上通过短信接收网站的统计信息，请注册短信 API 并在下面输入资料。",
@@ -29,13 +28,13 @@
         "Settings_SMSProvider": "短信服务商",
         "Settings_SuperAdmin": "用户设置",
         "Settings_SuspiciousPhoneNumber": "如果没有收到短信，试试前面不要 0。例如. %s",
-        "Settings_UpdateOrDeleteAccount": "您也可以 %s修改%s 或 %s删除%s 这个帐号。",
+        "Settings_UpdateOrDeleteAccount": "您也可以 %1$s修改%2$s 或 %3$s删除%4$s 这个帐号。",
         "Settings_ValidatePhoneNumber": "有效",
         "Settings_VerificationCodeJustSent": "我们刚发了代码短信到这个号码: 请输入上面的代码然后点 \"验证\"。",
         "SettingsMenu": "手机短信",
         "SMS_Content_Too_Long": "[太长]",
         "TopLinkTooltip": "设置网站分析报表发送到邮箱或者手机!",
         "TopMenu": "邮件和短信报表",
-        "VerificationText": "代码为 %s。要验证电话号码及接收 Piwik 短信报表，请复制本代码到 Piwik > %s > %s 的表格中。"
+        "VerificationText": "代码为 %1$s。要验证电话号码及接收 Piwik 短信报表，请复制本代码到 Piwik > %2$s > %3$s 的表格中。"
     }
 }

@@ -112,7 +112,6 @@ abstract class Metric
             $value = $row->getColumn($columnName);
 
             if ($value === false) {
-
                 if (empty($mappingNameToId)) {
                     $mappingNameToId = Metrics::getMappingFromNameToId();
                 }
@@ -123,14 +122,10 @@ abstract class Metric
             }
 
             return $value;
-
         } elseif (!empty($row)) {
-            
             if (array_key_exists($columnName, $row)) {
                 return $row[$columnName];
-
             } else {
-
                 if (empty($mappingNameToId)) {
                     $mappingNameToId = Metrics::getMappingFromNameToId();
                 }
@@ -179,16 +174,19 @@ abstract class Metric
      */
     public static function getActualMetricColumn(DataTable $table, $columnName, $mappingNameToId = null)
     {
-        if (empty($mappingIdToName)) {
-            $mappingNameToId = Metrics::getMappingFromNameToId();
+        $firstRow = $table->getFirstRow();
+
+        if (!empty($firstRow) && $firstRow->hasColumn($columnName) === false) {
+
+            if (empty($mappingIdToName)) {
+                $mappingNameToId = Metrics::getMappingFromNameToId();
+            }
+
+            if (array_key_exists($columnName, $mappingNameToId)) {
+                $columnName = $mappingNameToId[$columnName];
+            }
         }
 
-        $firstRow = $table->getFirstRow();
-        if (!empty($firstRow)
-            && $firstRow->getColumn($columnName) === false
-        ) {
-            $columnName = $mappingNameToId[$columnName];
-        }
         return $columnName;
     }
 }

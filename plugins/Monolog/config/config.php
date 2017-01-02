@@ -6,20 +6,25 @@ use Piwik\Log;
 
 return array(
 
-    'Psr\Log\LoggerInterface' => DI\object('Monolog\Logger')
-        ->constructor('piwik', DI\link('log.handlers'), DI\link('log.processors')),
+    'Monolog\Logger' => DI\object('Monolog\Logger')
+        ->constructor('piwik', DI\get('log.handlers'), DI\get('log.processors')),
 
+    'Psr\Log\LoggerInterface' => DI\get('Monolog\Logger'),
+
+    'log.handler.classes' => array(
+        'file'     => 'Piwik\Plugins\Monolog\Handler\FileHandler',
+        'screen'   => 'Piwik\Plugins\Monolog\Handler\WebNotificationHandler',
+        'database' => 'Piwik\Plugins\Monolog\Handler\DatabaseHandler',
+    ),
     'log.handlers' => DI\factory(function (ContainerInterface $c) {
         if ($c->has('ini.log.log_writers')) {
             $writerNames = $c->get('ini.log.log_writers');
         } else {
             return array();
         }
-        $classes = array(
-            'file'     => 'Piwik\Plugins\Monolog\Handler\FileHandler',
-            'screen'   => 'Piwik\Plugins\Monolog\Handler\WebNotificationHandler',
-            'database' => 'Piwik\Plugins\Monolog\Handler\DatabaseHandler',
-        );
+
+        $classes = $c->get('log.handler.classes');
+
         $writerNames = array_map('trim', $writerNames);
         $writers = array();
         foreach ($writerNames as $writerName) {
@@ -31,25 +36,28 @@ return array(
     }),
 
     'log.processors' => array(
-        DI\link('Piwik\Plugins\Monolog\Processor\ClassNameProcessor'),
-        DI\link('Piwik\Plugins\Monolog\Processor\RequestIdProcessor'),
-        DI\link('Piwik\Plugins\Monolog\Processor\ExceptionToTextProcessor'),
-        DI\link('Piwik\Plugins\Monolog\Processor\SprintfProcessor'),
-        DI\link('Monolog\Processor\PsrLogMessageProcessor'),
-        DI\link('Piwik\Plugins\Monolog\Processor\TokenProcessor'),
+        DI\get('Piwik\Plugins\Monolog\Processor\SprintfProcessor'),
+        DI\get('Piwik\Plugins\Monolog\Processor\ClassNameProcessor'),
+        DI\get('Piwik\Plugins\Monolog\Processor\RequestIdProcessor'),
+        DI\get('Piwik\Plugins\Monolog\Processor\ExceptionToTextProcessor'),
+        DI\get('Monolog\Processor\PsrLogMessageProcessor'),
+        DI\get('Piwik\Plugins\Monolog\Processor\TokenProcessor'),
     ),
 
     'Piwik\Plugins\Monolog\Handler\FileHandler' => DI\object()
-        ->constructor(DI\link('log.file.filename'), DI\link('log.level'))
-        ->method('setFormatter', DI\link('Piwik\Plugins\Monolog\Formatter\LineMessageFormatter')),
+        ->constructor(DI\get('log.file.filename'), DI\get('log.level'))
+        ->method('setFormatter', DI\get('log.lineMessageFormatter.file')),
+
+    'log.lineMessageFormatter.file' => DI\object('Piwik\Plugins\Monolog\Formatter\LineMessageFormatter')
+        ->constructorParameter('allowInlineLineBreaks', false),
 
     'Piwik\Plugins\Monolog\Handler\DatabaseHandler' => DI\object()
-        ->constructor(DI\link('log.level'))
-        ->method('setFormatter', DI\link('Piwik\Plugins\Monolog\Formatter\LineMessageFormatter')),
+        ->constructor(DI\get('log.level'))
+        ->method('setFormatter', DI\get('Piwik\Plugins\Monolog\Formatter\LineMessageFormatter')),
 
     'Piwik\Plugins\Monolog\Handler\WebNotificationHandler' => DI\object()
-        ->constructor(DI\link('log.level'))
-        ->method('setFormatter', DI\link('Piwik\Plugins\Monolog\Formatter\LineMessageFormatter')),
+        ->constructor(DI\get('log.level'))
+        ->method('setFormatter', DI\get('Piwik\Plugins\Monolog\Formatter\LineMessageFormatter')),
 
     'log.level' => DI\factory(function (ContainerInterface $c) {
         if ($c->has('ini.log.log_level')) {
@@ -88,7 +96,7 @@ return array(
     }),
 
     'Piwik\Plugins\Monolog\Formatter\LineMessageFormatter' => DI\object()
-        ->constructor(DI\link('log.format')),
+        ->constructor(DI\get('log.format')),
 
     'log.format' => DI\factory(function (ContainerInterface $c) {
         if ($c->has('ini.log.string_message_format')) {

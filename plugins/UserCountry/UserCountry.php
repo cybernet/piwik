@@ -9,7 +9,6 @@
 namespace Piwik\Plugins\UserCountry;
 
 use Piwik\ArchiveProcessor;
-use Piwik\Common;
 use Piwik\Config;
 use Piwik\Container\StaticContainer;
 use Piwik\Intl\Data\Provider\RegionDataProvider;
@@ -28,9 +27,9 @@ require_once PIWIK_INCLUDE_PATH . '/plugins/UserCountry/GeoIPAutoUpdater.php';
 class UserCountry extends \Piwik\Plugin
 {
     /**
-     * @see Piwik\Plugin::getListHooksRegistered
+     * @see Piwik\Plugin::registerEvents
      */
-    public function getListHooksRegistered()
+    public function registerEvents()
     {
         return array(
             'AssetManager.getStylesheetFiles'        => 'getStylesheetFiles',
@@ -77,6 +76,10 @@ class UserCountry extends \Piwik\Plugin
     public function getJsFiles(&$jsFiles)
     {
         $jsFiles[] = "plugins/UserCountry/javascripts/userCountry.js";
+        $jsFiles[] = "plugins/UserCountry/angularjs/location-provider-selection/location-provider-selection.controller.js";
+        $jsFiles[] = "plugins/UserCountry/angularjs/location-provider-selection/location-provider-selection.directive.js";
+        $jsFiles[] = "plugins/UserCountry/angularjs/location-provider-updater/location-provider-updater.controller.js";
+        $jsFiles[] = "plugins/UserCountry/angularjs/location-provider-updater/location-provider-updater.directive.js";
     }
 
     /**
@@ -119,6 +122,8 @@ class UserCountry extends \Piwik\Plugin
         $translationKeys[] = "UserCountry_FatalErrorDuringDownload";
         $translationKeys[] = "UserCountry_SetupAutomaticUpdatesOfGeoIP";
         $translationKeys[] = "General_Done";
+        $translationKeys[] = "General_Save";
+        $translationKeys[] = "General_Continue";
     }
 
     public static function isGeoLocationAdminEnabled()

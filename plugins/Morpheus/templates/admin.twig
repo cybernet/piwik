@@ -1,48 +1,59 @@
 {% extends 'layout.twig' %}
 
-{% block pageTitle %}{% if not isCustomLogo %}Piwik &rsaquo;{% endif %} {{ 'CoreAdminHome_Administration'|translate }}{% endblock %}
+{% set categoryTitle %}{{ 'CoreAdminHome_Administration'|translate }}{% endset %}
 
 {% set bodyClass = postEvent('Template.bodyClass', 'admin') %}
+{% set isAdminArea = true %}
 
 {% block body %}
-    {% if isSuperUser %}
-        {% set topMenuModule = 'CoreAdminHome' %}
-        {% set topMenuAction = 'generalSettings' %}
-    {% else %}
-        {% set topMenuModule = 'SitesManager' %}
-        {% set topMenuAction = 'index' %}
-    {% endif %}
+    {% set topMenuModule = 'CoreAdminHome' %}
+    {% set topMenuAction = 'home' %}
     {{ parent() }}
 {% endblock %}
 
 {% block root %}
     {% include "@CoreHome/_topScreen.twig" %}
 
+    <div class="top_controls">
+        <div piwik-quick-access ng-cloak class="piwikTopControl borderedControl"></div>
+
+        {% block topcontrols %}
+        {% endblock %}
+
+        {% include "@CoreHome/_headerMessage.twig" %}
+    </div>
+
     {% import 'ajaxMacros.twig' as ajax %}
-    {{ ajax.requestErrorDiv(emailSuperUser|default('')) }}
+    {{ ajax.requestErrorDiv(emailSuperUser|default(''), areAdsForProfessionalServicesEnabled, currentModule) }}
     {{ postEvent("Template.beforeContent", "admin", currentModule) }}
 
-    <div id="container">
+    <div class="page">
 
         {% if showMenu is not defined or showMenu %}
-            {% include "@CoreAdminHome/_menu.twig" %}
+            {% import '@CoreHome/_menu.twig' as menu %}
+            {{ menu.menu(adminMenu, false, 'Menu--admin', currentModule, currentAction) }}
         {% endif %}
 
-        <div id="content" class="admin">
-
-            {% include "@CoreHome/_headerMessage.twig" %}
-            {% include "@CoreHome/_notifications.twig" %}
-
-            <div class="ui-confirm" id="alert">
-                <h2></h2>
-                <input role="no" type="button" value="{{ 'General_Ok'|translate }}"/>
-            </div>
-
+        <div class="pageWrap">
+            <a name="main"></a>
+            {% block notification %}
+                {% include "@CoreHome/_notifications.twig" %}
+            {% endblock %}
             {% include "@CoreHome/_warningInvalidHost.twig" %}
 
-            {% block content %}
-            {% endblock %}
+            <div class="admin" id="content" ng-cloak>
 
+                <div class="ui-confirm" id="alert">
+                    <h2></h2>
+                    <input role="no" type="button" value="{{ 'General_Ok'|translate }}"/>
+                </div>
+
+                {% block content %}
+                {% endblock %}
+
+            </div>
         </div>
     </div>
+
+
 {% endblock %}

@@ -18,7 +18,7 @@ use Piwik\Tracker\Visitor;
 class Language extends VisitDimension
 {
     protected $columnName = 'location_browser_lang';
-    protected $columnType = 'VARCHAR(20) NOT NULL';
+    protected $columnType = 'VARCHAR(20) NULL';
 
     public function getName()
     {
@@ -50,5 +50,15 @@ class Language extends VisitDimension
 
         $languageCode = Common::extractLanguageAndRegionCodeFromBrowserLanguage($acceptLanguagesString);
         return $languageCode;
+    }
+
+    protected function configureSegments()
+    {
+        $segment = new \Piwik\Plugin\Segment();
+        $segment->setCategory('Visit Location');
+        $segment->setSegment('languageCode');
+        $segment->setName('General_Language');
+        $segment->setAcceptedValues('de, fr, en-gb, zh-cn, etc.');
+        $this->addSegment($segment);
     }
 }

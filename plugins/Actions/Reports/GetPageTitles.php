@@ -11,12 +11,14 @@ namespace Piwik\Plugins\Actions\Reports;
 use Piwik\Piwik;
 use Piwik\Plugin\ViewDataTable;
 use Piwik\API\Request;
-use Piwik\Common;
 use Piwik\Plugins\Actions\Columns\PageTitle;
 use Piwik\Plugins\Actions\Columns\Metrics\AveragePageGenerationTime;
 use Piwik\Plugins\Actions\Columns\Metrics\AverageTimeOnPage;
 use Piwik\Plugins\Actions\Columns\Metrics\BounceRate;
 use Piwik\Plugins\Actions\Columns\Metrics\ExitRate;
+use Piwik\Plugin\ReportsProvider;
+use Piwik\Report\ReportWidgetFactory;
+use Piwik\Widget\WidgetsList;
 
 class GetPageTitles extends Base
 {
@@ -40,8 +42,7 @@ class GetPageTitles extends Base
 
         $this->actionToLoadSubTables = $this->action;
 
-        $this->menuTitle   = 'Actions_SubmenuPageTitles';
-        $this->widgetTitle = 'Actions_WidgetPageTitles';
+        $this->subcategoryId = 'Actions_SubmenuPageTitles';
     }
 
     public function getMetrics()
@@ -81,8 +82,8 @@ class GetPageTitles extends Base
     public function getRelatedReports()
     {
         return array(
-            new GetEntryPageTitles(),
-            new GetExitPageTitles()
+            ReportsProvider::factory('Actions', 'getEntryPageTitles'),
+            ReportsProvider::factory('Actions', 'getExitPageTitles'),
         );
     }
 }

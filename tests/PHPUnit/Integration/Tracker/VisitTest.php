@@ -8,22 +8,19 @@
 
 namespace Piwik\Tests\Integration\Tracker;
 
-use Piwik\Access;
 use Piwik\Cache;
-use Piwik\CacheId;
-use Piwik\Archive\ArchiveInvalidator;
+use Piwik\Container\StaticContainer;
 use Piwik\Date;
 use Piwik\Network\IPUtils;
 use Piwik\Plugin\Manager;
 use Piwik\Plugins\SitesManager\API;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\Mock\FakeAccess;
-use Piwik\Tracker\ActionPageview;
+use Piwik\Tests\Framework\Mock\Tracker\RequestAuthenticated;
 use Piwik\Tracker\Request;
 use Piwik\Tracker\Visit;
 use Piwik\Tracker\VisitExcluded;
 use Piwik\Tests\Framework\TestCase\IntegrationTestCase;
-use Piwik\Tracker\Visitor;
 
 /**
  * @group Core
@@ -35,12 +32,14 @@ class VisitTest extends IntegrationTestCase
         parent::setUp();
 
         // setup the access layer
-        $pseudoMockAccess = new FakeAccess;
         FakeAccess::$superUser = true;
-        Access::setSingletonInstance($pseudoMockAccess);
 
         Manager::getInstance()->loadTrackerPlugins();
-        Manager::getInstance()->loadPlugin('SitesManager');
+        $pluginNames = array_keys(Manager::getInstance()->getLoadedPlugins());
+        $pluginNames[] = 'SitesManager';
+        $pluginNames[] = 'WebsiteMeasurable';
+        Manager::getInstance()->loadPlugins($pluginNames);
+        Visit::$dimensions = null;
     }
 
     /**
@@ -93,15 +92,113 @@ class VisitTest extends IntegrationTestCase
         $idsite = API::getInstance()->addSite("name", "http://piwik.net/", $ecommerce = 0,
             $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null, $excludedIp);
 
-        $request = new Request(array('idsite' => $idsite));
+        $request = new RequestAuthenticated(array('idsite' => $idsite));
 
         // test that IPs within the range, or the given IP, are excluded
         foreach ($tests as $ip => $expected) {
-            $testIpIsExcluded = IPUtils::stringToBinaryIP($ip);
+            $request->setParam('cip', $ip);
 
-            $excluded = new VisitExcluded_public($request, $testIpIsExcluded);
-            $this->assertSame($expected, $excluded->public_isVisitorIpExcluded($testIpIsExcluded));
+            $excluded = new VisitExcluded_public($request);
+            $this->assertSame($expected, $excluded->public_isVisitorIpExcluded($ip));
         }
+    }
+
+    public function getExcludeByUrlData()
+    {
+        return array(
+            array(array('http://test.com'), true, array(
+                'http://test.com' => true,
+                'https://test.com' => true,
+                'http://test.com/uri' => true,
+                'http://test.com/?query' => true,
+                'http://xtest.com' => false,
+            )),
+            array(array('http://test.com', 'http://localhost'), true, array(
+                'http://test.com' => true,
+                'http://localhost' => true,
+                'http://x.com' => false,
+            )),
+            array(array('http://test.com'), false, array(
+                'http://x.com' => true,
+            )),
+            array(array('http://test.com', 'http://sub.test2.com'), true, array(
+                'http://sub.test.com' => false, // we do not match subdomains
+                'http://sub.sub.test.com' => false,
+                'http://subtest.com' => false,
+                'http://test.com.org' => false,
+                'http://test2.com' => false,
+                'http://sub.test2.com' => true,
+                'http://test.com' => true,
+                'http://x.sub.test2.com' => false,
+                'http://xsub.test2.com' => false,
+                'http://sub.test2.com.org' => false,
+            )),
+            array(array('http://test.com/path', 'http://test2.com/sub/dir'), true, array(
+                'http://test.com/path' => true, // test matching path
+                'http://test.com/path/' => true,
+                'http://test.com/path/test' => true,
+
+                'http://test.com/path1' => false,
+                'http://test.com/' => false,
+                'http://test.com' => false,
+                'http://test.com/foo' => false,
+                'http://sub.test.com/path' => false,  // we still do not match subdomains
+
+                'http://test2.com/sub/dir' => true,
+                'http://test2.com/sub/dir/' => true,
+                'http://test2.com/sub/dir/test' => true,
+
+                'http://test2.com/sub/foo/' => false,
+                'http://test2.com/sub/' => false,
+                'http://test2.com/' => false,
+                'http://test2.com/dir/sub' => false,
+            )),
+        );
+    }
+
+    /**
+     * @dataProvider getExcludeByUrlData
+     */
+    public function testExcludeByUrl($siteUrls, $excludeUnknownUrls, array $urlsTracked)
+    {
+        $siteId = API::getInstance()->addSite('name', $siteUrls, $ecommerce = null, $siteSearch = null, $searchKeywordParameters = null, $searchCategoryParameters = null, null, null, null, null, null, null, null, null, null, null, $excludeUnknownUrls);
+        foreach ($urlsTracked as $url => $isTracked) {
+            $visitExclude = new VisitExcluded(new Request(array(
+                'idsite' => $siteId,
+                'rec'    => 1,
+                'url'    => $url
+            )));
+            $this->assertEquals($isTracked, !$visitExclude->isExcluded(), $url . ' is not returning expected result');
+        }
+    }
+
+    /**
+     * @dataProvider getChromeDataSaverData
+     */
+    public function testVisitShouldNotBeExcluded_IfMadeViaChromeDataSaverCompressionProxy($ip, $isNonHumanBot)
+    {
+        $idsite = API::getInstance()->addSite("name", "http://piwik.net/", $ecommerce = 0,
+            $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null);
+
+
+        $request = new RequestAuthenticated(array('idsite' => $idsite, 'cip' => $ip));
+
+        $_SERVER['HTTP_VIA'] = '1.1 Chrome-Compression-Proxy';
+        $excluded = new VisitExcluded_public($request);
+        $isBot = $excluded->public_isNonHumanBot();
+        unset($_SERVER['HTTP_VIA']);
+        $this->assertSame($isNonHumanBot, $isBot);
+    }
+
+    public function getChromeDataSaverData()
+    {
+        return array(
+            array('216.239.32.0', $isNonHumanBot = false), // false because google ips
+            array('66.249.93.251', $isNonHumanBot = false),
+            array('173.194.0.1', $isNonHumanBot = false),
+            array('72.30.198.1', $isNonHumanBot = true), // not a google bot, a yahoo bot
+            array('64.4.0.1', $isNonHumanBot = true), // a MSN bot
+        );
     }
 
     /**
@@ -145,7 +242,8 @@ class VisitTest extends IntegrationTestCase
 
         // test that user agents that contain excluded user agent strings are excluded
         foreach ($tests as $ua => $expected) {
-            $excluded = new VisitExcluded_public($request, $ip = false, $ua);
+            $request->setParam('ua', $ua);
+            $excluded = new VisitExcluded_public($request);
 
             $this->assertSame($expected, $excluded->public_isUserAgentExcluded(), "Result if isUserAgentExcluded('$ua') was not " . ($expected ? 'true' : 'false') . ".");
         }
@@ -212,10 +310,11 @@ class VisitTest extends IntegrationTestCase
         );
 
         $idsite = API::getInstance()->addSite("name", "http://piwik.net/");
-        $request = new Request(array('idsite' => $idsite, 'bots' => 0));
+        $request = new RequestAuthenticated(array('idsite' => $idsite, 'bots' => 0));
 
         foreach ($isIpBot as $ip => $isBot) {
-            $excluded = new VisitExcluded_public($request, IPUtils::stringToBinaryIP($ip));
+            $request->setParam('cip', $ip);
+            $excluded = new VisitExcluded_public($request);
 
             $this->assertSame($isBot, $excluded->public_isNonHumanBot(), $ip);
         }
@@ -269,37 +368,6 @@ class VisitTest extends IntegrationTestCase
 
             $this->assertSame($isBot, $excluded->public_isNonHumanBot(), $userAgent);
         }
-    }
-
-    public function test_isVisitNew_ReturnsFalse_IfLastActionTimestampIsWithinVisitTimeLength_AndNoDimensionForcesVisit_AndVisitorKnown()
-    {
-        $this->setDimensionsWithOnNewVisit(array(false, false, false));
-
-        /** @var Visit $visit */
-        list($visit, $visitor, $action) = $this->makeVisitorAndAction(
-            $lastActionTime = '2012-01-02 08:08:34', $thisActionTime = '2012-01-02 08:12:45', $isVisitorKnown = true);
-
-        $result = $visit->isVisitNew($visitor, $action);
-
-        $this->assertFalse($result);
-    }
-
-    public function test_isVisitNew_ReturnsTrue_IfLastActionTimestampWasYesterday()
-    {
-        $this->setDimensionsWithOnNewVisit(array(false, false, false));
-
-        // test same day
-        /** @var Visit $visit */
-        list($visit, $visitor, $action) = $this->makeVisitorAndAction(
-            $lastActionTime = '2012-01-01 23:59:58', $thisActionTime = '2012-01-01 23:59:59', $isVisitorKnown = true);
-        $result = $visit->isVisitNew($visitor, $action);
-        $this->assertFalse($result);
-
-        // test different day
-        list($visit, $visitor, $action) = $this->makeVisitorAndAction(
-        $lastActionTime = '2012-01-01 23:59:58', $thisActionTime = '2012-01-02 00:00:01', $isVisitorKnown = true);
-        $result = $visit->isVisitNew($visitor, $action);
-        $this->assertTrue($result);
     }
 
     public function test_markArchivedReportsAsInvalidIfArchiveAlreadyFinished_ShouldRemember_IfRequestWasDoneLongAgo()
@@ -370,7 +438,7 @@ class VisitTest extends IntegrationTestCase
 
         $visit->handle();
 
-        $archive = new ArchiveInvalidator();
+        $archive = StaticContainer::get('Piwik\Archive\ArchiveInvalidator');
         $remembered = $archive->getRememberedArchivedReportsThatShouldBeInvalidated();
 
         $this->assertSame($expectedRemeberedArchivedReports, $remembered);
@@ -389,67 +457,11 @@ class VisitTest extends IntegrationTestCase
         return array($visit, $request);
     }
 
-    public function test_isVisitNew_ReturnsTrue_IfLastActionTimestampIsNotWithinVisitTimeLength_AndNoDimensionForcesVisit_AndVisitorNotKnown()
+    public function provideContainerConfig()
     {
-        $this->setDimensionsWithOnNewVisit(array(false, false, false));
-
-        /** @var Visit $visit */
-        list($visit, $visitor, $action) = $this->makeVisitorAndAction($lastActionTime = '2012-01-02 08:08:34', $thisActionTime = '2012-01-02 09:12:45');
-
-        $result = $visit->isVisitNew($visitor, $action);
-
-        $this->assertTrue($result);
-    }
-
-    public function test_isVisitNew_ReturnsTrue_IfLastActionTimestampIsWithinVisitTimeLength_AndDimensionForcesVisit()
-    {
-        $this->setDimensionsWithOnNewVisit(array(false, false, true));
-
-        /** @var Visit $visit */
-        list($visit, $visitor, $action) = $this->makeVisitorAndAction($lastActionTime = '2012-01-02 08:08:34', $thisActionTime = '2012-01-02 08:12:45');
-
-        $result = $visit->isVisitNew($visitor, $action);
-
-        $this->assertTrue($result);
-    }
-
-    public function test_isVisitNew_ReturnsTrue_IfDimensionForcesVisit_AndVisitorKnown()
-    {
-        $this->setDimensionsWithOnNewVisit(array(false, false, true));
-
-        /** @var Visit $visit */
-        list($visit, $visitor, $action) = $this->makeVisitorAndAction($lastActionTime = '2012-01-02 08:08:34', $thisActionTime = '2012-01-02 08:12:45');
-
-        $result = $visit->isVisitNew($visitor, $action);
-
-        $this->assertTrue($result);
-    }
-
-    private function makeVisitorAndAction($lastActionTimestamp, $currentActionTime, $isVisitorKnown = false)
-    {
-        $idsite = API::getInstance()->addSite("name", "http://piwik.net/");
-
-        list($visit, $request) = $this->prepareVisitWithRequest(array('idsite' => $idsite), $currentActionTime);
-
-        $visitor = new Visitor($request, 'configid', array('visit_last_action_time' => Date::factory($lastActionTimestamp)->getTimestamp()));
-        $visitor->setIsVisitorKnown($isVisitorKnown);
-
-        $action = new ActionPageview($request);
-
-        return array($visit, $visitor, $action);
-    }
-
-    private function setDimensionsWithOnNewVisit($dimensionOnNewVisitResults)
-    {
-        $dimensions = array();
-        foreach ($dimensionOnNewVisitResults as $onNewVisitResult) {
-            $dim = $this->getMock('Piwik\\Plugin\\Dimension', array('shouldForceNewVisit', 'getColumnName'));
-            $dim->expects($this->any())->method('shouldForceNewVisit')->will($this->returnValue($onNewVisitResult));
-            $dimensions[] = $dim;
-        }
-
-        $cache = Cache::getTransientCache();
-        $cache->save(CacheId::pluginAware('VisitDimensions'), $dimensions);
+        return array(
+            'Piwik\Access' => new FakeAccess()
+        );
     }
 }
 

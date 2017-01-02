@@ -7,25 +7,32 @@
 (function () {
     angular.module('piwikApp').controller('SitesManagerController', SitesManagerController);
 
-    SitesManagerController.$inject = ['$scope', '$filter', 'coreAPI', 'sitesManagerAPI', 'piwik', 'sitesManagerApiHelper'];
+    SitesManagerController.$inject = ['$scope', '$filter', 'coreAPI', 'sitesManagerAPI', 'piwikApi', 'sitesManagerAdminSitesModel', 'piwik', 'sitesManagerApiHelper', 'sitesManagerTypeModel', '$rootScope', '$window'];
 
-    function SitesManagerController($scope, $filter, coreAPI, sitesManagerAPI, piwik, sitesManagerApiHelper) {
+    function SitesManagerController($scope, $filter, coreAPI, sitesManagerAPI, piwikApi, adminSites, piwik, sitesManagerApiHelper, sitesManagerTypeModel, $rootScope, $window) {
 
         var translate = $filter('translate');
 
+        $scope.globalSettings = {};
+
+        $rootScope.$on('$locationChangeSuccess', function () {
+            if (piwik.hasSuperUserAccess) {
+                // as we are not using a router yet...
+                if ($window.location.hash === '#globalSettings' || $window.location.hash === '#/globalSettings') {
+                    broadcast.propagateNewPage('action=globalSettings');
+                }
+            }
+        });
+
         var init = function () {
-
-            initModel();
-            initActions();
-        };
-
-        var initModel = function() {
 
             $scope.period = piwik.broadcast.getValueFromUrl('period');
             $scope.date = piwik.broadcast.getValueFromUrl('date');
-            $scope.sites = [];
+            $scope.adminSites = adminSites;
             $scope.hasSuperUserAccess = piwik.hasSuperUserAccess;
             $scope.redirectParams = {showaddsite: false};
+            $scope.cacheBuster = piwik.cacheBuster;
+            $scope.totalNumberOfSites = '?';
 
             initSelectLists();
             initUtcTime();
@@ -33,27 +40,30 @@
             initCustomVariablesActivated();
             initIsTimezoneSupportEnabled();
             initGlobalParams();
+
+            initActions();
         };
 
         var initActions = function () {
 
             $scope.cancelEditSite = cancelEditSite;
             $scope.addSite = addSite;
+            $scope.addNewEntity = addNewEntity;
             $scope.saveGlobalSettings = saveGlobalSettings;
-
-            $scope.informSiteIsBeingEdited = informSiteIsBeingEdited;
             $scope.lookupCurrentEditSite = lookupCurrentEditSite;
         };
 
-        var informSiteIsBeingEdited = function() {
+        var initAvailableTypes = function () {
+            return sitesManagerTypeModel.fetchAvailableTypes().then(function (types) {
+                $scope.availableTypes = types;
+                $scope.typeForNewEntity = 'website';
 
-            $scope.siteIsBeingEdited = true;
+                return types;
+            });
         };
 
         var initSelectLists = function() {
 
-            initSiteSearchSelectOptions();
-            initEcommerceSelectOptions();
             initCurrencyList();
             initTimezones();
         };
@@ -61,6 +71,8 @@
         var initGlobalParams = function() {
 
             showLoading();
+
+            var availableTypesPromise = initAvailableTypes();
 
             sitesManagerAPI.getGlobalSettings(function(globalSettings) {
 
@@ -72,11 +84,20 @@
                 $scope.globalSettings.excludedQueryParametersGlobal = sitesManagerApiHelper.commaDelimitedFieldToArray($scope.globalSettings.excludedQueryParametersGlobal);
                 $scope.globalSettings.excludedUserAgentsGlobal = sitesManagerApiHelper.commaDelimitedFieldToArray($scope.globalSettings.excludedUserAgentsGlobal);
 
+                hideLoading();
+
                 initKeepURLFragmentsList();
 
-                initSiteList();
-
-                triggerAddSiteIfRequested();
+                adminSites.fetchLimitedSitesWithAdminAccess(function () {
+                    availableTypesPromise.then(function () {
+                        triggerAddSiteIfRequested();
+                    });
+                });
+                sitesManagerAPI.getSitesIdWithAdminAccess(function (siteIds) {
+                    if (siteIds && siteIds.length) {
+                        $scope.totalNumberOfSites = siteIds.length;
+                    }
+                });
             });
         };
 
@@ -84,15 +105,7 @@
             var search = String(window.location.search);
 
             if(piwik.helper.getArrayFromQueryString(search).showaddsite == 1)
-                addSite();
-        };
-
-        var initEcommerceSelectOptions = function() {
-
-            $scope.eCommerceptions = [
-                {key: '0', value: translate('SitesManager_NotAnEcommerceSite')},
-                {key: '1', value: translate('SitesManager_EnableEcommerce')}
-            ];
+                addNewEntity();
         };
 
         var initUtcTime = function() {
@@ -122,19 +135,22 @@
 
                 function (timezones) {
 
+                    var scopeTimezones = [];
                     $scope.timezones = [];
 
                     angular.forEach(timezones, function(groupTimezones, timezoneGroup) {
 
                         angular.forEach(groupTimezones, function(label, code) {
 
-                            $scope.timezones.push({
+                            scopeTimezones.push({
                                 group: timezoneGroup,
-                                code: code,
-                                label: label
+                                key: code,
+                                value: label
                             });
                         });
                     });
+
+                    $scope.timezones = scopeTimezones;
                 }
             );
         };
@@ -158,25 +174,31 @@
             });
         };
 
-        var initSiteSearchSelectOptions = function() {
-
-            $scope.siteSearchOptions = [
-                {key: '1', value: translate('SitesManager_EnableSiteSearch')},
-                {key: '0', value: translate('SitesManager_DisableSiteSearch')}
+        var initKeepURLFragmentsList = function() {
+            $scope.keepURLFragmentsOptions = [
+                {key: 0, value: ($scope.globalSettings.keepURLFragmentsGlobal ? translate('General_Yes') : translate('General_No')) + ' (' + translate('General_Default') + ')'},
+                {key: 1, value: translate('General_Yes')},
+                {key: 2, value: translate('General_No')}
             ];
         };
 
-        var initKeepURLFragmentsList = function() {
-
-            $scope.keepURLFragmentsOptions = {
-                0: ($scope.globalSettings.keepURLFragmentsGlobal ? translate('General_Yes') : translate('General_No')) + ' (' + translate('General_Default') + ')',
-                1: translate('General_Yes'),
-                2: translate('General_No')
-            };
+        var addNewEntity = function () {
+            sitesManagerTypeModel.hasMultipleTypes().then(function (hasMultipleTypes) {
+                if (hasMultipleTypes) {
+                    $scope.showAddSiteDialog = true;
+                } else if ($scope.availableTypes.length === 1) {
+                    var type = $scope.availableTypes[0].id;
+                    addSite(type);
+                }
+            });
         };
 
-        var addSite = function() {
-            $scope.sites.push({});
+        var addSite = function(type) {
+            if (!type) {
+                type = 'website'; // todo shall we really hard code this or trigger an exception or so?
+            }
+
+            $scope.adminSites.sites.unshift({type: type});
         };
 
         var saveGlobalSettings = function() {
@@ -200,36 +222,32 @@
                 searchKeywordParameters: $scope.globalSettings.searchKeywordParametersGlobal.join(','),
                 searchCategoryParameters: $scope.globalSettings.searchCategoryParametersGlobal.join(',')
             }, 'POST');
-
+            ajaxHandler.withTokenInUrl();
             ajaxHandler.redirectOnSuccess($scope.redirectParams);
             ajaxHandler.setLoadingElement();
-            ajaxHandler.send(true);
+            ajaxHandler.send();
         };
 
-        var cancelEditSite = function ($event) {
-            $event.stopPropagation();
-            piwik.helper.redirect($scope.redirectParams);
+        var cancelEditSite = function (site) {
+            site.editMode = false;
+
+            var idSite = site.idsite;
+            if (idSite) {
+                var siteElement = $('.site[idsite=' + idSite + ']');
+                if (siteElement[0]) {
+                    // todo move this into a directive
+                    siteElement[0].scrollIntoView();
+                }
+            }
         };
 
         var lookupCurrentEditSite = function () {
 
-            var sitesInEditMode = $scope.sites.filter(function(site) {
+            var sitesInEditMode = $scope.adminSites.sites.filter(function(site) {
                 return site.editMode;
             });
 
             return sitesInEditMode[0];
-        };
-
-        var initSiteList = function () {
-
-            sitesManagerAPI.getSitesWithAdminAccess(function (sites) {
-
-                angular.forEach(sites, function(site) {
-                    $scope.sites.push(site);
-                });
-
-                hideLoading();
-            });
         };
 
         var initCurrencyList = function () {

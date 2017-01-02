@@ -44,13 +44,14 @@ class DoNotTrackHeaderChecker
 
         if($exclude) {
 
-            $trackingCookie = IgnoreCookie::getTrackingCookie();
-            $trackingCookie->delete();
+            IgnoreCookie::deleteThirdPartyCookieUIDIfExists();
 
             // this is an optional supplement to the site's tracking status resource at:
             //     /.well-known/dnt
-            // per Tracking Preference Expression (draft)
-            header('Tk: 1');
+            // per Tracking Preference Expression
+            
+            //Tracking Perference Expression has been updated to require Tk: N rather than Tk: 1
+            Common::sendHeader('Tk: N');
         }
     }
 
@@ -146,6 +147,9 @@ class DoNotTrackHeaderChecker
 
             // Maxthon
             'Maxthon',
+            
+            // Epiphany - https://github.com/piwik/piwik/issues/8682
+            'Epiphany',
         );
     }
 }

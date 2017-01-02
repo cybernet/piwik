@@ -1,12 +1,14 @@
 {
     "Contents": {
-        "ContentName": "İçerik İsmi",
-        "ContentPiece": "İçerik Parçası",
-        "Contents": "İçerikler",
-        "ContentTarget": "İçerik Hedefi",
-        "Impressions": "Gösterimler",
-        "Interaction": "Etkileşim",
+        "PluginDescription": "İçerik ve reklam izleme, sayfalarınızdaki herhangi bir içeriğin (reklam, görsel, herhangi bir öge) başarımının (görülme, tıklanma, CTR) izlenmesini sağlar.",
+        "Impressions": "Görülme",
         "InteractionRate": "Etkileşim Oranı",
-        "Interactions": "Etkileşimler"
+        "ContentName": "İçerik Adı",
+        "ContentPiece": "İçerik Parçası",
+        "ContentTarget": "İçerik Hedefi",
+        "Contents": "İçerikler",
+        "InteractionsMetricDocumentation": "İçerik bloğu ile kaç kere etkileşime geçildiği (afiş ya da reklama 'tıklanma' gibi).",
+        "ImpressionsMetricDocumentation": "Afiş ya da reklam gibi bir içerik bloğunun bir sayfada kaç kere görüntülendiği .",
+        "InteractionRateMetricDocumentation": "İçeriğin görüntülenmesi ile etkileşime geçilme oranı."
     }
 }

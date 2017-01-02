@@ -103,6 +103,9 @@
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -230,6 +233,9 @@
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -391,6 +397,9 @@
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -406,13 +415,13 @@
 		<events>1</events>
 		<continent>Europe</continent>
 		<continentCode>eur</continentCode>
-		<country>Russian Federation</country>
+		<country>Russia</country>
 		<countryCode>ru</countryCode>
 		<countryFlag>plugins/UserCountry/images/flags/ru.png</countryFlag>
 		<region>Saint Petersburg City</region>
 		<regionCode>66</regionCode>
 		<city>Hluboká nad Vltavou</city>
-		<location>Hluboká nad Vltavou, Saint Petersburg City, Russian Federation</location>
+		<location>Hluboká nad Vltavou, Saint Petersburg City, Russia</location>
 		<latitude />
 		<longitude />
 		<visitLocalTime>12:34:06</visitLocalTime>
@@ -534,6 +543,9 @@
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -549,13 +561,13 @@
 		<events>1</events>
 		<continent>Europe</continent>
 		<continentCode>eur</continentCode>
-		<country>Macedonia, the Former Yugoslav Republic of</country>
+		<country>Macedonia</country>
 		<countryCode>mk</countryCode>
 		<countryFlag>plugins/UserCountry/images/flags/mk.png</countryFlag>
 		<region>Miravci</region>
 		<regionCode>66</regionCode>
 		<city>Stratford-upon-Avon</city>
-		<location>Stratford-upon-Avon, Miravci, Macedonia, the Former Yugoslav Republic of</location>
+		<location>Stratford-upon-Avon, Miravci, Macedonia</location>
 		<latitude />
 		<longitude />
 		<visitLocalTime>12:34:06</visitLocalTime>
@@ -661,6 +673,9 @@
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -676,13 +691,13 @@
 		<events>0</events>
 		<continent>Europe</continent>
 		<continentCode>eur</continentCode>
-		<country>Macedonia, the Former Yugoslav Republic of</country>
+		<country>Macedonia</country>
 		<countryCode>mk</countryCode>
 		<countryFlag>plugins/UserCountry/images/flags/mk.png</countryFlag>
 		<region>Miravci</region>
 		<regionCode>66</regionCode>
 		<city>Stratford-upon-Avon</city>
-		<location>Stratford-upon-Avon, Miravci, Macedonia, the Former Yugoslav Republic of</location>
+		<location>Stratford-upon-Avon, Miravci, Macedonia</location>
 		<latitude />
 		<longitude />
 		<visitLocalTime>12:34:06</visitLocalTime>
@@ -788,6 +803,9 @@
 		<referrerSearchEngineUrl />
 		<referrerSearchEngineIcon />
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>
@@ -803,13 +821,13 @@
 		<events>0</events>
 		<continent>Europe</continent>
 		<continentCode>eur</continentCode>
-		<country>Russian Federation</country>
+		<country>Russia</country>
 		<countryCode>ru</countryCode>
 		<countryFlag>plugins/UserCountry/images/flags/ru.png</countryFlag>
 		<region>Saint Petersburg City</region>
 		<regionCode>66</regionCode>
 		<city>Hluboká nad Vltavou</city>
-		<location>Hluboká nad Vltavou, Saint Petersburg City, Russian Federation</location>
+		<location>Hluboká nad Vltavou, Saint Petersburg City, Russia</location>
 		<latitude />
 		<longitude />
 		<visitLocalTime>12:34:06</visitLocalTime>
@@ -905,6 +923,9 @@
 		<referrerSearchEngineUrl>http://google.com</referrerSearchEngineUrl>
 		<referrerSearchEngineIcon>plugins/Referrers/images/searchEngines/google.com.png</referrerSearchEngineIcon>
 		<deviceType>Desktop</deviceType>
+		<deviceTypeIcon>plugins/DevicesDetection/images/screens/normal.gif</deviceTypeIcon>
+		<deviceBrand>Unknown</deviceBrand>
+		<deviceModel />
 		<operatingSystem>Windows XP</operatingSystem>
 		<operatingSystemName>Windows</operatingSystemName>
 		<operatingSystemIcon>plugins/DevicesDetection/images/os/WIN.gif</operatingSystemIcon>

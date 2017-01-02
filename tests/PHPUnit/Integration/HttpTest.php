@@ -55,6 +55,13 @@ class HttpTest extends \PHPUnit_Framework_TestCase
         $this->assertGreaterThan(0, filesize($destinationPath));
     }
 
+    public function testBuildQuery()
+    {
+        $this->assertEquals('', Http::buildQuery(array()));
+        $this->assertEquals('test=foo', Http::buildQuery(array('test' => 'foo')));
+        $this->assertEquals('test=foo&bar=baz', Http::buildQuery(array('test' => 'foo', 'bar' => 'baz')));
+    }
+
     /**
      * @dataProvider getMethodsToTest
      */
@@ -119,6 +126,109 @@ class HttpTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider getMethodsToTest
      */
+    public function testHttpAuthentication($method)
+    {
+        $result = Http::sendHttpRequestBy(
+            $method,
+            Fixture::getRootUrl() . 'tests/PHPUnit/Integration/Http/HttpAuthentication.php',
+            30,
+            $userAgent = null,
+            $destinationPath = null,
+            $file = null,
+            $followDepth = 0,
+            $acceptLanguage = false,
+            $acceptInvalidSslCertificate = false,
+            $byteRange = false,
+            $getExtendedInfo = true,
+            $httpMethod = 'GET',
+            $httpUsername = 'test',
+            $httpPassword = 'test'
+        );
+
+        $this->assertEquals('Authentication successful', $result['data']);
+        $this->assertEquals(200, $result['status']);
+    }
+
+    /**
+     * @dataProvider getMethodsToTest
+     */
+    public function testHttpAuthenticationInvalid($method)
+    {
+        $result = Http::sendHttpRequestBy(
+            $method,
+            Fixture::getRootUrl() . 'tests/PHPUnit/Integration/Http/HttpAuthentication.php',
+            30,
+            $userAgent = null,
+            $destinationPath = null,
+            $file = null,
+            $followDepth = 0,
+            $acceptLanguage = false,
+            $acceptInvalidSslCertificate = false,
+            $byteRange = false,
+            $getExtendedInfo = true,
+            $httpMethod = 'GET',
+            $httpUsername = '',
+            $httpPassword = ''
+        );
+
+        $this->assertEquals(401, $result['status']);
+    }
+
+    /**
+     * @dataProvider getMethodsToTest
+     */
+    public function testHttpPost_ViaString($method)
+    {
+        $result = Http::sendHttpRequestBy(
+            $method,
+            Fixture::getRootUrl() . 'tests/PHPUnit/Integration/Http/Post.php',
+            30,
+            $userAgent = null,
+            $destinationPath = null,
+            $file = null,
+            $followDepth = 0,
+            $acceptLanguage = false,
+            $acceptInvalidSslCertificate = false,
+            $byteRange = false,
+            $getExtendedInfo = false,
+            $httpMethod = 'POST',
+            $httpUsername = '',
+            $httpPassword = '',
+            'abc12=43&abfec=abcdef'
+        );
+
+        $this->assertEquals('{"abc12":"43","abfec":"abcdef","method":"post"}', $result);
+    }
+
+    /**
+     * @dataProvider getMethodsToTest
+     */
+    public function testHttpPost_ViaArray($method)
+    {
+        $result = Http::sendHttpRequestBy(
+            $method,
+            Fixture::getRootUrl() . 'tests/PHPUnit/Integration/Http/Post.php',
+            30,
+            $userAgent = null,
+            $destinationPath = null,
+            $file = null,
+            $followDepth = 0,
+            $acceptLanguage = false,
+            $acceptInvalidSslCertificate = false,
+            $byteRange = false,
+            $getExtendedInfo = false,
+            $httpMethod = 'POST',
+            $httpUsername = '',
+            $httpPassword = '',
+            array('adf2' => '44', 'afc23' => 'ab12')
+        );
+
+        $this->assertEquals('{"adf2":"44","afc23":"ab12","method":"post"}', $result);
+    }
+
+    /**
+     * @dataProvider getMethodsToTest
+     */
     public function testHttpsWorksWithValidCertificate($method)
     {
         $result = Http::sendHttpRequestBy($method, 'https://builds.piwik.org/LATEST', 10);
@@ -127,21 +237,27 @@ class HttpTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * erroe message can be:
+     *      curl_exec: server certificate verification failed. CAfile: /home/travis/build/piwik/piwik/core/DataFiles/cacert.pem CRLfile: none. Hostname requested was: self-signed.badssl.com
+     * or
+     *      curl_exec: SSL certificate problem: self signed certificate. Hostname requested was: self-signed.badssl.com
      * @expectedException \Exception
-     * @expectedExceptionMessage curl_exec: SSL
+     * @expectedExceptionMessageRegExp /curl_exec: .*certificate.* /
      */
     public function testCurlHttpsFailsWithInvalidCertificate()
     {
-        Http::sendHttpRequestBy('curl', 'https://divezone.net', 10);
+        // use a domain from https://badssl.com/
+        Http::sendHttpRequestBy('curl', 'https://self-signed.badssl.com/', 10);
     }
 
     /**
      * @expectedException \Exception
-     * @expectedExceptionMessage failed to open stream: operation failed
+     * @expectedExceptionMessage failed to open stream
      */
     public function testFopenHttpsFailsWithInvalidCertificate()
     {
-        Http::sendHttpRequestBy('fopen', 'https://divezone.net', 10);
+        // use a domain from https://badssl.com/
+        Http::sendHttpRequestBy('fopen', 'https://self-signed.badssl.com/', 10);
     }
 
     /**

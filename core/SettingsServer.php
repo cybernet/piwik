@@ -72,20 +72,6 @@ class SettingsServer
     }
 
     /**
-     * Returns `true` if running on an Apache web server, `false` if otherwise.
-     *
-     * @return bool
-     * @api
-     */
-    public static function isApache()
-    {
-        $apache = isset($_SERVER['SERVER_SOFTWARE']) &&
-            !strncmp($_SERVER['SERVER_SOFTWARE'], 'Apache', 6);
-
-        return $apache;
-    }
-
-    /**
      * Returns `true` if running on a Windows operating system, `false` if otherwise.
      *
      * @since 0.6.5
@@ -127,9 +113,14 @@ class SettingsServer
     {
         static $gd = null;
         if (is_null($gd)) {
+            $gd = false;
+
             $extensions = @get_loaded_extensions();
-            $gd = in_array('gd', $extensions) && function_exists('imageftbbox');
+            if (is_array($extensions)) {
+                $gd = in_array('gd', $extensions) && function_exists('imageftbbox');
+            }
         }
+
         return $gd;
     }
 

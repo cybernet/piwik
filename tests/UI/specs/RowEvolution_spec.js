@@ -39,7 +39,7 @@ describe("RowEvolution", function () {
 
     it('should load multi-row evolution correctly', function (done) {
         expect.screenshot('multirow_evolution').to.be.captureSelector('.ui-dialog', function (page) {
-            page.click('a.rowevolution-startmulti');
+            page.click('.rowevolution-startmulti');
             page.mouseMove('tbody tr:nth-child(2)');
             page.mouseMove('a.actionRowEvolution:visible');
             page.click('a.actionRowEvolution:visible');
@@ -51,6 +51,7 @@ describe("RowEvolution", function () {
             page.evaluate(function () {
                 $('select.multirowevoltion-metric').val($('select.multirowevoltion-metric option:nth-child(3)').val()).change();
             });
+            page.wait(1000);
         }, done);
     });
 

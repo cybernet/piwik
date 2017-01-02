@@ -136,6 +136,11 @@ class LogAggregator
     protected $segment;
 
     /**
+     * @var string
+     */
+    private $queryOriginHint = '';
+
+    /**
      * Constructor.
      *
      * @param \Piwik\ArchiveProcessor\Parameters $params
@@ -148,10 +153,22 @@ class LogAggregator
         $this->sites = $params->getIdSites();
     }
 
-    public function generateQuery($select, $from, $where, $groupBy, $orderBy)
+    public function setQueryOriginHint($nameOfOrigiin)
+    {
+        $this->queryOriginHint = $nameOfOrigiin;
+    }
+
+    public function generateQuery($select, $from, $where, $groupBy, $orderBy, $limit = 0, $offset = 0)
     {
         $bind = $this->getGeneralQueryBindParams();
-        $query = $this->segment->getSelectQuery($select, $from, $where, $bind, $orderBy, $groupBy);
+        $query = $this->segment->getSelectQuery($select, $from, $where, $bind, $orderBy, $groupBy, $limit, $offset);
+
+        $select = 'SELECT';
+        if ($this->queryOriginHint && is_array($query) && 0 === strpos(trim($query['sql']), $select)) {
+            $query['sql'] = trim($query['sql']);
+            $query['sql'] = 'SELECT /* ' . $this->queryOriginHint . ' */' . substr($query['sql'], strlen($select));
+        }
+
         return $query;
     }
 
@@ -447,8 +464,8 @@ class LogAggregator
     protected function isMetricRequested($metricId, $metricsRequested)
     {
         // do not process INDEX_NB_UNIQ_FINGERPRINTS unless specifically asked for
-        if($metricsRequested === false) {
-            if($metricId == Metrics::INDEX_NB_UNIQ_FINGERPRINTS) {
+        if ($metricsRequested === false) {
+            if ($metricId == Metrics::INDEX_NB_UNIQ_FINGERPRINTS) {
                 return false;
             }
             return true;
@@ -456,7 +473,7 @@ class LogAggregator
         return in_array($metricId, $metricsRequested);
     }
 
-    protected function getWhereStatement($tableName, $datetimeField, $extraWhere = false)
+    public function getWhereStatement($tableName, $datetimeField, $extraWhere = false)
     {
         $where = "$tableName.$datetimeField >= ?
 				AND $tableName.$datetimeField <= ?

@@ -63,26 +63,18 @@ class AddSegmentByLabel extends BaseFilter
         if (count($this->segments) === 1) {
             $segment = reset($this->segments);
 
-            foreach ($table->getRows() as $key => $row) {
-                if ($key == DataTable::ID_SUMMARY_ROW) {
-                    continue;
-                }
-
+            foreach ($table->getRowsWithoutSummaryRow() as $key => $row) {
                 $label = $row->getColumn('label');
 
                 if (!empty($label)) {
                     $row->setMetadata('segment', $segment . '==' . urlencode($label));
                 }
             }
-        } else if (!empty($this->delimiter)) {
+        } elseif (!empty($this->delimiter)) {
             $numSegments  = count($this->segments);
             $conditionAnd = ';';
 
-            foreach ($table->getRows() as $key => $row) {
-                if ($key == DataTable::ID_SUMMARY_ROW) {
-                    continue;
-                }
-
+            foreach ($table->getRowsWithoutSummaryRow() as $key => $row) {
                 $label = $row->getColumn('label');
                 if (!empty($label)) {
                     $parts = explode($this->delimiter, $label);

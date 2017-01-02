@@ -14,7 +14,7 @@ describe("Installation", function () {
     this.fixture = null;
 
     before(function () {
-        testEnvironment.testUseRegularAuth = 1;
+        testEnvironment.testUseMockAuth = 0;
         testEnvironment.configFileLocal = path.join(PIWIK_INCLUDE_PATH, "/tmp/test.config.ini.php");
         testEnvironment.dontUseTestConfig = true;
         testEnvironment.tablesPrefix = 'piwik_';
@@ -29,7 +29,7 @@ describe("Installation", function () {
         delete testEnvironment.configFileLocal;
         delete testEnvironment.dontUseTestConfig;
         delete testEnvironment.tablesPrefix;
-        delete testEnvironment.testUseRegularAuth;
+        delete testEnvironment.testUseMockAuth;
         testEnvironment.save();
     });
 
@@ -47,19 +47,33 @@ describe("Installation", function () {
 
     it("should display the system check page when next is clicked on the first page", function (done) {
         expect.screenshot("system_check").to.be.capture(function (page) {
-            page.click('.submit');
+            page.click('.next-step .btn');
+        }, done);
+    });
+
+    var pageUrl;
+    it("should have already created a tmp/sessions/index.htm file to prevent directory listing", function (done) {
+        expect.screenshot('nothing_to_see_here').to.be.capture(function (page) {
+            pageUrl = page.getCurrentUrl();
+
+            // page.load will load by default the proxy ie. http://localhost/piwik/tests/PHPUnit/proxy/
+            // but we need here to check in: http://localhost/piwik/tmp/sessions/
+            page.load("../../../tmp/sessions/index.htm");
+
         }, done);
     });
 
     it("should display the database setup page when next is clicked on the system check page", function (done) {
         expect.screenshot("db_setup").to.be.capture(function (page) {
-            page.click('.submit');
+            page.load(pageUrl);
+
+            page.click('.next-step .btn');
         }, done);
     });
 
     it("should fail when the next button is clicked and no database info is entered in the form", function (done) {
         expect.screenshot("db_setup_fail").to.be.capture(function (page) {
-            page.click('.submit');
+            page.click('.btn');
         }, done);
     });
 
@@ -76,19 +90,30 @@ describe("Installation", function () {
             }
 
             page.sendKeys('input[name=dbname]', 'newdb');
-            page.click('.submit');
+            page.click('.btn');
         }, done);
     });
 
     it("should display the superuser configuration page when next is clicked on the tables created page", function (done) {
         expect.screenshot("superuser").to.be.capture(function (page) {
-            page.click('.submit');
+            page.click('.next-step .btn');
+        }, done);
+    });
+
+    var pageUrl, pageUrlDe;
+
+    it("should un-select Professional Services newsletter checkbox when language is German", function (done) {
+        expect.screenshot("superuser_de").to.be.capture(function (page) {
+            pageUrl = page.getCurrentUrl();
+            pageUrlDe = pageUrl + '&language=de'
+            page.load(pageUrlDe);
         }, done);
     });
 
     it("should fail when incorrect information is entered in the superuser configuration page", function (done) {
         expect.screenshot("superuser_fail").to.be.capture(function (page) {
-            page.click('.submit');
+            page.load(pageUrl);
+            page.click('.btn');
         }, done);
     });
 
@@ -98,39 +123,50 @@ describe("Installation", function () {
             page.sendKeys('input[name=password]', 'thepassword');
             page.sendKeys('input[name=password_bis]', 'thepassword');
             page.sendKeys('input[name=email]', 'hello@piwik.org');
-            page.click('.submit');
+            page.click('.btn');
             page.wait(3000);
         }, done);
     });
 
     it("should should fail when incorrect information is entered in the setup a website page", function (done) {
         expect.screenshot("setup_website_fail").to.be.capture(function (page) {
-            page.click('.submit');
+            page.click('.btn');
         }, done);
     });
 
     it("should display the javascript tracking page when correct information is entered in the setup website page and next is clicked", function (done) {
         expect.screenshot("js_tracking").to.be.capture(function (page) {
             page.sendKeys('input[name=siteName]', 'Serenity');
-            page.sendKeys('input[name=url]', 'serenity.com');
             page.evaluate(function () {
+                // cannot use sendKeys since quickform does not use placeholder attribute
+                $('input[name=url]').val('serenity.com');
+                
                 $('select[name=timezone]').val('Europe/Paris');
                 $('select[name=ecommerce]').val('1');
             });
-            page.click('.submit');
+            page.click('.btn');
             page.wait(3000);
+
+            // manually remove port in tracking code, since ui-test.php won't be using the correct INI config file
+            page.evaluate(function () {
+                $('pre').each(function () {
+                    var html = $(this).html();
+                    html = html.replace(/localhost\:[0-9]+/g, 'localhost');
+                    $(this).html(html);
+                });
+            });
         }, done);
     });
 
     it("should display the congratulations page when next is clicked on the javascript tracking page", function (done) {
         expect.screenshot("congrats").to.be.capture(function (page) {
-            page.click('.submit');
+            page.click('.next-step .btn');
         }, done);
     });
 
     it("should continue to piwik after submitting on the privacy settings form in the congrats page", function (done) {
         expect.screenshot('login_form', 'Login').to.be.capture(function (page) {
-            page.click('.submit');
+            page.click('.btn');
         }, done);
     });
 });

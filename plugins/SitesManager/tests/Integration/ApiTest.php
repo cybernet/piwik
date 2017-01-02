@@ -8,11 +8,16 @@
 
 namespace Piwik\Plugins\SitesManager\tests\Integration;
 
-use Piwik\Access;
+use Piwik\Container\StaticContainer;
 use Piwik\Piwik;
+use Piwik\Plugin;
+use Piwik\Plugins\MobileAppMeasurable;
+use Piwik\Plugins\MobileAppMeasurable\Type;
+use Piwik\Plugins\WebsiteMeasurable\Type as WebsiteType;
 use Piwik\Plugins\SitesManager\API;
 use Piwik\Plugins\SitesManager\Model;
 use Piwik\Plugins\UsersManager\API as APIUsersManager;
+use Piwik\Measurable\Measurable;
 use Piwik\Site;
 use Piwik\Tests\Framework\Mock\FakeAccess;
 use Piwik\Tests\Framework\TestCase\IntegrationTestCase;
@@ -23,6 +28,8 @@ use PHPUnit_Framework_Constraint_IsType;
  * Class Plugins_SitesManagerTest
  *
  * @group Plugins
+ * @group ApiTest
+ * @group SitesManager
  */
 class ApiTest extends IntegrationTestCase
 {
@@ -30,25 +37,19 @@ class ApiTest extends IntegrationTestCase
     {
         parent::setUp();
 
+        Plugin\Manager::getInstance()->activatePlugin('MobileAppMeasurable');
+
         // setup the access layer
-        $pseudoMockAccess = new FakeAccess;
         FakeAccess::$superUser = true;
-        Access::setSingletonInstance($pseudoMockAccess);
     }
 
     /**
      * empty name -> exception
-     *
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testAddSiteEmptyName()
+    public function test_addSite_WithEmptyName_ThrowsException()
     {
-        try {
-            API::getInstance()->addSite("", array("http://piwik.net"));
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        API::getInstance()->addSite("", array("http://piwik.net"));
     }
 
     /**
@@ -60,8 +61,8 @@ class ApiTest extends IntegrationTestCase
             array(array()), // no urls
             array(array("")),
             array(""),
-            array("httpww://piwik.net"),
-            array("httpww://piwik.net/gqg~#"),
+            array("5http://piwik.net"),
+            array("???://piwik.net"),
         );
     }
 
@@ -69,24 +70,30 @@ class ApiTest extends IntegrationTestCase
      * wrong urls -> exception
      *
      * @dataProvider getInvalidUrlData
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testAddSiteWrongUrls($url)
+    public function test_addSite_WithWrongUrls_ThrowsException($url)
     {
-        try {
-            API::getInstance()->addSite("name", $url);
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        API::getInstance()->addSite("name", $url);
     }
 
     /**
      * Test with valid IPs
-     *
-     * @group Plugins
      */
-    public function testAddSiteExcludedIpsAndtimezoneAndCurrencyAndExcludedQueryParametersValid()
+    public function test_addSite_WithExcludedIps_AndTimezone_AndCurrency_AndExcludedQueryParameters_SucceedsWhenParamsAreValid()
+    {
+        $this->addSiteTest($expectedWebsiteType = 'mobile-\'app');
+    }
+
+    /**
+     * @dataProvider getDifferentTypesDataProvider
+     */
+    public function test_addSite_WhenTypeIsKnown($expectedWebsiteType)
+    {
+        $this->addSiteTest($expectedWebsiteType);
+    }
+
+    private function addSiteTest($expectedWebsiteType, $settingValues = null)
     {
         $ips = '1.2.3.4,1.1.1.*,1.2.*.*,1.*.*.*';
         $timezone = 'Europe/Paris';
@@ -95,12 +102,11 @@ class ApiTest extends IntegrationTestCase
         $expectedExcludedQueryParameters = 'p1,P2,P33333';
         $excludedUserAgents = " p1,P2, \nP3333 ";
         $expectedExcludedUserAgents = "p1,P2,P3333";
-        $expectedWebsiteType = 'mobile-\'app';
         $keepUrlFragment = 1;
         $idsite = API::getInstance()->addSite("name", "http://piwik.net/", $ecommerce = 1,
             $siteSearch = 1, $searchKeywordParameters = 'search,param', $searchCategoryParameters = 'cat,category',
             $ips, $excludedQueryParameters, $timezone, $currency, $group = null, $startDate = null, $excludedUserAgents,
-            $keepUrlFragment, $expectedWebsiteType);
+            $keepUrlFragment, $expectedWebsiteType, $settingValues);
         $siteInfo = API::getInstance()->getSiteFromId($idsite);
         $this->assertEquals($ips, $siteInfo['excluded_ips']);
         $this->assertEquals($timezone, $siteInfo['timezone']);
@@ -116,6 +122,8 @@ class ApiTest extends IntegrationTestCase
         $this->assertEquals($searchCategoryParameters, $siteInfo['sitesearch_category_parameters']);
         $this->assertEquals($expectedExcludedQueryParameters, $siteInfo['excluded_parameters']);
         $this->assertEquals($expectedExcludedUserAgents, $siteInfo['excluded_user_agents']);
+
+        return $siteInfo;
     }
 
     /**
@@ -138,25 +146,18 @@ class ApiTest extends IntegrationTestCase
      * Test with invalid IPs
      *
      * @dataProvider getInvalidIPsData
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testAddSiteExcludedIpsNotValid($ip)
+    public function test_addSite_WithInvalidExcludedIps_ThrowsException($ip)
     {
-        try {
-            API::getInstance()->addSite("name", "http://piwik.net/", $ecommerce = 0,
-                $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null, $ip);
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        API::getInstance()->addSite("name", "http://piwik.net/", $ecommerce = 0,
+            $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null, $ip);
     }
 
     /**
      * one url -> one main_url and nothing inserted as alias urls
-     *
-     * @group Plugins
      */
-    public function testAddSiteOneUrl()
+    public function test_addSite_WithOneUrl_Succeeds_AndCreatesNoAliasUrls()
     {
         $url = "http://piwik.net/";
         $urlOK = "http://piwik.net";
@@ -173,13 +174,11 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * several urls -> one main_url and others as alias urls
-     *
-     * @group Plugins
      */
-    public function testAddSiteSeveralUrls()
+    public function test_addSite_WithSeveralUrls_Succeeds_AndCreatesAliasUrls()
     {
-        $urls = array("http://piwik.net/", "http://piwik.com", "https://piwik.net/test/");
-        $urlsOK = array("http://piwik.net", "http://piwik.com", "https://piwik.net/test");
+        $urls = array("http://piwik.net/", "http://piwik.com", "https://piwik.net/test/", "piwik.net/another/test");
+        $urlsOK = array("http://piwik.net", "http://piwik.com", "http://piwik.net/another/test", "https://piwik.net/test");
         $idsite = API::getInstance()->addSite("super website", $urls);
         $this->assertInternalType(PHPUnit_Framework_Constraint_IsType::TYPE_INT, $idsite);
 
@@ -192,10 +191,8 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * strange name
-     *
-     * @group Plugins
      */
-    public function testAddSiteStrangeName()
+    public function test_addSite_WithStrangeName_Succeeds()
     {
         $name = "supertest(); ~@@()''!£\$'%%^'!£ போ";
         $idsite = API::getInstance()->addSite($name, "http://piwik.net");
@@ -204,6 +201,49 @@ class ApiTest extends IntegrationTestCase
         $siteInfo = API::getInstance()->getSiteFromId($idsite);
         $this->assertEquals($name, $siteInfo['name']);
 
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage SitesManager_OnlyMatchedUrlsAllowed
+     * @dataProvider getDifferentTypesDataProvider
+     */
+    public function test_addSite_ShouldFailAndNotCreatedASite_IfASettingIsInvalid($type)
+    {
+        try {
+            $settings = array('WebsiteMeasurable' => array(array('name' => 'exclude_unknown_urls', 'value' => 'fooBar')));
+            $this->addSiteWithType($type, $settings);
+        } catch (Exception $e) {
+
+            // make sure no site created
+            $ids = API::getInstance()->getAllSitesId();
+            $this->assertEquals(array(), $ids);
+
+            throw $e;
+        }
+    }
+
+    public function test_addSite_ShouldSavePassedMeasurableSettings_IfSettingsAreValid()
+    {
+        $type = WebsiteType::ID;
+        $settings = array('WebsiteMeasurable' => array(array('name' => 'urls', 'value' => array('http://www.piwik.org'))));
+        $idSite = $this->addSiteWithType($type, $settings);
+
+        $this->assertSame(1, $idSite);
+
+        $settings = $this->getWebsiteMeasurable($idSite);
+        $urls = $settings->urls->getValue();
+
+        $this->assertSame(array('http://www.piwik.org'), $urls);
+    }
+
+    /**
+     * @return \Piwik\Plugins\WebsiteMeasurable\MeasurableSettings
+     */
+    private function getWebsiteMeasurable($idSite)
+    {
+        $settings = StaticContainer::get('Piwik\Plugin\SettingsProvider');
+        return $settings->getMeasurableSettings('WebsiteMeasurable', $idSite, null);
     }
 
     /**
@@ -226,12 +266,46 @@ class ApiTest extends IntegrationTestCase
         return $idsite;
     }
 
+    private function addSiteWithType($type, $settings)
+    {
+        return API::getInstance()->addSite("name", "http://piwik.net/", $ecommerce = 0,
+            $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null,
+            $ip = null,
+            $excludedQueryParameters = null,
+            $timezone = null,
+            $currency = null,
+            $group = null,
+            $startDate = null,
+            $excludedUserAgents = null,
+            $keepURLFragments = null,
+            $type, $settings);
+    }
+
+    private function updateSiteSettings($idSite, $newSiteName, $settings)
+    {
+        return API::getInstance()->updateSite($idSite,
+            $newSiteName,
+            $urls = null,
+            $ecommerce = null,
+            $siteSearch = null,
+            $searchKeywordParameters = null,
+            $searchCategoryParameters = null,
+            $excludedIps = null,
+            $excludedQueryParameters = null,
+            $timezone = null,
+            $currency = null,
+            $group = null,
+            $startDate = null,
+            $excludedUserAgents = null,
+            $keepURLFragments = null,
+            $type = null,
+            $settings);
+    }
+
     /**
      * no duplicate -> all the urls are saved
-     *
-     * @group Plugins
      */
-    public function testAddSiteUrlsnoDuplicate()
+    public function test_addSiteAliasUrls_WithUniqueUrls_SavesAllUrls()
     {
         $idsite = $this->_addSite();
 
@@ -268,10 +342,8 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * duplicate -> don't save the already existing URLs
-     *
-     * @group Plugins
      */
-    public function testAddSiteUrlsDuplicate()
+    public function test_addSiteAliasUrls_WithDuplicateUrls_RemovesDuplicatesBeforeSaving()
     {
         $idsite = $this->_addSite();
 
@@ -294,10 +366,8 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * case empty array => nothing happens
-     *
-     * @group Plugins
      */
-    public function testAddSiteUrlsNoUrlsToAdd1()
+    public function test_addSiteAliasUrls_WithNoUrls_DoesNothing()
     {
         $idsite = $this->_addSite();
 
@@ -320,10 +390,8 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * case array only duplicate => nothing happens
-     *
-     * @group Plugins
      */
-    public function testAddSiteUrlsNoUrlsToAdd2()
+    public function test_addSiteAliasUrls_WithAlreadyPersistedUrls_DoesNothing()
     {
         $idsite = $this->_addSite();
 
@@ -346,59 +414,50 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * wrong format urls => exception
-     *
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testAddSiteUrlsWrongUrlsFormat3()
+    public function test_addSiteAliasUrls_WithIncorrectFormat_ThrowsException_3()
     {
-        try {
-            $idsite = $this->_addSite();
-            $toAdd = array("http:mpigeq");
-            API::getInstance()->addSiteAliasUrls($idsite, $toAdd);
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        $idsite = $this->_addSite();
+        $toAdd = array("http:mpigeq");
+        API::getInstance()->addSiteAliasUrls($idsite, $toAdd);
     }
 
     /**
      * wrong idsite => no exception because simply no access to this resource
-     *
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testAddSiteUrlsWrongIdSite1()
+    public function test_addSiteAliasUrls_WithWrongIdSite_ThrowsException()
     {
-        try {
-            $toAdd = array("http://pigeq.com/test");
-            API::getInstance()->addSiteAliasUrls(-1, $toAdd);
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        $toAdd = array("http://pigeq.com/test");
+        API::getInstance()->addSiteAliasUrls(-1, $toAdd);
     }
 
     /**
      * wrong idsite => exception
-     *
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testAddSiteUrlsWrongIdSite2()
+    public function test_addSiteAliasUrls_WithWrongIdSite_ThrowsException2()
     {
-        try {
-            $toAdd = array("http://pigeq.com/test");
-            API::getInstance()->addSiteAliasUrls(155, $toAdd);
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        $toAdd = array("http://pigeq.com/test");
+        API::getInstance()->addSiteAliasUrls(155, $toAdd);
+    }
+
+    public function test_addSite_CorrectlySavesExcludeUnknownUrlsSetting()
+    {
+        $idSite = API::getInstance()->addSite("site", array("http://piwik.net"), $ecommerce = null, $siteSearch = null,
+            $searchKeywordParams = null, $searchCategoryParams = null, $excludedIps = null, $excludedQueryParams = null,
+            $timezone = null, $currency = null, $group = null, $startDate = null, $excludedUserAgents = null,
+            $keepUrlFragments = null, $type = null, $settings = null, $excludeUnknownUrls = true);
+
+        $site = API::getInstance()->getSiteFromId($idSite);
+        $this->assertEquals(1, $site['exclude_unknown_urls']);
     }
 
     /**
      * no Id -> empty array
-     *
-     * @group Plugins
      */
-    public function testGetAllSitesIdNoId()
+    public function test_getAllSitesId_ReturnsNothing_WhenNoSitesSaved()
     {
         $ids = API::getInstance()->getAllSitesId();
         $this->assertEquals(array(), $ids);
@@ -406,10 +465,8 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * several Id -> normal array
-     *
-     * @group Plugins
      */
-    public function testGetAllSitesIdSeveralId()
+    public function test_getAllSitesId_ReturnsAllIds_WhenMultipleSitesPersisted()
     {
         $name = "tetq";
         $idsites = array(
@@ -426,40 +483,27 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * wrong id => exception
-     *
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testGetSiteFromIdWrongId1()
+    public function test_getSiteFromId_WithWrongId_ThrowsException1()
     {
-        try {
-            API::getInstance()->getSiteFromId(0);
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        API::getInstance()->getSiteFromId(0);
     }
 
     /**
      * wrong id => exception
-     *
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testGetSiteFromIdWrongId2()
+    public function test_getSiteFromId_WithWrongId_ThrowsException2()
     {
-        try {
-            API::getInstance()->getSiteFromId("x1");
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        API::getInstance()->getSiteFromId("x1");
     }
 
     /**
      * wrong id : no access => exception
-     *
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testGetSiteFromIdWrongId3()
+    public function test_getSiteFromId_ThrowsException_WhenTheUserDoesNotHavaAcessToTheSite()
     {
         $idsite = API::getInstance()->addSite("site", array("http://piwik.net", "http://piwik.com/test/"));
         $this->assertEquals(1, $idsite);
@@ -468,20 +512,13 @@ class ApiTest extends IntegrationTestCase
         FakeAccess::setIdSitesView(array(2));
         FakeAccess::setIdSitesAdmin(array());
 
-        try {
-            API::getInstance()->getSiteFromId(1);
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        API::getInstance()->getSiteFromId(1);
     }
 
     /**
      * normal case
-     *
-     * @group Plugins
      */
-    public function testGetSiteFromIdNormalId()
+    public function test_getSiteFromId_WithNormalId_ReturnsTheCorrectSite()
     {
         $name = "website ''";
         $idsite = API::getInstance()->addSite($name, array("http://piwik.net", "http://piwik.com/test/"));
@@ -494,10 +531,8 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * there is no admin site available -> array()
-     *
-     * @group Plugins
      */
-    public function testGetSitesWithAdminAccessNoResult()
+    public function test_getSitesWithAdminAccess_ReturnsNothing_WhenUserHasNoAdminAccess()
     {
         FakeAccess::setIdSitesAdmin(array());
 
@@ -507,36 +542,105 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * normal case, admin and view and noaccess website => return only admin
-     *
-     * @group Plugins
      */
-    public function testGetSitesWithAdminAccess()
+    public function test_getSitesWithAdminAccess_shouldOnlyReturnSitesHavingActuallyAdminAccess()
     {
         API::getInstance()->addSite("site1", array("http://piwik.net", "http://piwik.com/test/"));
         API::getInstance()->addSite("site2", array("http://piwik.com/test/"));
         API::getInstance()->addSite("site3", array("http://piwik.org"));
 
         $resultWanted = array(
-            0 => array("idsite" => 1, "name" => "site1", "main_url" => "http://piwik.net", "ecommerce" => 0, "excluded_ips" => "", 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website'),
-            1 => array("idsite" => 3, "name" => "site3", "main_url" => "http://piwik.org", "ecommerce" => 0, "excluded_ips" => "", 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website'),
+            0 => array("idsite" => 1, "name" => "site1", "main_url" => "http://piwik.net", "ecommerce" => 0, "excluded_ips" => "", 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website', 'exclude_unknown_urls' => 0),
+            1 => array("idsite" => 3, "name" => "site3", "main_url" => "http://piwik.org", "ecommerce" => 0, "excluded_ips" => "", 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website', 'exclude_unknown_urls' => 0),
         );
 
         FakeAccess::setIdSitesAdmin(array(1, 3));
 
         $sites = API::getInstance()->getSitesWithAdminAccess();
 
-        // we dont test the ts_created
+        // we don't test the ts_created
         unset($sites[0]['ts_created']);
         unset($sites[1]['ts_created']);
         $this->assertEquals($resultWanted, $sites);
     }
 
+    public function test_getSitesWithAdminAccess_shouldApplyLimit_IfSet()
+    {
+        $this->createManySitesWithAdminAccess(40);
+
+        // should return all sites by default
+        $sites = API::getInstance()->getSitesWithAdminAccess();
+        $this->assertReturnedSitesContainsSiteIds(range(1, 40), $sites);
+
+        // return only 5 sites
+        $sites = API::getInstance()->getSitesWithAdminAccess(false, false, 5);
+        $this->assertReturnedSitesContainsSiteIds(array(1, 2, 3, 4, 5), $sites);
+
+        // return only 10 sites
+        $sites = API::getInstance()->getSitesWithAdminAccess(false, false, 10);
+        $this->assertReturnedSitesContainsSiteIds(range(1, 10), $sites);
+    }
+
+    public function test_getSitesWithAdminAccess_shouldApplyPattern_IfSetAndFindBySiteName()
+    {
+        $this->createManySitesWithAdminAccess(40);
+
+        // by site name
+        $sites = API::getInstance()->getSitesWithAdminAccess(false, 'site38');
+        $this->assertReturnedSitesContainsSiteIds(array(38), $sites);
+    }
+
+    public function test_getSitesWithAdminAccess_shouldApplyPattern_IfSetAndFindByUrl()
+    {
+        $this->createManySitesWithAdminAccess(40);
+
+        $sites = API::getInstance()->getSitesWithAdminAccess(false, 'piwik38.o');
+        $this->assertReturnedSitesContainsSiteIds(array(38), $sites);
+    }
+
+    public function test_getSitesWithAdminAccess_shouldApplyPattern_AndFindMany()
+    {
+        $this->createManySitesWithAdminAccess(40);
+
+        $sites = API::getInstance()->getSitesWithAdminAccess(false, '5');
+        $this->assertReturnedSitesContainsSiteIds(array(5, 15, 25, 35), $sites);
+    }
+
+    public function test_getSitesWithAdminAccess_shouldApplyPatternAndLimit()
+    {
+        $this->createManySitesWithAdminAccess(40);
+
+        $sites = API::getInstance()->getSitesWithAdminAccess(false, '5', 2);
+        $this->assertReturnedSitesContainsSiteIds(array(5, 15), $sites);
+    }
+
+    private function createManySitesWithAdminAccess($numSites)
+    {
+        for ($i = 1; $i <= $numSites; $i++) {
+            API::getInstance()->addSite("site" . $i, array("http://piwik$i.org"));
+        }
+
+        FakeAccess::setIdSitesAdmin(range(1, $numSites));
+    }
+
+    private function assertReturnedSitesContainsSiteIds($expectedSiteIds, $sites)
+    {
+        $this->assertCount(count($expectedSiteIds), $sites);
+
+        foreach ($sites as $site) {
+            $key = array_search($site['idsite'], $expectedSiteIds);
+            $this->assertNotFalse($key, 'Did not find expected siteId "' . $site['idsite'] . '" in the expected siteIds');
+            unset($expectedSiteIds[$key]);
+        }
+
+        $siteIds = var_export($expectedSiteIds, 1);
+        $this->assertEmpty($expectedSiteIds, 'Not all expected sites were found, remaining site ids: ' . $siteIds);
+    }
+
     /**
      * there is no admin site available -> array()
-     *
-     * @group Plugins
      */
-    public function testGetSitesWithViewAccessNoResult()
+    public function test_getSitesWithViewAccess_ReturnsNothing_IfUserHasNoViewOrAdminAccess()
     {
         FakeAccess::setIdSitesView(array());
         FakeAccess::setIdSitesAdmin(array());
@@ -547,25 +651,25 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * normal case, admin and view and noaccess website => return only admin
-     *
-     * @group Plugins
      */
-    public function testGetSitesWithViewAccess()
+    public function test_getSitesWithViewAccess_ReturnsSitesWithViewAccess()
     {
         API::getInstance()->addSite("site1", array("http://piwik.net", "http://piwik.com/test/"));
         API::getInstance()->addSite("site2", array("http://piwik.com/test/"));
         API::getInstance()->addSite("site3", array("http://piwik.org"));
 
         $resultWanted = array(
-            0 => array("idsite" => 1, "name" => "site1", "main_url" => "http://piwik.net", "ecommerce" => 0, 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', "excluded_ips" => "", 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website'),
-            1 => array("idsite" => 3, "name" => "site3", "main_url" => "http://piwik.org", "ecommerce" => 0, 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', "excluded_ips" => "", 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website'),
+            0 => array("idsite" => 1, "name" => "site1", "main_url" => "http://piwik.net", "ecommerce" => 0, 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', "excluded_ips" => "", 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website', 'exclude_unknown_urls' => 0),
+            1 => array("idsite" => 3, "name" => "site3", "main_url" => "http://piwik.org", "ecommerce" => 0, 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', "excluded_ips" => "", 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website', 'exclude_unknown_urls' => 0),
         );
 
         FakeAccess::setIdSitesView(array(1, 3));
         FakeAccess::setIdSitesAdmin(array());
 
         $sites = API::getInstance()->getSitesWithViewAccess();
-        // we dont test the ts_created
+
+        // we don't test the ts_created
+
         unset($sites[0]['ts_created']);
         unset($sites[1]['ts_created']);
         $this->assertEquals($resultWanted, $sites);
@@ -573,10 +677,8 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * there is no admin site available -> array()
-     *
-     * @group Plugins
      */
-    public function testGetSitesWithAtLeastViewAccessNoResult()
+    public function test_getSitesWithAtLeastViewAccess_ReturnsNothing_WhenUserHasNoAccess()
     {
         FakeAccess::setIdSitesView(array());
         FakeAccess::setIdSitesAdmin(array());
@@ -587,25 +689,23 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * normal case, admin and view and noaccess website => return only admin
-     *
-     * @group Plugins
      */
-    public function testGetSitesWithAtLeastViewAccess()
+    public function test_getSitesWithAtLeastViewAccess_ReturnsSitesWithViewAccess()
     {
         API::getInstance()->addSite("site1", array("http://piwik.net", "http://piwik.com/test/"), $ecommerce = 1);
         API::getInstance()->addSite("site2", array("http://piwik.com/test/"));
         API::getInstance()->addSite("site3", array("http://piwik.org"));
 
         $resultWanted = array(
-            0 => array("idsite" => 1, "name" => "site1", "main_url" => "http://piwik.net", "ecommerce" => 1, "excluded_ips" => "", 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website'),
-            1 => array("idsite" => 3, "name" => "site3", "main_url" => "http://piwik.org", "ecommerce" => 0, "excluded_ips" => "", 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website'),
+            0 => array("idsite" => 1, "name" => "site1", "main_url" => "http://piwik.net", "ecommerce" => 1, "excluded_ips" => "", 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website', 'exclude_unknown_urls' => 0),
+            1 => array("idsite" => 3, "name" => "site3", "main_url" => "http://piwik.org", "ecommerce" => 0, "excluded_ips" => "", 'sitesearch' => 1, 'sitesearch_keyword_parameters' => '', 'sitesearch_category_parameters' => '', 'excluded_parameters' => '', 'excluded_user_agents' => '', 'timezone' => 'UTC', 'currency' => 'USD', 'group' => '', 'keep_url_fragment' => 0, 'type' => 'website', 'exclude_unknown_urls' => 0),
         );
 
         FakeAccess::setIdSitesView(array(1, 3));
         FakeAccess::setIdSitesAdmin(array());
 
         $sites = API::getInstance()->getSitesWithAtLeastViewAccess();
-        // we dont test the ts_created
+        // we don't test the ts_created
         unset($sites[0]['ts_created']);
         unset($sites[1]['ts_created']);
         $this->assertEquals($resultWanted, $sites);
@@ -613,10 +713,8 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * no urls for this site => array()
-     *
-     * @group Plugins
      */
-    public function testGetSiteUrlsFromIdNoUrls()
+    public function test_getSiteUrlsFromId_ReturnsMainUrlOnly_WhenNoAliasUrls()
     {
         $idsite = API::getInstance()->addSite("site1", array("http://piwik.net"));
 
@@ -626,10 +724,8 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * normal case
-     *
-     * @group Plugins
      */
-    public function testGetSiteUrlsFromIdManyUrls()
+    public function test_getSiteUrlsFromId_ReturnsMainAndAliasUrls()
     {
         $site = array("http://piwik.net",
                       "http://piwik.org",
@@ -650,27 +746,19 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * wrongId => exception
-     *
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testGetSiteUrlsFromIdWrongId()
+    public function test_getSiteUrlsFromId_ThrowsException_WhenSiteIdIsIncorrect()
     {
-        try {
-            FakeAccess::setIdSitesView(array(3));
-            FakeAccess::setIdSitesAdmin(array());
-            API::getInstance()->getSiteUrlsFromId(1);
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        FakeAccess::setIdSitesView(array(3));
+        FakeAccess::setIdSitesAdmin(array());
+        API::getInstance()->getSiteUrlsFromId(1);
     }
 
     /**
      * one url => no change to alias urls
-     *
-     * @group Plugins
      */
-    public function testUpdateSiteOneUrl()
+    public function test_updateSite_WithOneUrl_RemovesAliasUrls_AndUpdatesTheSiteCorrectly()
     {
         $urls = array("http://piwiknew.com",
                       "http://piwiknew.net",
@@ -692,6 +780,7 @@ class ApiTest extends IntegrationTestCase
         // Updating the group to something
         $group = 'something';
         API::getInstance()->updateSite($idsite, "test toto@{}", $newMainUrl, $ecommerce = 0, $ss = true, $ss_kwd = null, $ss_cat = '', $ips = null, $parametersExclude = null, $timezone = null, $currency = null, $group);
+
         $websites = API::getInstance()->getSitesFromGroup($group);
         $this->assertEquals(1, count($websites));
         $this->assertEquals(date('Y-m-d'), date('Y-m-d', strtotime($websites[0]['ts_created'])));
@@ -717,10 +806,8 @@ class ApiTest extends IntegrationTestCase
 
     /**
      * strange name and NO URL => name ok, main_url not updated
-     *
-     * @group Plugins
      */
-    public function testUpdateSiteStrangeNameNoUrl()
+    public function test_updateSite_WithStrangeName_AndNoAliasUrls_UpdatesTheName_ButNoUrls()
     {
         $idsite = API::getInstance()->addSite("site1", "http://main.url");
         $newName = "test toto@{'786'}";
@@ -737,10 +824,8 @@ class ApiTest extends IntegrationTestCase
     /**
      * several urls => both main and alias are updated
      * also test the update of group field
-     *
-     * @group Plugins
      */
-    public function testUpdateSiteSeveralUrlsAndGroup()
+    public function test_updateSite_WithSeveralUrlsAndGroup_UpdatesGroupAndUrls()
     {
         $urls = array("http://piwiknew.com",
                       "http://piwiknew.net",
@@ -783,6 +868,95 @@ class ApiTest extends IntegrationTestCase
         sort($allUrls);
         sort($newurls);
         $this->assertEquals($newurls, $allUrls);
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage SitesManager_OnlyMatchedUrlsAllowed
+     */
+    public function test_updateSite_ShouldFailAndNotUpdateSite_IfASettingIsInvalid()
+    {
+        $type  = MobileAppMeasurable\Type::ID;
+        $idSite = $this->addSiteWithType($type, array());
+
+        try {
+            $settings = array('MobileAppMeasurable' => array(array('name' => 'exclude_unknown_urls', 'value' => 'fooBar')));
+            $this->updateSiteSettings($idSite, 'newSiteName', $settings);
+
+        } catch (Exception $e) {
+            // verify nothing was updated (not even the name)
+            $measurable = new Measurable($idSite);
+            $this->assertNotEquals('newSiteName', $measurable->getName());
+
+            throw $e;
+        }
+    }
+
+    public function test_updateSite_ShouldSavePassedMeasurableSettings_IfSettingsAreValid()
+    {
+        $type = WebsiteType::ID;
+        $idSite = $this->addSiteWithType($type, array());
+
+        $this->assertSame(1, $idSite);
+
+        $settings = array('WebsiteMeasurable' => array(array('name' => 'urls', 'value' => array('http://www.piwik.org'))));
+
+        $this->updateSiteSettings($idSite, 'newSiteName', $settings);
+
+        $settings = $this->getWebsiteMeasurable($idSite);
+
+        // verify it was updated
+        $measurable = new Measurable($idSite);
+        $this->assertSame('newSiteName', $measurable->getName());
+        $this->assertSame(array('http://www.piwik.org'), $settings->urls->getValue());
+    }
+
+    public function test_updateSite_CorreclySavesExcludedUnknownUrlSettings()
+    {
+        $idSite = API::getInstance()->addSite("site1", array("http://piwik.net"));
+
+        $site = API::getInstance()->getSiteFromId($idSite);
+        $this->assertEquals(0, $site['exclude_unknown_urls']);
+
+        API::getInstance()->updateSite($idSite, $siteName = null, $urls = null, $ecommerce = null, $siteSearch = null,
+            $searchKeywordParams = null, $searchCategoryParams = null, $excludedIps = null, $excludedQueryParameters = null,
+            $timzeone = null, $currency = null, $group = null, $startDate = null, $excludedUserAgents = null,
+            $keepUrlFragments = null, $type = null, $settings = null, $excludeUnknownUrls = true);
+
+        $site = API::getInstance()->getSiteFromId($idSite);
+        $this->assertEquals(1, $site['exclude_unknown_urls']);
+    }
+
+    /**
+     * @dataProvider getDifferentTypesDataProvider
+     */
+    public function test_updateSite_WithDifferentTypes($type)
+    {
+        $idSite = $this->addSiteWithType('website', array());
+
+        $site = API::getInstance()->getSiteFromId($idSite);
+        $this->assertEquals(0, $site['exclude_unknown_urls']);
+
+        API::getInstance()->updateSite($idSite, $siteName = 'new site name', $urls = null, $ecommerce = true, $siteSearch = false,
+            $searchKeywordParams = null, $searchCategoryParams = null, $excludedIps = null, $excludedQueryParameters = null,
+            $timzeone = null, $currency = 'NZD', $group = null, $startDate = null, $excludedUserAgents = null,
+            $keepUrlFragments = null, $type, $settings = null, $excludeUnknownUrls = true);
+
+        $site = API::getInstance()->getSiteFromId($idSite);
+        $this->assertEquals('new site name', $site['name']);
+        $this->assertEquals(1, $site['exclude_unknown_urls']);
+        $this->assertEquals(1, $site['ecommerce']);
+        $this->assertEquals(0, $site['sitesearch']);
+        $this->assertEquals('NZD', $site['currency']);
+    }
+
+    public function getDifferentTypesDataProvider()
+    {
+        return array(
+            array('website'),
+            array('mobileapp'),
+            array('notexistingtype'),
+        );
     }
 
     /**
@@ -861,9 +1035,6 @@ class ApiTest extends IntegrationTestCase
         $this->assertEmpty($siteInfo);
     }
 
-    /**
-     * @group Plugins
-     */
     public function testGetSitesGroups()
     {
         $groups = array('group1', ' group1 ', '', 'group2');
@@ -886,38 +1057,25 @@ class ApiTest extends IntegrationTestCase
     /**
      *
      * @dataProvider getInvalidTimezoneData
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testAddSitesInvalidTimezone($timezone)
+    public function test_addSite_WithInvalidTimezone_ThrowsException($timezone)
     {
-        try {
-            API::getInstance()->addSite("site1", array('http://example.org'), $ecommerce = 0,
-                $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null, $ip = '', $params = '', $timezone);
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        API::getInstance()->addSite("site1", array('http://example.org'), $ecommerce = 0,
+            $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null, $ip = '', $params = '', $timezone);
     }
 
     /**
-     * @group Plugins
+     * @expectedException \Exception
      */
-    public function testAddSitesInvalidCurrency()
+    public function test_addSite_WithInvalidCurrency_ThrowsException()
     {
-        try {
-            $invalidCurrency = '€';
-            API::getInstance()->addSite("site1", array('http://example.org'), $ecommerce = 0,
-                $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null, '', 'UTC', $invalidCurrency);
-        } catch (Exception $e) {
-            return;
-        }
-        $this->fail('Expected exception not raised');
+        $invalidCurrency = '€';
+        API::getInstance()->addSite("site1", array('http://example.org'), $ecommerce = 0,
+            $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null, '', 'UTC', $invalidCurrency);
     }
 
-    /**
-     * @group Plugins
-     */
-    public function testSetDefaultTimezoneAndCurrencyAndExcludedQueryParametersAndExcludedIps()
+    public function test_setDefaultTimezone_AndCurrency_AndExcludedQueryParameters_AndExcludedIps_UpdatesDefaultsCorreclty()
     {
         // test that they return default values
         $defaultTimezone = API::getInstance()->getDefaultTimezone();
@@ -983,10 +1141,7 @@ class ApiTest extends IntegrationTestCase
         $this->assertFalse(Site::isEcommerceEnabledFor($idsite));
     }
 
-    /**
-     * @group Plugins
-     */
-    public function testGetSitesIdFromSiteUrlSuperUser()
+    public function test_getSitesIdFromSiteUrl_AsSuperUser_ReturnsTheRequestedSiteIds()
     {
         API::getInstance()->addSite("site1", array("http://piwik.net", "http://piwik.com"));
         API::getInstance()->addSite("site2", array("http://piwik.com", "http://piwik.net"));
@@ -1005,16 +1160,60 @@ class ApiTest extends IntegrationTestCase
         $this->assertTrue(count($idsites) == 3);
     }
 
-    /**
-     * @group Plugins
-     */
-    public function testGetSitesIdFromSiteUrlUser()
+    public function test_getSitesIdFromSiteUrl_MatchesBothHttpAndHttpsUrls_AsSuperUser()
     {
-        API::getInstance()->addSite("site1", array("http://www.piwik.net", "http://piwik.com"));
+        API::getInstance()->addSite("site1", array("https://piwik.org", "http://example.com", "fb://special-url"));
+
+        $this->assert_getSitesIdFromSiteUrl_matchesBothHttpAndHttpsUrls();
+    }
+
+    public function test_getSitesIdFromSiteUrl_MatchesBothHttpAndHttpsUrls_AsUserWithViewPermission()
+    {
+        API::getInstance()->addSite("site1", array("https://piwik.org", "http://example.com", "fb://special-url"));
+
+        APIUsersManager::getInstance()->addUser("user1", "geqgegagae", "tegst@tesgt.com", "alias");
+        APIUsersManager::getInstance()->setUserAccess("user1", "view", array(1));
+
+        // Make sure we're not Super user
+        FakeAccess::$superUser = false;
+        FakeAccess::$identity = 'user1';
+        $this->assertFalse(Piwik::hasUserSuperUserAccess());
+
+        $this->assert_getSitesIdFromSiteUrl_matchesBothHttpAndHttpsUrls();
+    }
+
+    private function assert_getSitesIdFromSiteUrl_matchesBothHttpAndHttpsUrls()
+    {
+        $idsites = API::getInstance()->getSitesIdFromSiteUrl('http://piwik.org');
+        $this->assertTrue(count($idsites) == 1);
+
+        $idsites = API::getInstance()->getSitesIdFromSiteUrl('piwik.org');
+        $this->assertTrue(count($idsites) == 1);
+
+        $idsites = API::getInstance()->getSitesIdFromSiteUrl('https://www.piwik.org');
+        $this->assertTrue(count($idsites) == 1);
+
+        $idsites = API::getInstance()->getSitesIdFromSiteUrl('https://example.com');
+        $this->assertTrue(count($idsites) == 1);
+
+        $idsites = API::getInstance()->getSitesIdFromSiteUrl("fb://special-url");
+        $this->assertTrue(count($idsites) == 1);
+
+        $idsites = API::getInstance()->getSitesIdFromSiteUrl('https://random-example.com');
+        $this->assertTrue(count($idsites) == 0);
+
+        $idsites = API::getInstance()->getSitesIdFromSiteUrl('not-found.piwik.org');
+        $this->assertTrue(count($idsites) == 0);
+
+        $idsites = API::getInstance()->getSitesIdFromSiteUrl('piwik.org/not-found/');
+        $this->assertTrue(count($idsites) == 0);
+    }
+
+    public function test_getSitesIdFromSiteUrl_AsUser()
+    {
+        API::getInstance()->addSite("site1", array("http://www.piwik.net", "https://piwik.com"));
         API::getInstance()->addSite("site2", array("http://piwik.com", "http://piwik.net"));
         API::getInstance()->addSite("site3", array("http://piwik.com", "http://piwik.org"));
-
-        $saveAccess = Access::getInstance();
 
         APIUsersManager::getInstance()->addUser("user1", "geqgegagae", "tegst@tesgt.com", "alias");
         APIUsersManager::getInstance()->setUserAccess("user1", "view", array(1));
@@ -1027,12 +1226,12 @@ class ApiTest extends IntegrationTestCase
         APIUsersManager::getInstance()->setUserAccess("user3", "view", array(1, 2));
         APIUsersManager::getInstance()->setUserAccess("user3", "admin", array(3));
 
-        $pseudoMockAccess = new FakeAccess;
         FakeAccess::$superUser = false;
         FakeAccess::$identity = 'user1';
         FakeAccess::setIdSitesView(array(1));
         FakeAccess::setIdSitesAdmin(array());
-        Access::setSingletonInstance($pseudoMockAccess);
+
+        $this->assertFalse(Piwik::hasUserSuperUserAccess());
         $idsites = API::getInstance()->getSitesIdFromSiteUrl('http://piwik.com');
         $this->assertEquals(1, count($idsites));
 
@@ -1042,31 +1241,27 @@ class ApiTest extends IntegrationTestCase
         $idsites = API::getInstance()->getSitesIdFromSiteUrl('http://piwik.net');
         $this->assertEquals(1, count($idsites));
 
-        $pseudoMockAccess = new FakeAccess;
         FakeAccess::$superUser = false;
         FakeAccess::$identity = 'user2';
         FakeAccess::setIdSitesView(array(1));
         FakeAccess::setIdSitesAdmin(array(3));
-        Access::setSingletonInstance($pseudoMockAccess);
+
         $idsites = API::getInstance()->getSitesIdFromSiteUrl('http://piwik.com');
         $this->assertEquals(2, count($idsites));
 
-        $pseudoMockAccess = new FakeAccess;
         FakeAccess::$superUser = false;
         FakeAccess::$identity = 'user3';
         FakeAccess::setIdSitesView(array(1, 2));
         FakeAccess::setIdSitesAdmin(array(3));
-        Access::setSingletonInstance($pseudoMockAccess);
+
         $idsites = API::getInstance()->getSitesIdFromSiteUrl('http://piwik.com');
         $this->assertEquals(3, count($idsites));
 
-        Access::setSingletonInstance($saveAccess);
+        $idsites = API::getInstance()->getSitesIdFromSiteUrl('https://www.piwik.com');
+        $this->assertEquals(3, count($idsites));
     }
 
-    /**
-     * @group Plugins
-     */
-    public function testGetSitesFromTimezones()
+    public function test_getSitesFromTimezones_ReturnsCorrectIdSites()
     {
         API::getInstance()->addSite("site3", array("http://piwik.org"), null, $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null, null, null, 'UTC');
         $idsite2 = API::getInstance()->addSite("site3", array("http://piwik.org"), null, $siteSearch = 1, $searchKeywordParameters = null, $searchCategoryParameters = null, null, null, 'Pacific/Auckland');
@@ -1075,4 +1270,12 @@ class ApiTest extends IntegrationTestCase
         $result = API::getInstance()->getSitesIdFromTimezones(array('UTC+10', 'Pacific/Auckland'));
         $this->assertEquals(array($idsite2, $idsite3, $idsite4), $result);
     }
+
+    public function provideContainerConfig()
+    {
+        return array(
+            'Piwik\Access' => new FakeAccess(),
+        );
+    }
+
 }

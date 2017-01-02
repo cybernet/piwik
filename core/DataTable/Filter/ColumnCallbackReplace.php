@@ -74,7 +74,6 @@ class ColumnCallbackReplace extends BaseFilter
     public function filter($table)
     {
         foreach ($table->getRows() as $row) {
-
             $extraColumnParameters = array();
             foreach ($this->extraColumnParameters as $columnName) {
                 $extraColumnParameters[] = $row->getColumn($columnName);
@@ -98,6 +97,11 @@ class ColumnCallbackReplace extends BaseFilter
                 $this->setElementToReplace($row, $column, $newValue);
                 $this->filterSubTable($row);
             }
+        }
+
+        if (in_array('label', $this->columnsToFilter)) {
+            // we need to force rebuilding the index
+            $table->setLabelsHaveChanged();
         }
     }
 

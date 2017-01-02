@@ -11,8 +11,10 @@ describe("DashboardManager", function () {
 
     this.timeout(0);
 
-    var selectorToCapture = '.dashboard-manager';
-    var url = "?module=CoreHome&action=index&idSite=1&period=day&date=2012-01-01";
+    var selectorToCapture = '.dashboard-manager,.dashboard-manager .dropdown';
+
+    var generalParams = 'idSite=1&period=day&date=2012-01-01';
+    var url = '?module=CoreHome&action=index&' + generalParams + '#?' + generalParams + '&category=Dashboard_Dashboard&subcategory=5';
 
     it("should load correctly", function (done) {
         expect.screenshot("loaded").to.be.captureSelector(selectorToCapture, function (page) {
@@ -22,14 +24,15 @@ describe("DashboardManager", function () {
 
     it("should expand when clicked", function (done) {
         expect.screenshot("expanded").to.be.captureSelector(selectorToCapture, function (page) {
-            page.click('.dashboard-manager');
+            page.click('.dashboard-manager .title');
         }, done);
     });
 
     it("should show widget for a category when category label hovered", function (done) {
         expect.screenshot("widget_list_shown").to.be.captureSelector(selectorToCapture, function (page) {
             page.mouseMove('.widgetpreview-categorylist>li:contains(Live!)'); // have to mouse move twice... otherwise Live! will just be highlighted
-            page.mouseMove('.widgetpreview-categorylist>li:contains(Visits Summary)');
+            page.mouseMove('.widgetpreview-categorylist>li:contains(Visitors):first');
+            page.click('.widgetpreview-categorylist>li:contains(Visitors):first');
         }, done);
     });
 
@@ -47,6 +50,30 @@ describe("DashboardManager", function () {
             });
 
             page.click('.widgetpreview-widgetlist>li:contains(Visits Over Time)');
+        }, done);
+    });
+
+    it("should create new dashboard with new default widget selection when create dashboard process completed", function (done) {
+        expect.screenshot("create_new").to.be.capture(function (page) {
+            page.click('.dashboard-manager .title');
+            page.click('li[data-action=createDashboard]');
+            page.sendKeys('#createDashboardName', 'newdash2');
+            page.click('.modal.open .modal-footer a:contains(Ok)');
+
+            page.wait(2000);
+        }, done);
+    });
+
+    it("should remove dashboard when remove dashboard process completed", function (done) {
+        expect.screenshot("removed").to.be.capture(function (page) {
+            page.contains('ul.navbar ul li.sfActive:contains(newdash2)');
+            page.click('.dashboard-manager .title');
+            page.click('li[data-action=removeDashboard]');
+            page.click('.modal.open .modal-footer a:contains(Yes)');
+            page.mouseMove('.dashboard-manager');
+            page.evaluate(function () {
+                $('.widgetTop').removeClass('widgetTopHover');
+            });
         }, done);
     });
 });

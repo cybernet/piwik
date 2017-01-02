@@ -11,6 +11,7 @@ namespace Piwik\Plugins\PrivacyManager;
 use HTML_QuickForm2_DataSource_Array;
 use Piwik\Common;
 use Piwik\Config as PiwikConfig;
+use Piwik\Container\StaticContainer;
 use Piwik\DataTable\DataTableInterface;
 use Piwik\Date;
 use Piwik\Db;
@@ -24,9 +25,6 @@ use Piwik\Plugins\Goals\Archiver;
 use Piwik\Plugins\Installation\FormDefaultSettings;
 use Piwik\Site;
 use Piwik\Tracker\GoalManager;
-
-require_once PIWIK_INCLUDE_PATH . '/plugins/PrivacyManager/LogDataPurger.php';
-require_once PIWIK_INCLUDE_PATH . '/plugins/PrivacyManager/ReportsPurger.php';
 
 /**
  * Specifically include this for Tracker API (which does not use autoloader)
@@ -132,9 +130,9 @@ class PrivacyManager extends Plugin
     }
 
     /**
-     * @see Piwik\Plugin::getListHooksRegistered
+     * @see Piwik\Plugin::registerEvents
      */
-    public function getListHooksRegistered()
+    public function registerEvents()
     {
         return array(
             'AssetManager.getJavaScriptFiles'         => 'getJsFiles',
@@ -143,7 +141,13 @@ class PrivacyManager extends Plugin
             'Tracker.setVisitorIp'                    => array($this->ipAnonymizer, 'setVisitorIpAddress'),
             'Installation.defaultSettingsForm.init'   => 'installationFormInit',
             'Installation.defaultSettingsForm.submit' => 'installationFormSubmit',
+            'Translate.getClientSideTranslationKeys' => 'getClientSideTranslationKeys'
         );
+    }
+
+    public function getClientSideTranslationKeys(&$translationKeys)
+    {
+        $translationKeys[] = 'CoreAdminHome_SettingsSaveSuccess';
     }
 
     public function setTrackerCacheGeneral(&$cacheContent)
@@ -154,7 +158,12 @@ class PrivacyManager extends Plugin
 
     public function getJsFiles(&$jsFiles)
     {
-        $jsFiles[] = "plugins/PrivacyManager/javascripts/privacySettings.js";
+        $jsFiles[] = "plugins/PrivacyManager/angularjs/report-deletion.model.js";
+        $jsFiles[] = "plugins/PrivacyManager/angularjs/schedule-report-deletion/schedule-report-deletion.controller.js";
+        $jsFiles[] = "plugins/PrivacyManager/angularjs/anonymize-ip/anonymize-ip.controller.js";
+        $jsFiles[] = "plugins/PrivacyManager/angularjs/do-not-track-preference/do-not-track-preference.controller.js";
+        $jsFiles[] = "plugins/PrivacyManager/angularjs/delete-old-logs/delete-old-logs.controller.js";
+        $jsFiles[] = "plugins/PrivacyManager/angularjs/delete-old-reports/delete-old-reports.controller.js";
     }
 
     /**
@@ -166,13 +175,11 @@ class PrivacyManager extends Plugin
     {
         $form->addElement('checkbox', 'do_not_track', null,
             array(
-                'content' => '&nbsp;&nbsp;' . Piwik::translate('PrivacyManager_DoNotTrack_Enable') . '<br>'
-                    . Piwik::translate('PrivacyManager_DoNotTrack_EnabledMoreInfo'),
+                'content' => '<div class="form-help">' . Piwik::translate('PrivacyManager_DoNotTrack_EnabledMoreInfo') . '</div> &nbsp;&nbsp;' . Piwik::translate('PrivacyManager_DoNotTrack_Enable')
             ));
         $form->addElement('checkbox', 'anonymise_ip', null,
             array(
-                'content' => '&nbsp;&nbsp;' . Piwik::translate('PrivacyManager_AnonymizeIpInlineHelp') . '<br>'
-                    . Piwik::translate('PrivacyManager_AnonymizeIpExtendedHelp', array('213.34.51.91', '213.34.0.0')),
+                'content' => '<div class="form-help">' . Piwik::translate('PrivacyManager_AnonymizeIpExtendedHelp', array('213.34.51.91', '213.34.0.0')) . '</div> &nbsp;&nbsp;' . Piwik::translate('PrivacyManager_AnonymizeIpInlineHelp')
             ));
 
         // default values
@@ -326,7 +333,9 @@ class PrivacyManager extends Plugin
         Option::set(self::OPTION_LAST_DELETE_PIWIK_LOGS, $lastDeleteDate);
 
         // execute the purge
-        LogDataPurger::make($settings)->purgeData();
+        /** @var LogDataPurger $logDataPurger */
+        $logDataPurger = StaticContainer::get('Piwik\Plugins\PrivacyManager\LogDataPurger');
+        $logDataPurger->purgeData($settings['delete_logs_older_than']);
 
         return true;
     }
@@ -351,8 +360,9 @@ class PrivacyManager extends Plugin
         $result = array();
 
         if ($settings['delete_logs_enable']) {
-            $logDataPurger = LogDataPurger::make($settings);
-            $result = array_merge($result, $logDataPurger->getPurgeEstimate());
+            /** @var LogDataPurger $logDataPurger */
+            $logDataPurger = StaticContainer::get('Piwik\Plugins\PrivacyManager\LogDataPurger');
+            $result = array_merge($result, $logDataPurger->getPurgeEstimate($settings['delete_logs_older_than']));
         }
 
         if ($settings['delete_reports_enable']) {

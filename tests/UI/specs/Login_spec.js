@@ -14,13 +14,13 @@ describe("Login", function () {
         formlessLoginUrl = "?module=Login&action=logme&login=oliverqueen&password=" + md5Pass;
 
     before(function () {
-        testEnvironment.testUseRegularAuth = 1;
+        testEnvironment.testUseMockAuth = 0;
         testEnvironment.queryParamOverride = {date: "2012-01-01", period: "year"};
         testEnvironment.save();
     });
 
     after(function () {
-        testEnvironment.testUseRegularAuth = 0;
+        testEnvironment.testUseMockAuth = 1;
         delete testEnvironment.queryParamOverride;
         testEnvironment.save();
     });
@@ -49,9 +49,7 @@ describe("Login", function () {
 
     it("should redirect to login when logout link clicked", function (done) {
         expect.screenshot("login_form").to.be.capture("logout_form", function (page) {
-            page.click("#topBars span.title:contains(superUserLogin)");
-            page.wait(250);
-            page.click("#topBars a:contains(Sign out)");
+            page.click("nav .right .icon-sign-out");
         }, done);
     });
 
@@ -62,8 +60,18 @@ describe("Login", function () {
         }, done);
     });
 
+    it("should show reset password form and error message on error", function (done) {
+        expect.screenshot("password_reset_error").to.be.capture(function (page) {
+            page.sendKeys("#reset_form_login", "superUserLogin");
+            page.sendKeys("#reset_form_password", "superUserPass2");
+            page.click("#reset_form_submit", 3000);
+        }, done);
+    });
+
     it("should send email when password reset form submitted", function (done) {
         expect.screenshot("password_reset").to.be.capture(function (page) {
+            page.reload();
+            page.click("a#login_form_nav");
             page.sendKeys("#reset_form_login", "superUserLogin");
             page.sendKeys("#reset_form_password", "superUserPass2");
             page.sendKeys("#reset_form_password_bis", "superUserPass2");
@@ -91,7 +99,7 @@ describe("Login", function () {
 
     it("should login successfully when formless login used", function (done) {
         expect.page("").contains('#dashboard', 'formless_login', function (page) {
-            page.click("#topBars a:contains(Sign out)");
+            page.click("nav .right .icon-sign-out");
             page.load(formlessLoginUrl);
         }, done);
     });
